@@ -1,0 +1,33 @@
+# 스쿼트 코치
+
+카메라로 스쿼트 자세를 실시간으로 봐 주는 체육 수업용 웹앱이에요. 연습, 게임(30초·60초 챌린지), 형성평가(5회) 모드가 있어요.
+
+## 올리는 방법 (택 1)
+
+카메라는 **https 주소**에서만 켜져요. 이 폴더를 통째로 올려 주세요.
+
+- **Vercel**: vercel.com → Add New → Project → 이 폴더를 끌어다 놓기 (또는 GitHub 저장소에 넣고 연결)
+- **GitHub Pages**: 저장소에 폴더를 올리고 Settings → Pages에서 켜기
+- **Netlify**: app.netlify.com/drop 에 폴더를 끌어다 놓기
+
+## 폴더 구성
+
+| 파일 | 하는 일 |
+|---|---|
+| `index.html` | 앱 화면과 자세 분석 |
+| `lib/` | 자세 인식 라이브러리 (Google MediaPipe Tasks Vision 0.10.14, Apache 2.0) |
+| `models/pose_landmarker_lite.task` | 자세 인식 모델 (Google MediaPipe, Apache 2.0) |
+| `manifest.webmanifest`, `icon-*.png` | 홈 화면에 앱처럼 설치 |
+| `sw.js` | 한 번 받은 파일을 기기에 저장해 다음부터 빨리 열기 |
+
+`lib/`과 `models/`를 함께 올리면 학교 망에서 jsdelivr.net이나 storage.googleapis.com이 막혀 있어도 동작해요. `index.html`만 올리면 그 두 곳에서 받아 와요.
+
+## 판정 기준 (index.html 안에서 바꿀 수 있어요)
+
+- 깊이(옆에서): 무릎 각도 95° 이하면 허벅지 수평, 초보 기준은 약 117°
+- 상체(옆에서): 수직에서 50° 넘게 숙이면 ✗
+- 무릎 모임(앞에서, 시험 중): 앉았을 때 무릎 너비가 발목 너비의 80%보다 좁으면 ✗
+- 뒤꿈치: 정확도가 낮아 참고 알림만, 점수에는 넣지 않음
+- 평가 등급: 5회 중 4회 이상 잘함, 2~3회 보통, 그 아래 노력 필요
+
+영상은 기기 안에서만 처리하고 저장하거나 보내지 않아요.

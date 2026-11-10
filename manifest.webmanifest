@@ -1,0 +1,16 @@
+{
+  "name": "스쿼트 코치",
+  "short_name": "스쿼트 코치",
+  "description": "카메라로 스쿼트 자세를 실시간으로 봐 주고, 게임과 형성평가를 하는 체육 수업용 웹앱",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#101417",
+  "theme_color": "#101417",
+  "lang": "ko",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

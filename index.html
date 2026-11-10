@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>스쿼트 코치</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#101417">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
+<style>
+/* 체육관 전광판 느낌: 어두운 바탕, 큰 숫자와 큰 말. 교실 뒤에서도 읽히게 */
+:root{
+  --bg:#101417; --panel:#182025; --ink:#f1f4f5; --muted:#9aa7ae; --line:#2b353b;
+  --good:#3ddc84; --bad:#ff6b4a; --warn:#ffc53d; --accent:#4dabf7;
+  --f-big:'Black Han Sans','IBM Plex Sans KR',system-ui,sans-serif;
+  --f-body:'IBM Plex Sans KR',system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--f-body)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-rows:auto 1fr;height:100%;padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+header h1{margin:0;font-family:var(--f-big);font-weight:400;font-size:24px;letter-spacing:.02em}
+header h1 span{color:var(--good)}
+.seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px}
+.seg button{border:0;background:none;padding:6px 12px;border-radius:7px;font-weight:600;font-size:14px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.grow{flex:1}
+.iconbtn{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:6px 12px;font-size:14px;font-weight:600}
+main{position:relative;overflow:hidden;min-height:0}
+.stage{position:absolute;inset:0;display:grid;place-items:center;background:#000}
+video,#ov{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.mirror{transform:scaleX(-1)}
+/* 시작 화면 */
+.intro{position:absolute;inset:0;display:grid;place-items:center;padding:20px;background:radial-gradient(ellipse at 50% 20%,#1d2a31,#101417 70%);overflow:auto}
+.intro .box{max-width:620px;display:grid;gap:14px}
+.intro h2{margin:0;font-family:var(--f-big);font-weight:400;font-size:clamp(30px,6vw,46px);line-height:1.15}
+.intro ol{margin:0;padding-left:22px;color:#d5dde1;line-height:1.7}
+.intro .note{font-size:13px;color:var(--muted)}
+.big{font-family:var(--f-big);font-size:24px;border:0;border-radius:14px;padding:14px 22px;background:var(--good);color:#0b1a10}
+.err{color:var(--bad);font-weight:600}
+/* 실시간 HUD */
+.cue{position:absolute;left:50%;top:14px;transform:translateX(-50%);max-width:calc(100% - 24px);text-align:center;font-family:var(--f-big);font-size:clamp(26px,5.4vw,56px);line-height:1.1;padding:8px 22px;border-radius:16px;background:rgba(10,14,16,.72);transition:background .2s,color .2s;white-space:nowrap}
+.cue.good{color:var(--good)} .cue.bad{color:var(--bad)} .cue.warn{color:var(--warn)}
+.count{position:absolute;right:18px;bottom:16px;text-align:right;font-family:var(--f-big);line-height:.9;text-shadow:0 4px 18px rgba(0,0,0,.6)}
+.count b{display:block;font-weight:400;font-size:clamp(70px,14vw,150px);color:var(--ink)}
+.count small{font-family:var(--f-body);font-weight:700;font-size:15px;color:var(--muted)}
+.count .ok{color:var(--good)}
+.meter{position:absolute;left:18px;top:50%;transform:translateY(-50%);width:26px;height:min(52%,320px);border-radius:14px;background:rgba(255,255,255,.12);overflow:hidden;border:2px solid rgba(255,255,255,.25)}
+.meter i{position:absolute;left:0;right:0;top:0;background:var(--accent);height:0;transition:height .08s}
+.meter .target{position:absolute;left:-4px;right:-4px;height:3px;background:var(--warn)}
+.meter-lbl{position:absolute;left:52px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted);writing-mode:vertical-rl}
+.chips{position:absolute;left:18px;bottom:16px;display:flex;flex-direction:column;gap:6px}
+.chip{background:rgba(10,14,16,.75);border-radius:10px;padding:6px 12px;font-size:14px;display:flex;gap:10px;justify-content:space-between;min-width:170px}
+.chip b{font-variant-numeric:tabular-nums}
+.chip.bad b{color:var(--bad)} .chip.good b{color:var(--good)}
+.timer{position:absolute;right:18px;top:16px;font-family:var(--f-big);font-size:clamp(34px,6vw,60px);background:rgba(10,14,16,.72);border-radius:14px;padding:4px 16px;font-variant-numeric:tabular-nums}
+.timer.low{color:var(--bad)}
+.combo{position:absolute;right:20px;bottom:calc(16px + clamp(70px,14vw,150px) + 18px);font-family:var(--f-big);font-size:26px;color:var(--warn)}
+.pop{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%) scale(.6);font-family:var(--f-big);font-size:clamp(40px,9vw,90px);opacity:0;pointer-events:none}
+.pop.show{animation:pop .7s ease-out}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}25%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-80%) scale(1)}}
+.overlay{position:absolute;inset:0;display:grid;place-items:center;background:rgba(10,14,16,.82);padding:20px;overflow:auto}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px 24px;max-width:640px;width:100%;display:grid;gap:12px}
+.card h2{margin:0;font-family:var(--f-big);font-weight:400;font-size:34px}
+.card .grade{font-family:var(--f-big);font-size:64px;line-height:1}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stat{background:var(--bg);border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-family:var(--f-big);font-weight:400;font-size:34px}
+.stat span{font-size:12.5px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{padding:6px 8px;text-align:center;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600;font-size:13px}
+td.y{color:var(--good)} td.n{color:var(--bad)}
+.tip{background:rgba(255,197,61,.12);border-left:4px solid var(--warn);padding:10px 12px;border-radius:8px}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.row .iconbtn{padding:10px 16px}
+.cd{font-family:var(--f-big);font-size:160px}
+.choices{display:flex;flex-wrap:wrap;gap:8px}
+.choices button{border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:12px 18px;font-weight:700;font-size:16px}
+.choices button[aria-pressed="true"]{border-color:var(--good);color:var(--good)}
+[hidden]{display:none!important}
+@media (max-width:640px){header h1{font-size:20px}.chips{display:none}.meter{left:10px;width:20px}.meter-lbl{display:none}}
+@media (prefers-reduced-motion:reduce){.pop.show{animation:none;opacity:1}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>스쿼트 <span>코치</span></h1>
+    <div class="seg" role="group" aria-label="모드">
+      <button type="button" data-mode="practice" aria-pressed="true">연습</button>
+      <button type="button" data-mode="game" aria-pressed="false">게임</button>
+      <button type="button" data-mode="test" aria-pressed="false">평가</button>
+    </div>
+    <div class="seg" role="group" aria-label="찍는 방향">
+      <button type="button" data-view="side" aria-pressed="true">옆에서</button>
+      <button type="button" data-view="front" aria-pressed="false">앞에서 <small>(시험 중)</small></button>
+    </div>
+    <div class="seg" role="group" aria-label="깊이 기준">
+      <button type="button" data-depth="1" aria-pressed="true">허벅지 수평</button>
+      <button type="button" data-depth="0.7" aria-pressed="false">초보 기준</button>
+    </div>
+    <span class="grow"></span>
+    <button type="button" class="iconbtn" id="flip" hidden>카메라 전환</button>
+  </header>
+  <main>
+    <div class="stage" id="stage">
+      <video id="video" playsinline muted></video>
+      <canvas id="ov"></canvas>
+    </div>
+    <div id="hud" hidden>
+      <div class="cue" id="cue">준비</div>
+      <div class="meter" aria-hidden="true"><i id="meterFill"></i><div class="target" id="meterTarget"></div></div>
+      <div class="meter-lbl">깊이</div>
+      <div class="chips" id="chips">
+        <div class="chip" id="cKnee">무릎 각도 <b>–</b></div>
+        <div class="chip" id="cTorso">상체 기울기 <b>–</b></div>
+        <div class="chip" id="cExtra">뒤꿈치 <b>–</b></div>
+      </div>
+      <div class="timer" id="timer" hidden>60</div>
+      <div class="combo" id="combo" hidden></div>
+      <div class="count" id="count"><b id="countNum">0</b><small id="countSub">바른 스쿼트 0 · 전체 0</small></div>
+      <div class="pop" id="pop"></div>
+    </div>
+    <div class="intro" id="intro">
+      <div class="box">
+        <h2>카메라 앞에서<br>스쿼트를 해 보세요</h2>
+        <ol>
+          <li>기기를 허리 높이에 세우고 <b>2~3 m</b> 떨어져요.</li>
+          <li><b>머리부터 발끝까지</b> 화면에 다 나오게 서요.</li>
+          <li>옆에서 찍으면 <b>깊이·상체·뒤꿈치</b>를, 앞에서 찍으면 <b>깊이·무릎 모임</b>을 봐요.</li>
+          <li>처음에 똑바로 서서 1초 멈추면 준비가 끝나요.</li>
+        </ol>
+        <div><button type="button" class="big" id="start">카메라 켜기</button></div>
+        <p class="err" id="err" hidden></p>
+        <p class="note">영상은 이 기기 안에서만 처리하고 저장하거나 보내지 않아요. 처음 한 번 자세 인식 모델을 내려받고, 그다음부터는 이 기기에 저장된 것을 써요.</p>
+      </div>
+    </div>
+    <div class="overlay" id="gameSetup" hidden>
+      <div class="card">
+        <h2>스쿼트 챌린지</h2>
+        <p>시간 안에 <b>바른 스쿼트</b>를 최대한 많이! 깊이와 자세가 맞아야 점수가 올라가요. 연속으로 성공하면 콤보 점수가 붙어요.</p>
+        <div class="choices" role="group" aria-label="시간">
+          <button type="button" data-sec="30" aria-pressed="true">30초</button>
+          <button type="button" data-sec="60" aria-pressed="false">60초</button>
+        </div>
+        <p id="best" class="note"></p>
+        <div class="row"><button type="button" class="big" id="goGame">시작!</button></div>
+      </div>
+    </div>
+    <div class="overlay" id="countdown" hidden><div class="cd" id="cdNum">3</div></div>
+    <div class="overlay" id="result" hidden><div class="card" id="resultCard"></div></div>
+  </main>
+</div>
+
+<script type="module">
+const LIB = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
+const MODEL = 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task';
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const DEG = 180 / Math.PI;
+
+// ---------- 설정과 상태 ----------
+const S = { mode: 'practice', view: 'side', target: 1, facing: 'user', running: false,
+  game: { sec: 30, on: false, end: 0, score: 0, combo: 0, best: 0 }, test: { n: 5 } };
+const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+
+// ---------- 소리 ----------
+let actx = null;
+function beep(freqs, dur = .12, type = 'sine', vol = .18) {
+  try { actx ||= new AudioContext(); let t = actx.currentTime;
+    for (const f of freqs) { const o = actx.createOscillator(), g = actx.createGain(); o.type = type; o.frequency.value = f;
+      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur); o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur); t += dur * .8; } } catch (e) {}
+}
+const sfx = { good: () => beep([660, 990]), bad: () => beep([220, 180], .16, 'square', .08), tick: () => beep([520], .1), go: () => beep([880], .3), end: () => beep([523, 659, 784, 1046], .16) };
+
+// ---------- 자세 분석 엔진 ----------
+// MediaPipe 번호: 어깨 11/12, 엉덩이 23/24, 무릎 25/26, 발목 27/28, 뒤꿈치 29/30, 발끝 31/32
+const IDX = { L: { sh: 11, hip: 23, knee: 25, ankle: 27, heel: 29, toe: 31 }, R: { sh: 12, hip: 24, knee: 26, ankle: 28, heel: 30, toe: 32 } };
+const E = {
+  sm: null, calib: null, stillSince: 0, phase: 'up', rep: null, reps: [], lastCue: '', cueUntil: 0, lastSeen: 0,
+  reset() { this.calib = null; this.stillSince = 0; this.phase = 'up'; this.rep = null; this.reps = []; },
+  smooth(lm) { // 흔들림 줄이기
+    if (!this.sm) this.sm = lm.map(p => ({ ...p }));
+    else lm.forEach((p, i) => { const q = this.sm[i]; q.x += (p.x - q.x) * .55; q.y += (p.y - q.y) * .55; q.visibility = p.visibility; });
+    return this.sm;
+  },
+};
+const ang = (a, b, c) => { const v1x = a.x - b.x, v1y = a.y - b.y, v2x = c.x - b.x, v2y = c.y - b.y;
+  return Math.acos(clamp((v1x * v2x + v1y * v2y) / (Math.hypot(v1x, v1y) * Math.hypot(v2x, v2y) || 1), -1, 1)) * DEG; };
+
+function analyze(raw, W, H) {
+  // 화면 비율을 맞춘 좌표로 바꿔서 각도를 잼
+  const lm = E.smooth(raw).map(p => ({ x: p.x * W, y: p.y * H, v: p.visibility ?? 1 }));
+  const visOf = s => ['sh', 'hip', 'knee', 'ankle'].reduce((a, k) => a + lm[IDX[s][k]].v, 0) / 4;
+  const side = visOf('L') >= visOf('R') ? 'L' : 'R', J = k => lm[IDX[side][k]], Jo = k => lm[IDX[side === 'L' ? 'R' : 'L'][k]];
+  const need = S.view === 'side' ? visOf(side) : Math.min(visOf('L'), visOf('R'));
+  const M = { lm, side, visible: need > .55 };
+  if (!M.visible) return M;
+  const mid = k => S.view === 'side' ? J(k) : { x: (J(k).x + Jo(k).x) / 2, y: (J(k).y + Jo(k).y) / 2 };
+  const hip = mid('hip'), knee = mid('knee'), ankle = mid('ankle'), sh = mid('sh');
+  M.knee = S.view === 'side' ? ang(J('hip'), J('knee'), J('ankle')) : (ang(J('hip'), J('knee'), J('ankle')) + ang(Jo('hip'), Jo('knee'), Jo('ankle'))) / 2;
+  M.torso = Math.abs(Math.atan2(sh.x - hip.x, hip.y - sh.y)) * DEG; // 수직에서 기운 각도
+  const leg = Math.hypot(hip.x - ankle.x, hip.y - ankle.y);
+  // 똑바로 서서 1초 멈추면 기준 잡기
+  const now = performance.now();
+  if (M.knee > 160) { if (!E.stillSince) E.stillSince = now; if (now - E.stillSince > 900 && (!E.calib || E.phase === 'up'))
+      E.calib = { hipY: hip.y, kneeY: knee.y, leg, heelY: J('heel').y, footDy: J('toe').y - J('heel').y, kneeW: Math.abs(J('knee').x - Jo('knee').x), ankleW: Math.abs(J('ankle').x - Jo('ankle').x) }; }
+  else E.stillSince = 0;
+  M.ready = !!E.calib;
+  if (!E.calib) return M;
+  const C = E.calib;
+  // 깊이: 1 = 허벅지 수평. 옆에서는 무릎 각도(95°)로, 앞에서는 엉덩이가 내려간 거리로 잼
+  M.depth = S.view === 'side' ? clamp((170 - M.knee) / 75, 0, 1.3) : clamp((hip.y - C.hipY) / (.38 * C.leg), 0, 1.3);
+  if (S.view === 'side') { const lift = ((J('toe').y - J('heel').y) - C.footDy) / C.leg; E.heelRun = lift > .1 ? (E.heelRun || 0) + 1 : 0; M.heelLift = E.heelRun >= 6; M.heelVal = lift; }
+  if (S.view === 'front') { const kw = Math.abs(J('knee').x - Jo('knee').x), aw = Math.abs(J('ankle').x - Jo('ankle').x); M.kneeRatio = kw / Math.max(1, aw); M.valgus = M.depth > .45 && M.kneeRatio < .8; }
+  M.lean = S.view === 'side' && M.torso > 50;
+  return M;
+}
+
+// 한 번씩 세기: 서기 → 내려가기 → 다시 서기
+if (location.hash === '#debug') window.__E = E;
+function track(M) {
+  if (!M.ready || M.depth == null) return null;
+  if (E.phase === 'up' && M.depth > .35) { E.phase = 'down'; E.rep = { maxDepth: 0, minKnee: 180, maxTorso: 0, heel: false, valgus: false }; }
+  if (E.phase === 'down') {
+    const r = E.rep; (r.trace ||= []).push([+M.depth.toFixed(2), Math.round(M.knee), +(M.heelVal ?? M.kneeRatio ?? 0).toFixed(3)]); r.maxDepth = Math.max(r.maxDepth, M.depth); r.minKnee = Math.min(r.minKnee, M.knee);
+    if (S.view === 'side') { r.maxTorso = Math.max(r.maxTorso, M.torso); r.heel ||= M.heelLift; } else r.valgus ||= M.valgus;
+    if (M.depth < .15) { E.phase = 'up';
+      const res = { depth: r.maxDepth >= S.target, torso: S.view !== 'side' || r.maxTorso <= 50, heel: S.view !== 'side' || !r.heel, knee: S.view !== 'front' || !r.valgus, minKnee: Math.round(r.minKnee), maxTorso: Math.round(r.maxTorso), view: S.view };
+      res.good = res.depth && res.torso && res.knee; /* 뒤꿈치는 정확도가 낮아 참고로만 */ if (r.trace) res.trace = r.trace.filter((_, i) => i % 3 === 0); E.reps.push(res); E.rep = null; return res; }
+  }
+  return null;
+}
+
+// 지금 할 말 고르기
+function liveCue(M) {
+  const now = performance.now();
+  if (now < E.cueUntil) return null;
+  if (!M.visible) return ['몸 전체가 보이게 뒤로 가요', 'warn'];
+  if (!M.ready) return ['똑바로 서서 잠깐 멈춰요', 'warn'];
+  if (E.phase === 'down') {
+    if (M.valgus) return ['무릎을 바깥으로!', 'bad'];
+    if (M.heelLift) return ['뒤꿈치를 붙여요', 'warn'];
+    if (M.lean) return ['가슴을 들어요!', 'bad'];
+    if (M.depth >= S.target) return ['좋아요! 이제 일어나요', 'good'];
+    return ['엉덩이를 뒤로, 더 앉아요', ''];
+  }
+  return ['앉아 볼까요?', ''];
+}
+function repCue(r) {
+  if (r.good) return r.heel ? ['완벽해요!', 'good'] : ['좋아요! 뒤꿈치도 붙여 봐요', 'good'];
+  if (!r.depth) return ['조금 더 깊이 앉아요', 'warn'];
+  if (!r.knee) return ['무릎이 안으로 모였어요', 'bad'];
+  if (!r.torso) return ['상체가 너무 숙여졌어요', 'bad'];
+  return ['다시 해 봐요', 'warn'];
+}
+
+// ---------- 그리기 ----------
+const video = $('video'), ov = $('ov'), g = ov.getContext('2d');
+const BONES = [[11, 12], [11, 23], [12, 24], [23, 24], [23, 25], [25, 27], [24, 26], [26, 28], [27, 29], [29, 31], [27, 31], [28, 30], [30, 32], [28, 32], [11, 13], [13, 15], [12, 14], [14, 16]];
+function draw(M) {
+  const W = ov.width, H = ov.height; g.clearRect(0, 0, W, H);
+  if (!M?.lm) return;
+  const lm = M.lm, lw = Math.max(4, W / 200);
+  const bad = new Set();
+  if (M.lean) { bad.add('11-23'); bad.add('12-24'); }
+  if (M.valgus) { bad.add('23-25'); bad.add('24-26'); bad.add('25-27'); bad.add('26-28'); }
+  if (M.heelLift) { bad.add('27-29'); bad.add('28-30'); bad.add('29-31'); bad.add('30-32'); }
+  g.lineCap = 'round';
+  for (const [a, b] of BONES) { const p = lm[a], q = lm[b]; if (p.v < .4 || q.v < .4) continue;
+    g.strokeStyle = bad.has(a + '-' + b) ? '#ff6b4a' : (E.phase === 'down' && M.depth >= S.target ? '#3ddc84' : '#ffffffcc'); g.lineWidth = lw;
+    g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(q.x, q.y); g.stroke(); }
+  for (const i of [11, 12, 23, 24, 25, 26, 27, 28, 29, 30]) { const p = lm[i]; if (p.v < .4) continue; g.fillStyle = '#4dabf7'; g.beginPath(); g.arc(p.x, p.y, lw * 1.3, 0, 7); g.fill(); }
+  if (E.calib && M.visible && S.view === 'front') { // 엉덩이가 내려가야 할 높이
+    const y = E.calib.hipY + .38 * E.calib.leg * S.target; g.setLineDash([lw * 3, lw * 2]); g.strokeStyle = '#ffc53d'; g.lineWidth = lw * .6;
+    g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); g.setLineDash([]); }
+}
+
+// ---------- 화면 갱신 ----------
+function setCue(text, cls, hold = 0) { const el = $('cue'); if (el.textContent !== text) el.textContent = text; el.className = 'cue ' + (cls || ''); if (hold) E.cueUntil = performance.now() + hold; }
+function pop(text, color) { const p = $('pop'); p.textContent = text; p.style.color = color; p.classList.remove('show'); void p.offsetWidth; p.classList.add('show'); }
+function chip(id, label, val, state) { const c = $(id); c.className = 'chip ' + (state || ''); c.innerHTML = `${label} <b>${val}</b>`; }
+function updateHUD(M) {
+  const d = M?.depth ?? 0; $('meterFill').style.height = clamp(d / 1.2) * 100 + '%'; $('meterTarget').style.top = (S.target / 1.2) * 100 + '%';
+  chip('cKnee', '무릎 각도', M?.visible && M.knee ? Math.round(M.knee) + '°' : '–', '');
+  if (S.view === 'side') { chip('cTorso', '상체 기울기', M?.visible && M.torso != null ? Math.round(M.torso) + '°' : '–', M?.lean ? 'bad' : '');
+    chip('cExtra', '뒤꿈치(참고)', M?.ready ? (M.heelLift ? '들림?' : '붙음') : '–', M?.heelLift ? 'bad' : ''); }
+  else { chip('cTorso', '깊이', M?.ready ? Math.round(d * 100) + '%' : '–', d >= S.target ? 'good' : '');
+    chip('cExtra', '무릎 너비', M?.kneeRatio ? (M.valgus ? '모임' : '좋음') : '–', M?.valgus ? 'bad' : (M?.kneeRatio ? 'good' : '')); }
+  const good = E.reps.filter(r => r.good).length;
+  $('countNum').textContent = S.mode === 'game' ? S.game.score : (S.mode === 'test' ? `${E.reps.length}/${S.test.n}` : good);
+  $('countSub').innerHTML = S.mode === 'game' ? `점수 · 바른 스쿼트 <span class="ok">${good}</span>` : `바른 스쿼트 <span class="ok">${good}</span> · 전체 ${E.reps.length}`;
+}
+
+// ---------- 모드 ----------
+function onRep(r) {
+  const [t, c] = repCue(r); setCue(t, c, 1100);
+  if (r.good) sfx.good(); else sfx.bad();
+  if (S.mode === 'game' && S.game.on) {
+    if (r.good) { S.game.combo++; const add = 10 + (S.game.combo >= 3 ? 5 * (S.game.combo - 2) : 0); S.game.score += add; pop('+' + add, '#3ddc84'); }
+    else { S.game.combo = 0; pop('아쉬워요', '#ff6b4a'); }
+    $('combo').hidden = S.game.combo < 2; $('combo').textContent = `🔥 ${S.game.combo} 콤보`;
+  } else pop(r.good ? '✓' : '✗', r.good ? '#3ddc84' : '#ff6b4a');
+  if (S.mode === 'test' && E.reps.length >= S.test.n) setTimeout(showTestResult, 900);
+}
+function mostCommonMiss(reps) {
+  const m = { depth: 0, knee: 0, torso: 0, heel: 0 }; for (const r of reps) for (const k in m) if (!r[k]) m[k]++;
+  const heel = m.heel; m.heel = 0; const top = Object.entries(m).sort((a, b) => b[1] - a[1])[0];
+  return top[1] ? top[0] : heel >= 2 ? 'heel' : null;
+}
+const TIPS = { depth: '허벅지가 바닥과 수평이 될 때까지 앉아 보세요. 의자에 앉듯 엉덩이를 뒤로 빼면 더 깊이 앉을 수 있어요.',
+  knee: '무릎이 안으로 모였어요. 무릎을 둘째 발가락 방향으로 밀어 내고, 엉덩이 옆 근육(중둔근)에 힘을 주세요.',
+  heel: '뒤꿈치가 떴어요. 발 전체로 바닥을 누르고, 종아리·발목 스트레칭을 해 보세요.',
+  torso: '상체가 많이 숙여졌어요. 가슴을 펴고 앞을 보며, 팔을 앞으로 뻗어 균형을 잡아 보세요.' };
+const LABEL = { depth: '깊이', knee: '무릎', heel: '뒤꿈치(참고)', torso: '상체' };
+function startGame() {
+  $('gameSetup').hidden = true; E.reps = []; Object.assign(S.game, { score: 0, combo: 0, on: false });
+  $('combo').hidden = true; const cd = $('countdown'); cd.hidden = false; let n = 3; $('cdNum').textContent = n; sfx.tick();
+  const iv = setInterval(() => { n--; if (n > 0) { $('cdNum').textContent = n; sfx.tick(); } else { clearInterval(iv); cd.hidden = true; sfx.go();
+    S.game.on = true; S.game.end = performance.now() + S.game.sec * 1000; $('timer').hidden = false; setCue('시작!', 'good', 900); } }, 900);
+}
+function endGame() {
+  S.game.on = false; $('timer').hidden = true; sfx.end();
+  const good = E.reps.filter(r => r.good).length, all = E.reps.length, miss = mostCommonMiss(E.reps);
+  const key = `squat-best-${S.game.sec}-${S.view}`, best = +(store.get(key) || 0), isBest = S.game.score > best; if (isBest) store.set(key, S.game.score);
+  let maxCombo = 0, c = 0; for (const r of E.reps) { c = r.good ? c + 1 : 0; maxCombo = Math.max(maxCombo, c); }
+  showResult(`<h2>${S.game.sec}초 챌린지 끝!</h2>
+    <div class="grade" style="color:var(--good)">${S.game.score}점</div>
+    ${isBest ? '<p style="color:var(--warn);font-weight:700">🏆 이 기기 최고 기록!</p>' : `<p class="note">이 기기 최고 기록 ${best}점</p>`}
+    <div class="stats"><div class="stat"><b>${good}</b><span>바른 스쿼트</span></div><div class="stat"><b>${all}</b><span>전체</span></div><div class="stat"><b>${maxCombo}</b><span>최고 콤보</span></div></div>
+    ${miss ? `<div class="tip"><b>가장 많이 놓친 것: ${LABEL[miss]}</b><br>${TIPS[miss]}</div>` : (all ? '<div class="tip"><b>모든 스쿼트가 바른 자세였어요!</b></div>' : '')}
+    <div class="row"><button type="button" class="big" data-act="again">다시 도전</button><button type="button" class="iconbtn" data-act="close">닫기</button></div>`);
+}
+function showTestResult() {
+  const reps = E.reps.slice(0, S.test.n), good = reps.filter(r => r.good).length, miss = mostCommonMiss(reps);
+  const grade = good >= 4 ? ['잘함', 'var(--good)'] : good >= 2 ? ['보통', 'var(--warn)'] : ['노력 필요', 'var(--bad)'];
+  const cols = S.view === 'side' ? ['depth', 'torso', 'heel'] : ['depth', 'knee'];
+  const rows = reps.map((r, i) => `<tr><td>${i + 1}</td>${cols.map(k => `<td class="${r[k] ? 'y' : 'n'}">${r[k] ? '✓' : '✗'}</td>`).join('')}<td>${r.minKnee}°</td>${S.view === 'side' ? `<td>${r.maxTorso}°</td>` : ''}</tr>`).join('');
+  showResult(`<h2>스쿼트 형성평가</h2>
+    <div class="grade" style="color:${grade[1]}">${grade[0]}</div>
+    <p>${S.test.n}회 중 <b>${good}회</b>가 기준을 지켰어요. <span class="note">(${S.view === 'side' ? '옆에서' : '앞에서'} 찍음 · 깊이 기준 ${S.target >= 1 ? '허벅지 수평' : '초보'})</span></p>
+    <div style="overflow-x:auto"><table><thead><tr><th>회</th>${cols.map(k => `<th>${LABEL[k]}</th>`).join('')}<th>가장 굽힌 무릎</th>${S.view === 'side' ? '<th>가장 숙인 상체</th>' : ''}</tr></thead><tbody>${rows}</tbody></table></div>
+    ${miss ? `<div class="tip"><b>다음에 고칠 점: ${LABEL[miss]}</b><br>${TIPS[miss]}</div>` : '<div class="tip"><b>모든 기준을 지켰어요. 훌륭해요!</b></div>'}
+    <p class="note">${S.view === 'side' ? '무릎 모임은 앞에서 찍어야 볼 수 있어요.' : '상체 기울기와 뒤꿈치는 옆에서 찍어야 볼 수 있어요.'} 뒤꿈치는 카메라로 정확히 재기 어려워 참고로만 보여 주고 점수에는 넣지 않아요. 허리 굽음은 선생님이 함께 봐 주세요.</p>
+    <div class="row"><button type="button" class="big" data-act="again">다시 평가</button><button type="button" class="iconbtn" data-act="close">닫기</button></div>`);
+}
+function showResult(html) { $('resultCard').innerHTML = html; $('result').hidden = false;
+  $('resultCard').querySelectorAll('[data-act]').forEach(b => b.onclick = () => { $('result').hidden = true; if (b.dataset.act === 'again') setMode(S.mode, true); else setMode('practice', true); }); }
+function setMode(m, restart) {
+  S.mode = m; document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m));
+  S.game.on = false; $('timer').hidden = true; $('combo').hidden = true; $('result').hidden = true; $('gameSetup').hidden = true;
+  E.reps = []; E.phase = 'up'; E.rep = null;
+  if (!S.running) return;
+  if (m === 'game') { const best = +(store.get(`squat-best-${S.game.sec}-${S.view}`) || 0); $('best').textContent = best ? `이 기기 최고 기록: ${best}점` : ''; $('gameSetup').hidden = false; }
+  if (m === 'test') setCue(`평가: 스쿼트 ${S.test.n}회를 해 주세요`, 'warn', 1800);
+}
+document.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => setMode(b.dataset.mode, true));
+document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => { S.view = b.dataset.view; document.querySelectorAll('[data-view]').forEach(x => x.setAttribute('aria-pressed', x === b)); E.reset(); setMode(S.mode, true); });
+document.querySelectorAll('[data-depth]').forEach(b => b.onclick = () => { S.target = +b.dataset.depth; document.querySelectorAll('[data-depth]').forEach(x => x.setAttribute('aria-pressed', x === b)); });
+document.querySelectorAll('[data-sec]').forEach(b => b.onclick = () => { S.game.sec = +b.dataset.sec; document.querySelectorAll('[data-sec]').forEach(x => x.setAttribute('aria-pressed', x === b));
+  const best = +(store.get(`squat-best-${S.game.sec}-${S.view}`) || 0); $('best').textContent = best ? `이 기기 최고 기록: ${best}점` : ''; });
+$('goGame').onclick = startGame;
+
+// ---------- 카메라와 모델 ----------
+let landmarker = null, stream = null, lastT = -1;
+// 사이트에 함께 올린 파일(lib/, models/)을 먼저 쓰고, 없으면 인터넷(CDN)에서 받아요
+async function hasLocal() { try { const r = await fetch('models/pose_landmarker_lite.task', { method: 'HEAD' }); return r.ok; } catch (e) { return false; } }
+async function loadModel() {
+  const local = location.protocol.startsWith('http') && await hasLocal();
+  const lib = local ? new URL('lib', location.href).href : LIB, model = local ? new URL('models/pose_landmarker_lite.task', location.href).href : MODEL;
+  const { PoseLandmarker, FilesetResolver } = await import(`${lib}/vision_bundle.mjs`);
+  const files = await FilesetResolver.forVisionTasks(`${lib}/wasm`);
+  const opts = d => ({ baseOptions: { modelAssetPath: model, delegate: d }, runningMode: 'VIDEO', numPoses: 1, minPoseDetectionConfidence: .5, minTrackingConfidence: .5 });
+  try { return await PoseLandmarker.createFromOptions(files, opts('GPU')); } catch (e) { return await PoseLandmarker.createFromOptions(files, opts('CPU')); }
+}
+async function openCamera() {
+  stream?.getTracks().forEach(t => t.stop());
+  stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: S.facing, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+  video.srcObject = stream; await video.play();
+  const mir = S.facing === 'user'; video.classList.toggle('mirror', mir); ov.classList.toggle('mirror', mir);
+}
+$('start').onclick = async () => {
+  const btn = $('start'), err = $('err'); err.hidden = true; btn.disabled = true;
+  try {
+    if (!window.isSecureContext || !/^https?:$/.test(location.protocol)) throw new Error('파일로 직접 열면 카메라를 쓸 수 없어요. 선생님이 알려 준 https 인터넷 주소로 열어 주세요.');
+    if (!navigator.mediaDevices?.getUserMedia) throw new Error('이 브라우저는 카메라를 쓸 수 없어요. 크롬이나 사파리 최신 버전에서 https 주소로 열어 주세요.');
+    btn.textContent = '카메라 켜는 중…'; await openCamera();
+    btn.textContent = '자세 인식 모델 불러오는 중…'; landmarker = await loadModel();
+    $('intro').hidden = true; $('hud').hidden = false; $('flip').hidden = false; S.running = true; beep([1], .01, 'sine', .0001);
+    setMode(S.mode, true); requestAnimationFrame(loop);
+  } catch (e) {
+    err.hidden = false; err.textContent = e.name === 'NotAllowedError' && window.isSecureContext && /^https?:$/.test(location.protocol) ? '카메라 사용을 허락해 주세요. 주소창 옆 카메라 아이콘에서 바꿀 수 있어요.' : (e.message || String(e)) + (/https 인터넷 주소/.test(e.message || '') ? '' : ' (학교 망에서 자세 인식 파일을 받지 못했을 수 있어요.)');
+    btn.disabled = false; btn.textContent = '다시 시도';
+  }
+};
+$('flip').onclick = async () => { S.facing = S.facing === 'user' ? 'environment' : 'user'; try { await openCamera(); E.reset(); } catch (e) {} };
+
+function loop() {
+  if (video.readyState >= 2 && video.currentTime !== lastT) {
+    lastT = video.currentTime;
+    const W = video.videoWidth, H = video.videoHeight; if (ov.width !== W) { ov.width = W; ov.height = H; }
+    const res = landmarker.detectForVideo(video, performance.now());
+    const raw = res.landmarks?.[0];
+    let M = null;
+    const paused = !$('result').hidden || !$('gameSetup').hidden || !$('countdown').hidden || (S.mode === 'game' && !S.game.on) || (S.mode === 'test' && E.reps.length >= S.test.n);
+    if (raw) { M = analyze(raw, W, H); const r = paused ? null : track(M); if (r) onRep(r); }
+    else M = { visible: false };
+    const c = liveCue(M); if (c) setCue(c[0], c[1]);
+    draw(M); updateHUD(M);
+  }
+  if (S.game.on) { const left = Math.max(0, (S.game.end - performance.now()) / 1000); $('timer').textContent = Math.ceil(left); $('timer').classList.toggle('low', left <= 5);
+    if (left <= 0) endGame(); }
+  requestAnimationFrame(loop);
+}
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
