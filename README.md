@@ -1,4 +1,7 @@
-# 자세 코치 (스쿼트 · 푸시업)
+# 자세 코치 (스쿼트 · 푸시업) + 3D 체육 교과서
+
+- 자세 코치: https://minable17-glitch.github.io/squat-coach/
+- 3D 체육 교과서: https://minable17-glitch.github.io/squat-coach/textbook/ (`textbook/` 폴더)
 
 카메라로 스쿼트 자세를 실시간으로 봐 주는 체육 수업용 웹앱이에요. 연습, 게임(30초·60초 챌린지), 형성평가(5회) 모드가 있어요.
 
@@ -64,3 +67,14 @@
 - 통신은 Supabase Realtime을 써요. **별명과 개수만** 주고받고 저장하지 않아요. 영상은 보내지 않아요. 실명 대신 별명을 쓰도록 안내해 주세요.
 - 학교 망에서 `supabase.co`가 막혀 있으면 대결만 안 돼요. 연습·게임·평가는 그대로 돼요.
 - `lib/supabase.js`는 supabase-js 2.45.4 (MIT)예요.
+
+## 3D 체육 교과서 (`textbook/`)
+
+| 파일 | 하는 일 |
+|---|---|
+| `textbook/index.html` | 표지·목차, 책 모드(쪽 넘기기, 학습 목표, 확인 문제), 자유 탐색 |
+| `textbook/principles.html` | 트레이닝 원리 실험(근육이 자라는 인형) |
+| `textbook/lib/` | three.js 0.160.0 (MIT) — 학교 망에서 jsdelivr가 막혀도 열려요 |
+| `textbook/manifest.webmanifest`, `textbook/sw.js` | 홈 화면 설치, 한 번 열면 인터넷이 약해도 열림 |
+
+읽은 쪽과 확인 문제 결과는 그 기기의 브라우저에만 저장돼요(서버로 보내지 않음).

@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14191c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="../icon-192.png">
+<link rel="apple-touch-icon" href="../icon-192.png">
+<title>트레이닝 원리</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: 한 원리 = 한 화면. 왼쪽 큰 3D 인형(근육이 자라는 모습), 오른쪽 한 줄 설명 + 큰 선택 버튼 + 결과 + 퀴즈 */
+:root{
+  --bg:#f2f3f1; --surface:#ffffff; --ink:#1a2024; --muted:#5b666d; --line:#dde2e1;
+  --muscle:#cf3b2d; --good:#2f8a4e; --warn:#d9480f; --accent:#5f3dc4; --accent-soft:#f0ebff;
+  --stage:#1b2125; --overlay:rgba(17,22,25,.82); --overlay-ink:#eef2f3; --overlay-muted:#a9b4ba;
+  --f-body:'IBM Plex Sans KR',system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --f-num:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111518; --surface:#192024; --ink:#e7ecee; --muted:#9ba7ad; --line:#2a3338;
+  --muscle:#ff5c4b; --good:#5cc47e; --warn:#ff8a3d; --accent:#b197fc; --accent-soft:#2b2440; --stage:#151a1d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111518; --surface:#192024; --ink:#e7ecee; --muted:#9ba7ad; --line:#2a3338;
+  --muscle:#ff5c4b; --good:#5cc47e; --warn:#ff8a3d; --accent:#b197fc; --accent-soft:#2b2440; --stage:#151a1d; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6}
+.page{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px;display:grid;gap:12px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+header .eb{flex-basis:100%;font-size:12.5px;font-weight:600;letter-spacing:.06em;color:var(--muscle)}
+header h1{margin:0;font-size:clamp(22px,3vw,28px)}
+.pills{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.pills button{flex:0 0 auto;font:inherit;font-size:14px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer;min-height:40px;display:flex;align-items:center;gap:6px}
+.pills button[aria-current="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pills button .ok{color:var(--good);font-weight:700}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+.stage{position:sticky;top:10px;height:min(calc(100vh - 110px),640px);min-height:380px;border-radius:14px;overflow:hidden;background:var(--stage)}
+@media (max-width:900px){.stage{position:relative;top:auto;height:52vh;min-height:320px}}
+.stage canvas{display:block;width:100%;height:100%;touch-action:none}
+.hud{position:absolute;left:12px;top:12px;right:12px;display:flex;flex-wrap:wrap;gap:8px;pointer-events:none}
+.hud .box{background:var(--overlay);color:var(--overlay-ink);border-radius:12px;padding:6px 12px;font-size:13px;line-height:1.25}
+.hud .box b{display:block;font-family:var(--f-num);font-size:26px;font-variant-numeric:tabular-nums}
+.hud .box.up b{color:#8ce99a}.hud .box.bad b{color:#ffa8a8}
+.labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;transform:translate(-50%,calc(-100% - 8px));white-space:nowrap;font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--overlay);color:var(--overlay-ink);border:1px solid rgba(255,255,255,.25)}
+.lbl.warn{background:#c2410c;border-color:#fdba74;color:#fff}.lbl.up{border-color:#8ce99a}
+.load{position:absolute;inset:0;display:grid;place-items:center;color:var(--overlay-muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:12px;min-width:0}
+.card h2{margin:0;font-size:22px}
+.card .no{font-size:12.5px;font-weight:600;color:var(--muted);letter-spacing:.04em}
+.big{font-size:17px;font-weight:600;margin:0;line-height:1.5;text-wrap:balance}
+.mission{border:1px dashed var(--accent);background:var(--accent-soft);border-radius:10px;padding:8px 12px;font-size:14px}
+.mission.ok{border-style:solid;border-color:var(--good);background:color-mix(in srgb,var(--good) 12%,transparent)}
+.choices{display:grid;gap:8px}
+.choice{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:center;text-align:left;font:inherit;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;min-height:56px}
+.choice .kg{grid-row:span 2;font-family:var(--f-num);font-size:20px;font-weight:600;min-width:64px}
+.choice b{font-size:15.5px}
+.choice small{color:var(--muted);font-size:12.5px}
+.choice[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.choice:disabled{opacity:.45;cursor:default}
+.run{font:inherit;font-size:17px;font-weight:700;border:0;border-radius:12px;padding:13px 16px;background:var(--accent);color:#fff;cursor:pointer;min-height:50px}
+.run:disabled{opacity:.5;cursor:default}
+.sub{font:inherit;font-size:14px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:8px 12px;cursor:pointer;min-height:40px}
+.result{font-size:15px;padding:10px 12px;border-radius:10px;background:var(--bg);border-left:4px solid var(--muted)}
+.result.good{border-left-color:var(--good)}.result.bad{border-left-color:var(--muscle)}.result.warn{border-left-color:var(--warn)}
+.feel{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;font-size:12.5px;text-align:center}
+.feel div{padding:5px 4px;border-radius:7px;background:var(--bg);color:var(--muted)}
+.feel .on.f0{background:#868e96;color:#fff}.feel .on.f1{background:var(--good);color:#fff}.feel .on.f2{background:var(--warn);color:#fff}
+.log{display:flex;flex-wrap:wrap;gap:4px}
+.log span{font-family:var(--f-num);font-size:12px;padding:3px 7px;border-radius:6px;background:var(--bg)}
+.log .g{color:var(--good)}.log .l{color:var(--muted)}.log .h{color:var(--warn)}.log .x{color:var(--muscle)}
+.quiz{display:grid;gap:10px;border-top:1px solid var(--line);padding-top:12px}
+.quiz h3{margin:0;font-size:15px}
+.q{display:grid;gap:6px}
+.q .qq{font-weight:600}
+.q .opts{display:grid;gap:5px}
+.q .opts button{text-align:left;font:inherit;font-size:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:9px;padding:9px 11px;cursor:pointer;min-height:42px}
+.q .opts button.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,transparent)}
+.q .opts button.wrong{border-color:var(--muscle);background:color-mix(in srgb,var(--muscle) 10%,transparent)}
+.q .fb{font-size:13.5px;color:var(--muted)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.foot{font-size:12.5px;color:var(--muted)}
+.foot a{color:var(--accent)}
+</style>
+
+<div class="page">
+  <header>
+    <span class="eb">3D 체육 교과서 · 트레이닝 원리</span>
+    <h1>트레이닝 원리</h1>
+    <nav class="pills" id="pills" aria-label="원리 고르기"></nav>
+  </header>
+  <div class="layout">
+    <div class="stage" id="stage">
+      <canvas id="c" aria-label="덤벨 운동을 하는 3D 인형. 근육이 자라는 모습을 보여 줍니다."></canvas>
+      <div class="load" id="load">3D 화면을 불러오는 중…</div>
+      <div class="labels" id="labels"></div>
+      <div class="hud" id="hud"></div>
+    </div>
+    <section class="card" aria-live="polite">
+      <div><div class="no" id="no"></div><h2 id="title"></h2></div>
+      <p class="big" id="line"></p>
+      <div id="ctl" style="display:grid;gap:12px"></div>
+      <div class="quiz" id="quiz"></div>
+      <div style="display:flex;justify-content:space-between;gap:8px"><button class="sub" id="prev" type="button">← 이전 원리</button><button class="sub" id="next" type="button">다음 원리 →</button></div>
+    </section>
+  </div>
+  <p class="foot">근육이 자라는 정도와 숫자는 원리를 보여 주려고 단순하게 만든 예예요. 실제로는 사람마다 다르고, 보통 몇 주에서 몇 달이 걸려요. <a href="index.html" >3D 교과서로 돌아가기</a></p>
+</div>
+
+<script type="importmap">
+{"imports":{"three":"./lib/three.module.js","three/addons/":"./lib/addons/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const D = Math.PI / 180;
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const ss = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
+const dirA = d => V(0, Math.cos(d * D), Math.sin(d * D)); // 수직에서 앞으로 기운 각도
+const L = { shank: .43, thigh: .45, low: .25, up: .30, uarm: .29, farm: .27 };
+
+// ---------- 몸 만들기 도우미 ----------
+function footStand(x, z, heelDeg = 0, sd = Math.sign(x), yaw = 0) {
+  const toe = V(x + sd * .02, .03, z + .17);
+  const rot = pt => { const vy = pt.y - toe.y, vz = pt.z - toe.z, c = Math.cos(heelDeg * D), s = Math.sin(heelDeg * D);
+    return V(pt.x, toe.y + vy * c - vz * s, toe.z + vy * s + vz * c); };
+  const out = { toe, ankle: rot(V(x, .085, z)), heel: rot(V(x, .03, z - .06)) };
+  if (yaw) { const th = yaw * D * sd, c = Math.cos(th), sn = Math.sin(th), a = out.ankle;
+    for (const p of [out.toe, out.heel]) { const dx = p.x - a.x, dz = p.z - a.z; p.x = a.x + dx * c + dz * sn; p.z = a.z - dx * sn + dz * c; } }
+  return out;
+}
+function widen(hip, ankle, w) { const c = Math.sqrt(Math.max(.2, 1 - ((w - .1) / .86) ** 2)); hip.y = ankle.y + (hip.y - ankle.y) * c; return hip; }
+function chainUp(ankle, a, k) { const knee = ankle.clone().addScaledVector(dirA(a), L.shank); const hip = knee.addScaledVector(dirA(a - k), L.thigh); return V(0, hip.y, hip.z); }
+function ik(A, C, l1, l2, pole) {
+  const AC = C.clone().sub(A); let d = AC.length(); const dir = AC.divideScalar(d || 1); d = Math.min(d, l1 + l2 - 1e-4);
+  const a = (l1 * l1 - l2 * l2 + d * d) / (2 * d), h = Math.sqrt(Math.max(0, l1 * l1 - a * a));
+  const p = pole.clone().addScaledVector(dir, -pole.dot(dir)).normalize();
+  return A.clone().addScaledVector(dir, a).addScaledVector(p, h);
+}
+function armDir(s, abd, flex) { const ab = abd * D, f = flex * D, vy = -Math.cos(ab); return V(s * Math.sin(ab), vy * Math.cos(f), -vy * Math.sin(f)); }
+function build(S) {
+  const P = { ...S, side: {} };
+  const hipC = S.hip, mid = hipC.clone().addScaledVector(dirA(S.low), L.low), neck = mid.clone().addScaledVector(dirA(S.up), L.up);
+  const head = neck.clone().addScaledVector(dirA(S.head ?? S.up * .45), .14);
+  for (const s of [1, -1]) {
+    const f = S.feet[s], hip = hipC.clone().add(V(s * .1, 0, 0));
+    const knee = ik(hip, f.ankle, L.thigh, L.shank, S.kneePole[s]);
+    const sh = neck.clone().addScaledVector(dirA(S.up), -.05).add(V(s * .19, 0, 0));
+    let el, wr; const A = S.arms;
+    if (A.mode === 'angle') { const pk = v => Array.isArray(v) ? v[s === 1 ? 0 : 1] : (v || 0), ab = pk(A.abd), fl = pk(A.flex);
+      el = sh.clone().addScaledVector(armDir(s, ab, fl), L.uarm); wr = el.clone().addScaledVector(armDir(s, ab * .6, fl + pk(A.elbow)), L.farm); }
+    else if (A.mode === 'hang') { const R = L.uarm + L.farm - .01, dz = clamp(A.z - sh.z, -R, R); wr = sh.clone().add(V(s * -.02, -Math.sqrt(R * R - dz * dz), dz)); el = ik(sh, wr, L.uarm, L.farm, V(s, 0, -1)); }
+    else if (A.mode === 'hold') { const tg = neck.clone().addScaledVector(dirA(S.up + 90), A.fwd).addScaledVector(dirA(S.up), -A.drop); P.hold = tg;
+      wr = tg.clone().add(V(s * .07, 0, 0)); el = ik(sh, wr, L.uarm, L.farm, V(s * .6, -1, 0)); }
+    else { wr = A.wr[s].clone(); el = ik(sh, wr, L.uarm, L.farm, A.pole[s]); }
+    P.side[s] = { ...f, knee, hip, sh, el, wr };
+  }
+  const kn = P.side[1].knee.clone().add(P.side[-1].knee).multiplyScalar(.5);
+  const arm = [1, -1].reduce((a, s) => a.add(P.side[s].el).add(P.side[s].wr), V(0, 0, 0)).multiplyScalar(.25);
+  const com = hipC.clone().multiplyScalar(.38).addScaledVector(mid, .22).addScaledVector(neck, .1).addScaledVector(head, .07).addScaledVector(kn, .13).addScaledVector(arm, .1);
+  if (P.hold) com.multiplyScalar(.85).addScaledVector(P.hold, .15);
+  return Object.assign(P, { hipC, mid, neck, head, com });
+}
+const sym = fn => ({ 1: fn(1), [-1]: fn(-1) });
+const ang3 = (A, B, C) => A.clone().sub(B).angleTo(C.clone().sub(B)) / D;
+
+const DANGERS = { fall: '⚠ 무게중심이 발 뒤', impact: '⚠ 착지 충격', knee: '⚠ 무릎 인대', kneeFront: '⚠ 무릎 앞 힘줄', ankle: '⚠ 균형', back: '⚠ 허리', shoulder: '⚠ 어깨 앞쪽', wrist: '⚠ 손목·팔꿈치', neck: '⚠ 목', pull: '⚠ 근육이 놀라요' };
+const MUSCLES = {
+  bi: ['이두근', '팔 앞쪽', '팔꿈치를 굽히는 근육이에요. 덤벨 컬에서 가장 많이 일해요.'],
+  quad: ['대퇴사두근', '허벅지 앞', '무릎을 펴는 근육이에요. 앉거나 내려갈 때 버티며 늘어나고, 일어날 때 무릎을 펴며 몸을 밀어 올려요.'],
+  glute: ['대둔근', '엉덩이', '고관절을 펴는 가장 큰 근육이에요. 엉덩이를 뒤로 뺄수록 많이 늘어나고, 일어날 때 골반을 앞으로 밀어요.'],
+  ham: ['햄스트링', '허벅지 뒤', '고관절을 펴고 무릎을 굽히는 근육이에요. 힙힌지에서 가장 많이 늘어나며 일해요.'],
+  add: ['대내전근', '허벅지 안쪽', '다리를 모으는 근육이지만, 깊이 앉거나 숙일 때 고관절을 펴는 일을 크게 도와요.'],
+  gmed: ['중둔근', '엉덩이 옆', '골반을 수평으로 잡고 무릎이 안으로 무너지지 않게 버텨요. 한 다리로 설 때 특히 중요해요.'],
+  erector: ['척추세움근', '등·허리', '등뼈를 따라 길게 붙어 상체가 숙여질 때 등을 곧게 버텨요.'],
+  abs: ['복부 근육', '배', '배에 힘을 주어 몸통을 단단히 고정해요. 허리가 굽거나 꺾이지 않게 지켜요.'],
+  calf: ['종아리 근육', '비복근·가자미근', '발목을 안정시키고 발바닥으로 균형을 잡게 도와요.'],
+  chest: ['대흉근', '가슴', '팔을 앞으로 미는 근육이에요. 푸시업에서 가장 많이 일해요.'],
+  tri: ['삼두근', '팔 뒤쪽', '팔꿈치를 펴는 근육이에요. 푸시업에서 몸을 밀어 올릴 때 일해요.'],
+  delt: ['삼각근', '어깨', '팔을 들어 올리고 어깨를 감싸는 근육이에요. 앞쪽이 미는 동작을 도와요.'],
+};
+
+// ---------- 인형 ----------
+const XAX = V(1, 0, 0), M4 = new THREE.Matrix4();
+function frame(A, B, sgn = 1) {
+  const d = B.clone().sub(A), len = d.length(); d.divideScalar(len || 1);
+  const front = new THREE.Vector3().crossVectors(d, XAX).normalize().multiplyScalar(sgn);
+  const side = new THREE.Vector3().crossVectors(d, front).normalize(); front.crossVectors(side, d).normalize();
+  return { A, d, len, front, side, q: new THREE.Quaternion().setFromRotationMatrix(M4.makeBasis(side, d, front)) };
+}
+const MUSCLE_SPECS = [
+  { id: 'quad', seg: 'thigh', f: .52, fo: .052, oo: .008, r: [.062, .2, .05], m: 1 },
+  { id: 'ham', seg: 'thigh', f: .5, fo: -.05, oo: .004, r: [.054, .19, .044], m: 1 },
+  { id: 'add', seg: 'thigh', f: .3, fo: 0, oo: -.05, r: [.034, .14, .052], m: 1 },
+  { id: 'calf', seg: 'shank', f: .3, fo: -.046, oo: 0, r: [.044, .13, .044], m: 1 },
+  { id: 'glute', seg: 'low', f: -.12, fo: -.085, oo: .07, r: [.078, .09, .062], m: 1 },
+  { id: 'gmed', seg: 'low', f: .12, fo: -.02, oo: .135, r: [.035, .065, .06], m: 1 },
+  { id: 'erector', seg: 'low', f: .55, fo: -.088, oo: .034, r: [.028, .16, .03], m: 1 },
+  { id: 'erector', seg: 'up', f: .35, fo: -.098, oo: .036, r: [.026, .17, .028], m: 1 },
+  { id: 'abs', seg: 'low', f: .62, fo: .082, oo: 0, r: [.07, .17, .03], m: 0 },
+  { id: 'chest', seg: 'up', f: .68, fo: .085, oo: .075, r: [.075, .085, .035], m: 1 },
+  { id: 'delt', seg: 'uarm', f: .1, fo: 0, oo: .025, r: [.052, .085, .055], m: 1 },
+  { id: 'bi', seg: 'uarm', f: .5, fo: .038, oo: 0, r: [.04, .12, .036], m: 1 },
+  { id: 'tri', seg: 'uarm', f: .52, fo: -.034, oo: 0, r: [.036, .12, .032], m: 1 },
+];
+const capCache = {}, capsule = (r, l) => capCache[r + '_' + l] ||= new THREE.CapsuleGeometry(r, l, 6, 16);
+const sphereG = new THREE.SphereGeometry(1, 24, 16);
+const C_REST = new THREE.Color('#d9b9a8'), C_HOT = new THREE.Color('#e3261b');
+const sideVal = (x, s) => Array.isArray(x) ? x[s === -1 ? 1 : 0] : x;
+class Figure {
+  constructor(ghost) {
+    this.ghost = ghost; this.g = new THREE.Group(); scene.add(this.g); this.parts = []; this.muscles = []; this.dangers = [];
+    this.skin = ghost ? new THREE.MeshBasicMaterial({ color: 0x6db4ff, transparent: true, opacity: .22, depthWrite: false })
+                      : new THREE.MeshStandardMaterial({ color: 0xe9e5de, roughness: .62 });
+    const add = (m, key, x = {}) => { m.castShadow = !ghost; this.g.add(m); this.parts.push({ key, m, ...x }); return m; };
+    const limb = (key, r, l, sx = 1, sz = 1) => add(new THREE.Mesh(capsule(r, l), this.skin), key, { sx, sz, nom: l + 2 * r });
+    for (const s of [1, -1]) {
+      limb(['thigh', s], .066, .4); limb(['shank', s], .047, .4); limb(['uarm', s], .04, .25); limb(['farm', s], .034, .24);
+      add(new THREE.Mesh(new THREE.BoxGeometry(.09, 1, .06), this.skin), ['foot', s], { box: true });
+      for (const j of ['knee', 'ankle', 'el', 'sh', 'wr']) add(new THREE.Mesh(sphereG, this.skin), ['joint', s, j]).scale.setScalar({ knee: .056, ankle: .045, el: .038, sh: .055, wr: .036 }[j]);
+    }
+    limb(['low'], .1, .2, 1.45, .9); limb(['up'], .12, .2, 1.4, .82);
+    add(new THREE.Mesh(sphereG, this.skin), ['pelvis']);
+    add(new THREE.Mesh(sphereG, this.skin), ['head']).scale.set(.095, .115, .105);
+    add(new THREE.Mesh(capsule(.04, .06), this.skin), ['neck']);
+    if (ghost) return;
+    this.bar = new THREE.Mesh(new THREE.CylinderGeometry(.014, .014, 1.1, 12), new THREE.MeshStandardMaterial({ color: 0xc9a46a, roughness: .5 }));
+    this.bar.castShadow = true; this.g.add(this.bar);
+    const tm = c => new THREE.MeshStandardMaterial({ color: c, roughness: .4, metalness: .2 });
+    const cy = (g, r, h, y, c) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 10), tm(c)); m.position.y = y; m.castShadow = true; g.add(m); };
+    this.tools = { racket: new THREE.Group(), foil: new THREE.Group() };
+    cy(this.tools.racket, .013, .2, .1, 0x2f3438); cy(this.tools.racket, .006, .2, .3, 0x9aa3a8);
+    const head = new THREE.Mesh(new THREE.TorusGeometry(.11, .008, 8, 28), tm(0xe8590c)); head.position.y = .51; this.tools.racket.add(head);
+    const str = new THREE.Mesh(new THREE.CircleGeometry(.105, 24), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .22, side: THREE.DoubleSide })); str.position.y = .51; this.tools.racket.add(str);
+    cy(this.tools.foil, .012, .12, -.04, 0x2f3438); cy(this.tools.foil, .045, .012, .03, 0xc9ced2); cy(this.tools.foil, .004, .86, .46, 0xdfe3e6);
+    for (const k in this.tools) this.g.add(this.tools[k]);
+    this.heart = new THREE.Mesh(new THREE.SphereGeometry(.05, 16, 12), new THREE.MeshBasicMaterial({ color: 0xff2d55, depthTest: false })); this.heart.renderOrder = 11; this.g.add(this.heart);
+    this.pack = new THREE.Mesh(new THREE.BoxGeometry(.3, .38, .17), new THREE.MeshStandardMaterial({ color: 0x3b6fb0, roughness: .8 })); this.pack.castShadow = true; this.g.add(this.pack);
+    this.ball = new THREE.Mesh(new THREE.SphereGeometry(.12, 24, 16), new THREE.MeshStandardMaterial({ color: 0xe8590c, roughness: .7 })); this.ball.castShadow = true; this.g.add(this.ball);
+    this.kb = new THREE.Group(); const kbM = new THREE.MeshStandardMaterial({ color: 0x2b2f33, roughness: .45, metalness: .3 });
+    const kbB = new THREE.Mesh(new THREE.SphereGeometry(.085, 20, 16), kbM); kbB.castShadow = true; kbB.position.y = -.07;
+    const kbH = new THREE.Mesh(new THREE.TorusGeometry(.05, .012, 8, 20, Math.PI), kbM); this.kb.add(kbB, kbH); this.g.add(this.kb);
+    for (const sp of MUSCLE_SPECS) for (const s of sp.m ? [1, -1] : [0]) {
+      const mesh = new THREE.Mesh(sphereG, new THREE.MeshStandardMaterial({ color: C_REST.clone(), roughness: .5 }));
+      mesh.castShadow = true; mesh.userData = { kind: 'muscle', id: sp.id }; this.g.add(mesh); this.muscles.push({ sp, s, mesh });
+    }
+    for (const key of Object.keys(DANGERS)) for (const s of (key === 'back' || key === 'fall' || key === 'neck' ? [0] : [1, -1])) {
+      const mesh = new THREE.Mesh(sphereG, new THREE.MeshBasicMaterial({ color: 0xff4d2e, transparent: true, opacity: .5, depthTest: false }));
+      mesh.renderOrder = 10; mesh.userData = { kind: 'danger', key }; mesh.visible = false; this.g.add(mesh); this.dangers.push({ key, s, mesh });
+    }
+  }
+  update(M, vk, t, time) {
+    const Vr = M.variants[vk];
+    const P = build(M.spec(Vr.p(t), t)); this.P = P; const F = {};
+    for (const s of [1, -1]) { const S = P.side[s];
+      F['thigh' + s] = frame(S.hip, S.knee); F['shank' + s] = frame(S.knee, S.ankle); F['uarm' + s] = frame(S.sh, S.el);
+      F['farm' + s] = frame(S.el, S.wr); F['foot' + s] = frame(S.heel, S.toe);
+      S.hipAng = P.mid.clone().sub(P.hipC).angleTo(S.knee.clone().sub(S.hip)) / D; }
+    F.low = frame(P.hipC, P.mid, -1); F.up = frame(P.mid, P.neck, -1);
+    for (const p of this.parts) {
+      const [k, s, j] = p.key, m = p.m;
+      if (k === 'joint') { m.position.copy(P.side[s][j]); continue; }
+      if (k === 'pelvis') { m.position.copy(P.hipC).addScaledVector(F.low.d, .01); m.quaternion.copy(F.low.q); m.scale.set(.17, .11, .12); continue; }
+      if (k === 'head') { m.position.copy(P.head); m.quaternion.copy(frame(P.neck, P.head).q); continue; }
+      if (k === 'neck') { const f = frame(P.neck, P.head); m.position.copy(P.neck).addScaledVector(f.d, .04); m.quaternion.copy(f.q); continue; }
+      const f = F[k + (s ?? '')]; m.position.copy(f.A).addScaledVector(f.d, f.len / 2); m.quaternion.copy(f.q);
+      if (p.box) m.scale.set(1, f.len + .02, 1); else m.scale.set(p.sx, f.len / p.nom * 1.08, p.sz);
+    }
+    if (this.ghost) return;
+    for (const k in this.tools) { const tg = this.tools[k]; tg.visible = P.tool === k;
+      if (tg.visible) { const S1 = P.side[1]; tg.position.copy(S1.wr); tg.quaternion.setFromUnitVectors(V(0, 1, 0), S1.wr.clone().sub(S1.el).normalize()); } }
+    this.heart.visible = !!P.heart; if (P.heart) { this.heart.position.copy(F.up.A).addScaledVector(F.up.d, F.up.len * .7).addScaledVector(F.up.front, .11).addScaledVector(F.up.side, .04); this.heart.scale.setScalar(1 + .45 * Math.max(0, Math.sin(time * P.heart / 60 * 2 * Math.PI))); }
+    this.pack.visible = !!P.pack; if (P.pack) { this.pack.position.copy(F.up.A).addScaledVector(F.up.d, F.up.len * .45 - P.pack.drop).addScaledVector(F.up.front, -.19); this.pack.quaternion.copy(F.up.q); }
+    this.ball.visible = !!P.ball; if (P.ball) this.ball.position.copy(P.ball);
+    this.bar.visible = !!M.bar; this.kb.visible = !!P.hold; if (P.hold) this.kb.position.copy(P.hold);
+    if (M.bar) { const a = P.side[1].wr, b = P.side[-1].wr; this.bar.position.copy(a).add(b).multiplyScalar(.5); this.bar.quaternion.setFromUnitVectors(V(0, 1, 0), a.clone().sub(b).normalize()); }
+    const raw = M.act(vk, P, t), A = {};
+    for (const id in MUSCLES) A[id] = raw[id] === undefined ? .04 : Array.isArray(raw[id]) ? raw[id].map(x => clamp(x)) : clamp(raw[id]);
+    this.act = A;
+    for (const { sp, s, mesh } of this.muscles) {
+      const f = sp.seg === 'low' || sp.seg === 'up' ? F[sp.seg] : F[sp.seg + s];
+      const out = f.side.clone().multiplyScalar((Math.sign(f.side.x) || 1) * s);
+      mesh.position.copy(f.A).addScaledVector(f.d, f.len * sp.f).addScaledVector(f.front, sp.fo).addScaledVector(out, sp.oo);
+      mesh.quaternion.copy(f.q);
+      const a = sideVal(A[sp.id], s), b = (1 + .12 * a) * (1 + (P.growMap?.[sp.id] ?? .3 * (P.grow || 0))), bl = 1 + .45 * (P.growMap?.[sp.id] || 0); mesh.scale.set(sp.r[0] * b, sp.r[1] * bl, sp.r[2] * b);
+      mesh.material.color.copy(C_REST).lerp(C_HOT, Math.pow(a, .85));
+      const sel = state.sel === sp.id; mesh.material.emissive.setHex(sel ? 0x5a2a10 : 0); mesh.material.emissiveIntensity = sel ? .6 + .4 * Math.sin(time * 5) : 0;
+    }
+    const show = M.dangerShow ? M.dangerShow(t) : ss(.4, .85, t), pulse = 1 + .18 * Math.sin(time * 6), dl = Vr.danger || [];
+    for (const d of this.dangers) {
+      const on = show > .01 && dl.some(([k, sides]) => k === d.key && sides.includes(d.s)); d.mesh.visible = on; if (!on) continue;
+      d.mesh.material.opacity = .55 * show; let pos;
+      if (d.key === 'knee') pos = P.side[d.s].knee.clone().add(V(-d.s * .03, 0, .02));
+      else if (d.key === 'kneeFront') pos = P.side[d.s].knee.clone().addScaledVector(F['shank' + d.s].front, .06).addScaledVector(F['shank' + d.s].d, .05);
+      else if (d.key === 'ankle') pos = P.side[d.s].ankle.clone();
+      else if (d.key === 'pull') pos = P.side[d.s].hip.clone().lerp(P.side[d.s].knee, .5).add(V(0, .1, 0));
+      else if (d.key === 'neck') pos = P.neck.clone().addScaledVector(F.up.front, -.07);
+      else if (d.key === 'wrist') pos = P.side[d.s].wr.clone().add(V(0, .05, 0));
+      else if (d.key === 'shoulder') pos = P.side[d.s].sh.clone().add(V(0, .06, .03));
+      else if (d.key === 'fall') pos = P.com.clone();
+      else if (d.key === 'impact') pos = P.side[d.s].knee.clone().add(V(0, .03, .06));
+      else pos = F.low.A.clone().addScaledVector(F.low.d, F.low.len * .75).addScaledVector(F.low.front, -.13);
+      d.mesh.position.copy(pos); d.mesh.scale.setScalar(.065 * pulse);
+    }
+  }
+}
+
+// ---------- 이 페이지에서 쓰는 장면 ----------
+const state = { sel: null };
+const stage = document.getElementById('stage'), canvas = document.getElementById('c'), $ = id => document.getElementById(id);
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.outputColorSpace = THREE.SRGBColorSpace;
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x1b2125); scene.fog = new THREE.Fog(0x1b2125, 8, 16);
+const camera = new THREE.PerspectiveCamera(34, 1, .05, 60);
+const controls = new OrbitControls(camera, canvas); controls.enableDamping = true; controls.enablePan = false; controls.minDistance = 1.8; controls.maxDistance = 8; controls.maxPolarAngle = Math.PI * .52;
+scene.add(new THREE.HemisphereLight(0xe3ecff, 0x2b241e, .8));
+const sun = new THREE.DirectionalLight(0xfff3e0, 2.2); sun.position.set(-2.5, 5, 3.5); sun.castShadow = true; sun.shadow.mapSize.set(1536, 1536);
+Object.assign(sun.shadow.camera, { left: -3, right: 3, top: 3, bottom: -2 }); sun.shadow.radius = 4; sun.shadow.bias = -.0005; scene.add(sun);
+const rim = new THREE.DirectionalLight(0x9fb8ff, .9); rim.position.set(3, 2.5, -3); scene.add(rim);
+{ const c = document.createElement('canvas'); c.width = c.height = 512; const g = c.getContext('2d'); g.fillStyle = '#2a3034'; g.fillRect(0, 0, 512, 512);
+  g.strokeStyle = 'rgba(0,0,0,.45)'; g.lineWidth = 3; for (let i = 0; i <= 4; i++) { g.beginPath(); g.moveTo(i * 128, 0); g.lineTo(i * 128, 512); g.stroke(); g.beginPath(); g.moveTo(0, i * 128); g.lineTo(512, i * 128); g.stroke(); }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(4, 4);
+  const fl = new THREE.Mesh(new THREE.CircleGeometry(5, 64), new THREE.MeshStandardMaterial({ map: t, roughness: .95 })); fl.rotation.x = -Math.PI / 2; fl.receiveShadow = true; scene.add(fl); }
+// 덤벨 받침대 (점진성)
+const RACK = new THREE.Group(); scene.add(RACK); RACK.position.set(1.35, 0, -.35); RACK.rotation.y = -.5;
+const RACK_KG = [3, 4, 5, 6, 7, 8, 9, 10], rackItems = [];
+{ const leg = new THREE.MeshStandardMaterial({ color: 0x495057, metalness: .4 });
+  const top = new THREE.Mesh(new THREE.BoxGeometry(.32, .03, 1.5), leg); top.position.y = .42; top.castShadow = true; RACK.add(top);
+  for (const z of [-.7, .7]) { const l = new THREE.Mesh(new THREE.BoxGeometry(.04, .42, .04), leg); l.position.set(0, .21, z); RACK.add(l); }
+  RACK_KG.forEach((kg, i) => { const d = makeDumbbell(kg); d.position.set(0, .47, -.62 + i * .175); d.rotation.y = Math.PI / 2; RACK.add(d); rackItems.push(d); }); }
+function makeDumbbell(kg) { const g = new THREE.Group(), r = .035 + kg * .0065, m = new THREE.MeshStandardMaterial({ color: kg >= 8 ? 0xc92a2a : kg >= 5 ? 0x1c7ed6 : 0x868e96, roughness: .5 });
+  const h = new THREE.Mesh(new THREE.CylinderGeometry(.012, .012, .2, 10), new THREE.MeshStandardMaterial({ color: 0xadb5bd, metalness: .6, roughness: .3 })); h.rotation.z = Math.PI / 2; g.add(h);
+  for (const s of [-1, 1]) { const p = new THREE.Mesh(new THREE.CylinderGeometry(r, r, .035 + kg * .002, 18), m); p.rotation.z = Math.PI / 2; p.position.x = s * .09; p.castShadow = true; g.add(p); }
+  g.userData.kg = kg; return g; }
+
+// ---------- 인형 세 명까지 ----------
+const figs = [0, 1, 2].map(() => { const f = new Figure(false); f.g.visible = false; f.dumb = [makeDumbbell(4), makeDumbbell(4)]; f.dumb.forEach(d => f.g.add(d)); return f; });
+function setDumb(f, kg) { if (f.dumb[0].userData.kg === kg) return; f.dumb.forEach(d => f.g.remove(d)); f.dumb = [makeDumbbell(kg), makeDumbbell(kg)]; f.dumb.forEach(d => f.g.add(d)); }
+const ARM = ['bi', 'tri', 'delt', 'chest'], LEG = ['quad', 'glute', 'ham', 'calf'];
+function curlSpec(c, lean = 0) { const feet = sym(s => footStand(s * .13, 0)), tilt = -lean;
+  return { feet, hip: chainUp(feet[1].ankle, 0, 0), low: tilt * .6, up: tilt, head: tilt * .5, kneePole: sym(s => V(s * .2, 0, 1)), arms: { mode: 'angle', flex: lean * .6, abd: 7, elbow: 135 * c } }; }
+function squatSpec(t) { const feet = sym(s => footStand(s * .15, 0)), a = 30 * t, k = 110 * t, h = 115 * t, tor = a - k + h;
+  return { feet, hip: chainUp(feet[1].ankle, a, k), low: tor, up: tor, kneePole: sym(s => V(s * .25, 0, 1)), arms: { mode: 'angle', flex: 80 * clamp(t * 1.7), abd: 6, elbow: 10 } }; }
+function flexSpec() { const feet = sym(s => footStand(s * .14, 0));
+  return { feet, hip: chainUp(feet[1].ankle, 0, 0), low: 0, up: -3, head: -6, kneePole: sym(s => V(s * .2, 0, 1)), arms: { mode: 'ik', wr: sym(s => V(s * .46, 1.72, .03)), pole: sym(s => V(s, -.35, 0)) } }; }
+function before(x, label, time, extra = {}) { drawFig(figs[2], { x, spec: standSpec(), kg: 0, gArm: 0, gLeg: 0, work: [], ...extra }, time); lbl('before', label, headOf(figs[2])); }
+function standSpec() { return { ...curlSpec(.05), arms: { mode: 'angle', flex: 0, abd: 8, elbow: 12 } }; }
+// 한 사람 그리기: spec, 일하는 근육, 근육 크기(성장), 덤벨, 다침
+function drawFig(f, o, time) {
+  const act = {}; for (const id of o.work || []) act[id] = o.effort ?? .8;
+  const grow = {}; for (const id of ARM) grow[id] = (o.gArm || 0) * (id === 'bi' ? 1.3 : 1); for (const id of LEG) grow[id] = (o.gLeg || 0);
+  const spec = { ...o.spec, growMap: grow };
+  const def = { variants: { v: { p: () => null, danger: o.danger || [] } }, spec: () => spec, act: () => act, dangerShow: () => o.danger?.length ? 1 : 0 };
+  f.g.visible = true; f.g.position.x = o.x || 0; f.g.scale.setScalar(o.size || 1); f.update(def, 'v', 0, time);
+  const show = !!o.kg; if (show) setDumb(f, o.kg);
+  f.dumb.forEach((d, i) => { d.visible = show; if (!show) return; const S1 = f.P.side[i ? -1 : 1]; d.position.copy(S1.wr); d.rotation.set(0, 0, 0); });
+}
+
+// ---------- 원리 ----------
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const store = { get() { try { return JSON.parse(localStorage.getItem('tp-simple') || '{}'); } catch (e) { return {}; } }, set(v) { try { localStorage.setItem('tp-simple', JSON.stringify(v)); } catch (e) {} } };
+const saved = Object.assign({ quiz: {}, done: {} }, store.get());
+const S = { i: 0, choice: 1, run: null, week: 0, res: null };
+const P2 = { S: 100, w: 4, week: 0, log: [], hurt: false, anim: null };
+const LOAD_ZONE = (w, Sx) => { const r = w / (4 * Sx / 100); return r < .9 ? 0 : r <= 1.25 ? 1 : r <= 1.45 ? 2 : 3; };
+const QUIZ = [
+  [{ q: '매일 스쿼트 10개를 1년 동안 똑같이 했어요. 처음 한 달 뒤부터 다리 근력은 어떻게 될까요?', o: ['계속 좋아진다', '거의 그대로다', '갑자기 크게 늘어난다'], a: 1, e: '몸이 10개에 익숙해지면 더 이상 과부하가 아니라서 거의 그대로예요.' },
+   { q: '과부하를 주는 방법이 <u>아닌</u> 것은?', o: ['횟수를 늘린다', '무게를 더한다', '쉬는 시간을 줄인다', '같은 운동을 같은 횟수로 계속한다'], a: 3, e: '같은 자극을 계속하면 몸이 이미 적응해 있어서 과부하가 되지 않아요.' }],
+  [{ q: '4 kg 덤벨이 이제 쉬워졌어요. 다음 주에 알맞은 무게는?', o: ['10 kg', '5 kg', '그대로 4 kg'], a: 1, e: '근육이 커진 만큼 한 칸만 올려요. 한꺼번에 많이 올리면 다쳐요.' },
+   { q: '푸시업을 처음 배우는 친구에게 알맞은 순서는?', o: ['다이아몬드 → 기본 → 무릎 → 벽', '벽 → 무릎 → 기본 → 다이아몬드', '처음부터 기본 푸시업만'], a: 1, e: '쉬운 단계부터 어려운 단계로 한 계단씩 올라가요.' }],
+  [{ q: '시험 기간 3주 동안 운동을 전혀 안 했어요. 근육은 어떻게 될까요?', o: ['그대로 남아 있다', '조금씩 줄어든다', '오히려 더 커진다'], a: 1, e: '운동으로 얻은 근육과 체력은 저축되지 않아서, 쉬면 조금씩 줄어요.' },
+   { q: '운동 효과를 보려면 어떻게 하는 것이 좋을까요?', o: ['한 달에 한 번 아주 세게', '일주일에 여러 번 꾸준히', '생각날 때마다 아무 때나'], a: 1, e: '효과가 사라지기 전에 다시 운동해야 효과가 쌓여요.' }],
+  [{ q: '체육 시간에 반 전체가 똑같이 팔굽혀펴기 25개를 해야 한다면?', o: ['모두에게 알맞다', '어떤 친구에게는 무리, 어떤 친구에게는 너무 쉽다', '체력이 좋은 친구만 손해다'], a: 1, e: '체력이 다르면 같은 운동도 누군가에게는 무리, 누군가에게는 너무 쉬워요.' },
+   { q: '나에게 맞는 운동을 정할 때 고려할 것이 <u>아닌</u> 것은?', o: ['나의 체력 수준', '부상 경험', '나의 목표', '친구가 하는 운동'], a: 3, e: '친구에게 맞는 운동이 나에게도 맞는 것은 아니에요.' }],
+  [{ q: '100 m 달리기 기록을 줄이고 싶어요. 가장 알맞은 운동은?', o: ['스트레칭만 하기', '짧은 전력 달리기와 점프', '플랭크만 하기'], a: 1, e: '100 m는 짧은 순간에 힘을 내는 순발력이 중요해요. 그 방식과 비슷한 운동이 효과적이에요.' },
+   { q: '스쿼트를 매일 했는데 팔굽혀펴기 기록이 늘지 않았어요. 어떤 원리 때문일까요?', o: ['특이성의 원리', '반복성의 원리', '점진성의 원리'], a: 0, e: '다리 운동은 다리를 발달시켜요. 운동한 부위와 방식대로만 발달하는 것이 특이성이에요.' }]];
+const LES = [
+  { name: '과부하', title: '과부하의 원리', line: '평소보다 <b>조금 더 무거운 무게</b>로 운동해야 근육이 자라요.', n: 1, cam: [[.8, 1.4, 3.9], [0, 1.02, 0]], btn: '▶ 4주 운동하기', weeks: 4,
+    choices: [['1 kg', '너무 가벼움', '평소에도 쉽게 드는 무게'], ['4 kg', '알맞음', '10번째쯤 힘들어지는 무게'], ['10 kg', '너무 무거움', '바른 자세로 들 수 없는 무게']] },
+  { name: '점진성', title: '점진성의 원리', line: '근육이 커지면 같은 무게가 쉬워져요. <b>커진 만큼 조금씩</b> 무게를 올려야 계속 자라요.', n: 1, cam: [[1.2, 1.45, 4.2], [.35, 1.0, 0]] },
+  { name: '반복성', title: '반복성의 원리', line: '운동 효과는 <b>꾸준히</b> 해야 쌓이고, 그만두면 <b>다시 줄어들어요</b>.', n: 2, cam: [[0, 1.45, 4.2], [0, 1.02, 0]], btn: '▶ 8주 지켜보기', weeks: 8,
+    choices: [['vs', '4주 하고 그만둠', '오른쪽 친구는 4주 뒤 운동을 그만둬요'], ['vs', '2주에 한 번만', '오른쪽 친구는 가끔만 해요']] },
+  { name: '개별성', title: '개별성의 원리', line: '몸과 체력이 다르면 <b>알맞은 무게도 달라요</b>.', n: 3, cam: [[0, 1.55, 5.2], [0, 1.0, 0]], btn: '▶ 4주 운동하기', weeks: 4,
+    choices: [['4·4·4', '모두 같은 무게', '세 친구 모두 4 kg'], ['2·4·7', '각자 맞는 무게', '다온 2 kg · 나은 4 kg · 라온 7 kg']] },
+  { name: '특이성', title: '특이성의 원리', line: '근육은 <b>운동한 부위만</b> 자라요.', n: 1, cam: [[.8, 1.35, 3.9], [0, 1.0, 0]], btn: '▶ 4주 운동하기', weeks: 4,
+    choices: [['팔', '팔 운동', '덤벨 컬'], ['다리', '다리 운동', '스쿼트'], ['팔+다리', '둘 다', '덤벨 컬과 스쿼트']] },
+];
+const KIDS = [['다온', .86, -.12], ['나은', 1, 0], ['라온', 1.12, .15]];
+
+function pills() { $('pills').innerHTML = LES.map((l, i) => `<button type="button" aria-current="${S.i === i}" data-i="${i}">${i + 1}. ${l.name}${saved.done[i] ? ' <span class="ok">✓</span>' : ''}</button>`).join('');
+  $('pills').querySelectorAll('button').forEach(b => b.onclick = () => go(+b.dataset.i)); }
+function go(i) { S.i = i; S.choice = i === 0 ? 1 : 0; S.run = null; S.res = null; S.resChoice = null; const L = LES[i];
+  $('no').textContent = `원리 ${i + 1} / 5`; $('title').textContent = L.title; $('line').innerHTML = L.line; $('prev').disabled = i === 0; $('next').disabled = i === 4;
+  camGoal = L.cam; pills(); ctl(); quiz(); }
+function ctl() { const L = LES[S.i];
+  if (S.i === 1) return ctlProg();
+  $('ctl').innerHTML = `<div class="choices" role="group" aria-label="고르기">${L.choices.map((c, j) => `<button type="button" class="choice" data-c="${j}" aria-pressed="${S.choice === j}" ${S.run ? 'disabled' : ''}><span class="kg">${c[0]}</span><b>${c[1]}</b><small>${c[2]}</small></button>`).join('')}</div>
+    <button type="button" class="run" id="run" ${S.run ? 'disabled' : ''}>${S.run ? '운동하는 중…' : L.btn}</button>
+    ${S.res ? `<div class="result ${S.res[1]}">${S.res[0]}</div>` : ''}`;
+  $('ctl').querySelectorAll('[data-c]').forEach(b => b.onclick = () => { S.choice = +b.dataset.c; ctl(); });
+  $('run').onclick = () => { S.run = { t: 0, n: L.weeks }; S.runChoice = S.choice; S.res = null; ctl(); }; }
+function ctlProg() { const z = LOAD_ZONE(P2.w, P2.S), done = P2.week >= 8 || P2.hurt, ok = done && !P2.hurt && P2.S >= 150, busy = !!P2.anim;
+  const opt = (d, t) => { const w = P2.w + d; return `<button type="button" class="choice" data-d="${d}" ${done || busy || w > 10 ? 'disabled' : ''}><span class="kg">${w} kg</span><b>${t}</b><small>${d ? `지금보다 ${d} kg 무겁게` : '지금 무게 그대로'}</small></button>`; };
+  $('ctl').innerHTML = `<div class="mission ${ok ? 'ok' : ''}"><b>미션</b> 8주 뒤 팔 근육 <b>150% 이상</b>, 다치지 않기 ${ok ? '· 성공 ✓' : ''}</div>
+    <div><div style="font-size:13px;color:var(--muted);margin-bottom:4px">지금 ${P2.w} kg은 이 몸에게…</div><div class="feel"><div class="f0 ${!done && z === 0 ? 'on' : ''}">너무 가벼움</div><div class="f1 ${!done && z === 1 ? 'on' : ''}">알맞음</div><div class="f2 ${!done && z >= 2 ? 'on' : ''}">너무 무거움</div></div></div>
+    ${done ? '' : `<div style="font-weight:700">${P2.week + 1}주째 운동, 무게를 골라요</div>`}
+    <div class="choices">${opt(0, '그대로')}${opt(1, '한 칸 올리기')}${opt(3, '세 칸 올리기')}</div>
+    ${S.res ? `<div class="result ${S.res[1]}">${S.res[0]}</div>` : ''}
+    ${P2.log.length ? `<div class="log">${P2.log.map((x, k) => `<span class="${x[1]}">${k + 1}주 ${x[0]}kg ${{ g: '✓', l: '–', h: '!', x: '✗' }[x[1]]}</span>`).join('')}</div>` : ''}
+    ${done ? '<button type="button" class="run" id="again">처음부터 다시</button>' : ''}`;
+  $('ctl').querySelectorAll('[data-d]').forEach(b => b.onclick = () => weekProg(+b.dataset.d));
+  if ($('again')) $('again').onclick = () => { Object.assign(P2, { S: 100, w: 4, week: 0, log: [], hurt: false, anim: null }); S.res = null; ctl(); }; }
+function weekProg(d) { P2.w += d; const z = LOAD_ZONE(P2.w, P2.S), from = P2.S; P2.week++;
+  if (z === 3) { P2.hurt = true; P2.log.push([P2.w, 'x']); S.res = [`<b>${P2.week}주째에 다쳤어요!</b> ${P2.w} kg은 지금 몸에게 갑자기 너무 무거웠어요. 한꺼번에 많이 올리면 이렇게 돼요.`, 'bad']; }
+  else if (z === 1) { P2.S += 8; P2.log.push([P2.w, 'g']); S.res = [`<b>알맞은 무게였어요.</b> 근육이 자랐어요 (팔 근육 ${P2.S}%). 커진 만큼 ${P2.w} kg이 점점 쉬워질 거예요.`, 'good']; }
+  else if (z === 0) { P2.log.push([P2.w, 'l']); S.res = [`<b>이제 ${P2.w} kg은 너무 가벼워요.</b> 근육이 커져서 같은 무게로는 자극이 안 돼요. 근육이 자라지 않았어요.`, 'warn']; }
+  else { P2.log.push([P2.w, 'h']); S.res = [`<b>조금 너무 무거워요.</b> 자세가 흔들려서 근육이 자라지 않았어요. 조금만 올려 보세요.`, 'warn']; }
+  if (P2.week >= 8 && !P2.hurt) { const ok = P2.S >= 150; S.res = [`<b>8주 끝! 팔 근육 ${P2.S}%</b>. ${ok ? '근육이 커진 만큼 조금씩 올려서 계속 자랐어요. 미션 성공!' : '무게를 그대로 둔 주가 많아서 덜 자랐어요. 쉬워지면 한 칸 올려 보세요.'}`, ok ? 'good' : 'warn']; if (ok) done(1); }
+  P2.anim = { from, to: P2.S, t: 0 }; ctl(); }
+function done(i) { if (!saved.done[i]) { saved.done[i] = true; store.set(saved); pills(); } }
+function finishRun() { const i = S.i, c = S.runChoice ?? S.choice; S.resChoice = c;
+  if (i === 0) S.res = [[`<b>4주가 지나도 근육이 그대로예요.</b> 몸이 이미 익숙한 무게라서 자극이 되지 않아요.`, 'warn'], [`<b>팔 근육이 135%로 자랐어요!</b> 조금 힘든 무게가 근육을 자라게 했어요.`, 'good'], [`<b>몸을 뒤로 젖히며 들다가 허리와 손목을 다쳤어요.</b> 너무 무거우면 근육이 자라기 전에 다쳐요.`, 'bad']][c];
+  if (i === 2) S.res = c === 0 ? [`<b>꾸준히 한 친구는 계속 자랐어요.</b> 4주 하고 그만둔 친구는 커졌던 근육이 다시 줄어들었어요. 운동 효과는 저축되지 않아요.`, 'good'] : [`<b>가끔만 한 친구는 거의 그대로예요.</b> 운동 사이가 너무 길어서 효과가 쌓이기 전에 사라졌어요.`, 'good'];
+  if (i === 3) S.res = c === 0 ? [`<b>다온은 다쳤고, 라온은 그대로예요.</b> 같은 4 kg이 다온에게는 너무 무겁고, 라온에게는 너무 가벼웠어요. 나은만 알맞았어요.`, 'warn'] : [`<b>세 친구 모두 자랐어요!</b> 각자의 몸에 맞는 무게를 골랐기 때문이에요.`, 'good'];
+  if (i === 4) S.res = [[`<b>팔 근육만 자랐어요.</b> 다리는 그대로예요.`, 'good'], [`<b>다리 근육만 자랐어요.</b> 팔은 그대로예요.`, 'good'], [`<b>팔과 다리 모두 자랐어요.</b> 기르고 싶은 부위를 운동해야 그 부위가 자라요.`, 'good']][c];
+  if ((i === 0 && c === 1) || (i === 2) || (i === 3 && c === 1) || (i === 4 && c === 2)) done(i);
+  S.run = null; ctl(); }
+function quiz() { const Q = QUIZ[S.i]; $('quiz').innerHTML = '<h3>퀴즈</h3>' + Q.map((q, j) => { const k = `${S.i}-${j}`, ans = saved.quiz[k];
+  return `<div class="q"><div class="qq">Q${j + 1}. ${q.q}</div><div class="opts">${q.o.map((o, m) => `<button type="button" data-q="${j}" data-o="${m}" class="${ans == null ? '' : m === q.a ? 'right' : m === ans ? 'wrong' : ''}">${o}</button>`).join('')}</div>${ans == null ? '' : `<div class="fb">${ans === q.a ? '정답이에요! ' : '다시 생각해 보세요. '}${q.e}</div>`}</div>`; }).join('');
+  $('quiz').querySelectorAll('[data-q]').forEach(b => b.onclick = () => { saved.quiz[`${S.i}-${b.dataset.q}`] = +b.dataset.o; store.set(saved); quiz(); }); }
+
+// ---------- 매 장면 ----------
+const labelsEl = $('labels'), pool = {}, tmp = V(0, 0, 0);
+function lbl(key, text, pos, cls = '') { let e = pool[key]; if (!e) { e = document.createElement('div'); labelsEl.appendChild(e); pool[key] = e; }
+  e.className = 'lbl ' + cls; tmp.copy(pos).project(camera); e.hidden = tmp.z > 1; e.style.left = ((tmp.x + 1) / 2 * stage.clientWidth) + 'px'; e.style.top = ((1 - tmp.y) / 2 * stage.clientHeight) + 'px'; if (e.textContent !== text) e.textContent = text; e.dataset.used = '1'; }
+const headOf = f => f.P.head.clone().multiplyScalar(f.g.scale.x).add(f.g.position).add(V(0, .25, 0));
+function hud(items) { const h = items.map(([a, b, c]) => `<div class="box ${c || ''}">${a}<b>${b}</b></div>`).join(''); if ($('hud').innerHTML !== h) $('hud').innerHTML = h; }
+const curlC = time => .5 - .5 * Math.cos(2 * Math.PI * time / 1.6);
+let camGoal = null;
+function frameScene(time, dt) {
+  for (const k in pool) pool[k].dataset.used = '';
+  figs.forEach(f => f.g.visible = false); RACK.visible = S.i === 1;
+  if (S.run) { S.run.t += dt / (reduce ? .01 : 1.4); if (S.run.t >= S.run.n) { S.run.t = S.run.n; const r = S.run; frameScene.lastWeek = r.n; finishRun(); S.run = null; S.lastT = r.n; } }
+  const wk = S.run ? S.run.t : (S.res ? (LES[S.i].weeks || 0) : 0), W = LES[S.i].weeks || 4, f01 = wk / W, moving = !!S.run, shown = S.run ? S.runChoice : (S.res ? S.resChoice : S.choice), ended = !S.run && !!S.res;
+  const c = moving ? curlC(time) : .08 + .04 * Math.sin(time * 1.5);
+  if (S.i === 0) { const ch = shown, kg = [1, 4, 10][ch], hurt = ch === 2 && wk > .6, g = ch === 1 ? .35 * f01 : 0, cmp = wk > 0, x = cmp ? .38 : 0;
+    if (cmp) before(-.42, '처음', time);
+    const lean = ch === 2 && moving && !hurt ? 26 * curlC(time) : hurt ? 14 : 0;
+    const flex = ended && ch === 1;
+    drawFig(figs[0], { x, spec: hurt ? { ...curlSpec(.15, lean), arms: { mode: 'angle', flex: 0, abd: 12, elbow: 25 } } : flex ? flexSpec() : curlSpec(ch === 2 && moving ? c * .6 : c, lean), kg: hurt || flex ? 0 : kg, gArm: g, work: (moving && !hurt) || flex ? ARM.slice(0, 3) : [], effort: flex ? .55 : [.35, .9, .7][ch], danger: hurt ? [['back', [0]], ['wrist', [1, -1]]] : [] }, time);
+    if (cmp) lbl('after', `${Math.floor(wk)}주 뒤 · ${Math.round(100 + g * 100)}%`, headOf(figs[0]), g > .01 ? 'up' : hurt ? 'warn' : '');
+    hud([['운동한 기간', `${Math.floor(wk)}주`], ['팔 근육', `${Math.round(100 + g * 100)}%`, g > .01 ? 'up' : hurt ? 'bad' : '']]);
+  }
+  if (S.i === 1) { const a = P2.anim; if (a) { a.t += dt / (reduce ? .01 : 1.2); if (a.t >= 1) { P2.anim = null; ctl(); } }
+    const Sv = a ? a.from + (a.to - a.from) * clamp(a.t) : P2.S, hurt = P2.hurt && !a, busy = !!a;
+    const cmp = P2.week > 0 || busy, fin = P2.week >= 8 && !P2.hurt && !busy; if (cmp) before(-.42, '처음', time);
+    drawFig(figs[0], { x: cmp ? .38 : 0, spec: hurt ? { ...curlSpec(.15, 14), arms: { mode: 'angle', flex: 0, abd: 12, elbow: 25 } } : fin ? flexSpec() : curlSpec(busy ? curlC(time) : c), kg: hurt || fin ? 0 : P2.w, gArm: (Sv - 100) / 100 * .55, work: busy || fin ? ARM.slice(0, 3) : [], effort: fin ? .55 : .85, danger: hurt ? [['back', [0]], ['wrist', [1, -1]]] : [] }, time);
+    rackItems.forEach(d => { d.visible = d.userData.kg !== P2.w || hurt; });
+    const z = LOAD_ZONE(P2.w, P2.S);
+    hud([['주', `${P2.week} / 8`], ['지금 무게', `${P2.w} kg`], ['팔 근육', `${Math.round(Sv)}%`, Sv > 100 ? 'up' : '']]);
+    if (hurt) lbl('h0', '⚠ 다쳤어요', headOf(figs[0]), 'warn'); else if (fin) lbl('z', `8주 뒤 · ${Math.round(Sv)}%`, headOf(figs[0]), 'up'); else if (P2.week < 8) lbl('z', ['이 무게는 너무 가벼워요', '알맞은 무게', '너무 무거워요', '너무 무거워요'][z], headOf(figs[0]), z === 1 ? 'up' : z ? 'warn' : ''); }
+  if (S.i === 2) { const quit = shown === 0, gL = .4 * f01 * (wk / W > 0 ? 1 : 0);
+    const gR = quit ? (wk <= 4 ? .4 * wk / 8 : .2 * Math.exp(-(wk - 4) / 1.6)) : .05 * f01, rTrain = moving && (quit ? wk <= 4 : (Math.floor(wk) % 2 === 0 && wk % 1 < .35));
+    drawFig(figs[0], { x: -.6, spec: ended ? flexSpec() : curlSpec(moving ? c : .08), kg: ended ? 0 : 4, gArm: gL, work: moving || ended ? ARM.slice(0, 3) : [], effort: ended ? .55 : .8 }, time);
+    drawFig(figs[1], { x: .6, spec: rTrain ? curlSpec(c) : standSpec(), kg: rTrain || !moving ? 4 : 0, gArm: gR, work: rTrain ? ARM.slice(0, 3) : [] }, time);
+    lbl('a', `꾸준히 · ${Math.round(100 + gL * 100)}%`, headOf(figs[0]), 'up');
+    lbl('b', `${quit ? (wk > 4 ? '그만둠' : '4주만') : '가끔만'} · ${Math.round(100 + gR * 100)}%`, headOf(figs[1]), quit && wk > 4 ? 'warn' : '');
+    hud([['지난 기간', `${Math.floor(wk)}주`]]); }
+  if (S.i === 3) { const same = shown === 0, kgs = same ? [4, 4, 4] : [2, 4, 7];
+    KIDS.forEach(([nm, size, base], k) => { const hurt = same && k === 0 && wk > .6, none = same && k === 2, g = base + (hurt || none ? 0 : .3 * f01);
+      const fl = ended && !hurt && !none;
+      drawFig(figs[k], { x: (k - 1) * 1.05, size, spec: hurt ? { ...curlSpec(.15, 14), arms: { mode: 'angle', flex: 0, abd: 12, elbow: 25 } } : fl ? flexSpec() : curlSpec(moving ? c : .08), kg: hurt || fl ? 0 : kgs[k], gArm: g, work: moving && !hurt ? ARM.slice(0, 3) : [], effort: none ? .25 : .85, danger: hurt ? [['wrist', [1, -1]], ['back', [0]]] : [] }, time);
+      const txt = `${nm} · ${kgs[k]} kg${hurt ? ' · 다침' : wk > 0 ? ` · ${Math.round(100 + (g - base) * 100)}%` : ''}`;
+      lbl('k' + k, txt, headOf(figs[k]), hurt ? 'warn' : !none && wk > 0 ? 'up' : ''); });
+    hud([['운동한 기간', `${Math.floor(wk)}주`]]); }
+  if (S.i === 4) { const ch = shown, arm = ch !== 1, leg = ch !== 0, cmp = wk > 0;
+    if (cmp) before(-.42, '처음', time);
+    const useSquat = moving && (ch === 1 || (ch === 2 && Math.floor(time / 3.2) % 2 === 1));
+    const sq = .5 - .5 * Math.cos(2 * Math.PI * time / 2.2);
+    drawFig(figs[0], { x: cmp ? .38 : 0, spec: ended ? flexSpec() : useSquat ? squatSpec(sq) : curlSpec(moving && arm ? c : .08), kg: useSquat || ended ? 0 : 4, gArm: arm ? .32 * f01 : 0, gLeg: leg ? .32 * f01 : 0, work: moving ? (useSquat ? LEG : ARM.slice(0, 3)) : ended ? [...(arm ? ARM.slice(0, 3) : []), ...(leg ? LEG : [])] : [], effort: ended ? .55 : .8 }, time);
+    if (cmp) lbl('after', `${Math.floor(wk)}주 뒤`, headOf(figs[0]), 'up');
+    hud([['운동한 기간', `${Math.floor(wk)}주`], ['팔 근육', `${Math.round(100 + (arm ? 32 * f01 : 0))}%`, arm && wk > 0 ? 'up' : ''], ['다리 근육', `${Math.round(100 + (leg ? 32 * f01 : 0))}%`, leg && wk > 0 ? 'up' : '']]); }
+  for (const f of figs) if (f.g.visible) for (const d of f.dangers) { if (!d.mesh.visible || d.s === -1) continue; const p = d.mesh.position.clone().multiplyScalar(f.g.scale.x).add(f.g.position); lbl('d' + figs.indexOf(f) + d.key, DANGERS[d.key], p, 'warn'); }
+  for (const k in pool) if (!pool[k].dataset.used) pool[k].hidden = true;
+}
+function resize() { const w = stage.clientWidth, h = stage.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < 560 ? 44 : 34; camera.updateProjectionMatrix(); }
+new ResizeObserver(resize).observe(stage); resize();
+const clock = new THREE.Clock(); let time = 0;
+function loop() { const dt = Math.min(clock.getDelta(), .5); time += Math.min(dt, .05); // 진행은 실제 시간대로
+  if (camGoal) { const [p, t] = camGoal; camera.position.lerp(V(...p), .08); controls.target.lerp(V(...t), .08); if (camera.position.distanceTo(V(...p)) < .02) camGoal = null; }
+  frameScene(time, dt); controls.update(); renderer.render(scene, camera); requestAnimationFrame(loop); }
+$('prev').onclick = () => go(S.i - 1); $('next').onclick = () => go(S.i + 1);
+go(0); camera.position.set(...LES[0].cam[0]); controls.target.set(...LES[0].cam[1]); camGoal = null;
+$('load').remove(); window.__ready = true; window.__go = go; loop();
+</script>
+<script>
+setTimeout(function () { var l = document.getElementById('load'); if (l) l.textContent = '3D 화면을 불러오지 못했어요. 인터넷 연결을 확인해 주세요.'; }, 9000);
+</script>
+
+<script>
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
