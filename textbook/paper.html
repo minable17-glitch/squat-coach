@@ -600,6 +600,13 @@ body.paper:not(.bodymap) .pg-flow>section:has(#mlist),body.paper.bodymap .pg-flo
 .pb .steps button{padding:7px 10px;line-height:1.5}
 .pb .steps li,.pb .checks li{margin-top:5px}
 @media (orientation:landscape) and (max-height:440px){.pb .steps{font-size:17px}.pb .vcard p,.pb .detail p,.pb .card p,.pb .checks,.pb .why{font-size:17.5px;line-height:1.55}.pg-text{padding:10px 14px}}
+
+/* 유튜브 버튼은 맨 위에 */
+.pb .yt{display:none}
+.nv-yt{flex:none;display:flex;align-items:center;justify-content:center;height:46px;padding:0 13px;border-radius:12px;background:#ff3b30;color:#fff!important;font-weight:700;font-size:15px;text-decoration:none;white-space:nowrap}
+@media (orientation:landscape) and (max-height:440px){.nv-yt{height:42px;padding:0 11px}}
+
+@media (orientation:portrait){.nv-sel.m{flex:1 1 84px}.nv-sel.s{flex:2 1 110px}.nv-yt{padding:0 11px}}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -2805,7 +2812,7 @@ if (PAPER) {
   root.innerHTML = `<header class="pb-nav"><button type="button" class="nv-home" id="pbHome" aria-label="차례">☰</button>
       <label class="nv-sel m"><select id="selM" aria-label="움직임 고르기"><optgroup label="움직임">${MV.map(k => `<option value="${k}">${MOVES[k].name}</option>`).join('')}</optgroup><optgroup label="더 배우기"><option value="fitness">체력 요소</option><option value="train">트레이닝 원리</option><option value="body">몸 지도</option></optgroup></select></label>
       <div class="nv-frame" id="nvFrame" role="tablist" aria-label="기본, 응용, 일상에서, 스포츠에서"></div>
-      <label class="nv-sel s" id="selSw"><select id="selS" aria-label="장면 고르기"></select></label></header>
+      <label class="nv-sel s" id="selSw"><select id="selS" aria-label="장면 고르기"></select></label><a class="nv-yt" id="nvYt" target="_blank" rel="noopener" aria-label="유튜브에서 이 동작 영상 찾기">▶ 영상</a></header>
     <main class="pb-main"><div class="pb-toc" id="pbToc" hidden></div>
       <div class="pb-book" id="pbBook"><section class="pg pg-l" id="pgL"><div class="pg-text" id="pgText"><div class="pg-flow" id="pgFlow"></div></div></section>
         <section class="pg pg-r" id="pgR"><div class="plate" id="pbPlate"></div></section></div></main>
@@ -2816,7 +2823,7 @@ if (PAPER) {
   $('miniT').textContent = '주로 쓰는 근육'; $('miniT').onclick = null;
   const mqPort = matchMedia('(orientation:portrait)'), GAP = 32; let cur = 0, started = false, tocMove = 'squat', tp = 0, tpN = 1, lastKey = '';
   const idxOf = (m, sc) => SEQ.findIndex(p => p.m === m && p.sc === sc), firstOf = m => SEQ.findIndex(p => p.m === m);
-  function flow() { const fl = $('pgFlow'); if ($('pbBook').hidden) return; const key = state.m + state.sc + state.v; if (key !== lastKey) { lastKey = key; tp = 0; }
+  function flow() { const fl = $('pgFlow'); $('nvYt').hidden = $('vyt').hidden || !$('pbToc').hidden; $('nvYt').href = $('vyt').href; if ($('pbBook').hidden) return; const key = state.m + state.sc + state.v; if (key !== lastKey) { lastKey = key; tp = 0; }
     const W = fl.clientWidth; if (!W) return; fl.style.columnWidth = W + 'px'; tpN = Math.max(1, Math.round((fl.scrollWidth + GAP) / (W + GAP))); tp = Math.min(tp, tpN - 1);
     fl.style.transform = `translateX(${-tp * (W + GAP)}px)`; $('pbPg').textContent = tpN > 1 ? `${tp + 1} / ${tpN}쪽` : '';
     $('pbPrev').disabled = cur === 0 && tp === 0; $('pbNext').disabled = cur === SEQ.length - 1 && tp === tpN - 1;
