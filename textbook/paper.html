@@ -607,6 +607,12 @@ body.paper:not(.bodymap) .pg-flow>section:has(#mlist),body.paper.bodymap .pg-flo
 @media (orientation:landscape) and (max-height:440px){.nv-yt{height:42px;padding:0 11px}}
 
 @media (orientation:portrait){.nv-sel.m{flex:1 1 84px}.nv-sel.s{flex:2 1 110px}.nv-yt{padding:0 11px}}
+
+/* 카메라 자세 평가 버튼: 3D 화면 왼쪽 위에 항상 */
+.st-cam{position:absolute;left:8px;top:8px;z-index:3;display:flex;align-items:center;min-height:46px;padding:0 14px;border-radius:12px;background:var(--navy);color:#fff!important;font-weight:700;font-size:15px;text-decoration:none;white-space:nowrap;box-shadow:0 2px 6px rgba(20,40,75,.35)}
+.st-cam[hidden]{display:none}
+.pb .pg-flow>.try{display:none}
+@media (orientation:portrait){.st-cam{min-height:42px;padding:0 11px;font-size:14px}}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -2821,9 +2827,10 @@ if (PAPER) {
   $('pbPlate').append($('stage')); $('pgL').insertBefore($('tabs'), $('pgText'));
   $('pgFlow').append($('vcard'), $('prCard'), $('bodyCard'), $('labCard'), $('tryCard'), $('dname').closest('section'), $('mlist').closest('section'));
   $('miniT').textContent = '주로 쓰는 근육'; $('miniT').onclick = null;
+  $('stage').insertAdjacentHTML('beforeend', '<a class="st-cam" id="stCam" target="_blank" rel="noopener" hidden>📷 내 자세 평가</a>');
   const mqPort = matchMedia('(orientation:portrait)'), GAP = 32; let cur = 0, started = false, tocMove = 'squat', tp = 0, tpN = 1, lastKey = '';
   const idxOf = (m, sc) => SEQ.findIndex(p => p.m === m && p.sc === sc), firstOf = m => SEQ.findIndex(p => p.m === m);
-  function flow() { const fl = $('pgFlow'); $('nvYt').hidden = $('vyt').hidden || !$('pbToc').hidden; $('nvYt').href = $('vyt').href; if ($('pbBook').hidden) return; const key = state.m + state.sc + state.v; if (key !== lastKey) { lastKey = key; tp = 0; }
+  function flow() { const fl = $('pgFlow'); $('nvYt').hidden = $('vyt').hidden || !$('pbToc').hidden; $('nvYt').href = $('vyt').href; { const c = $('stCam'), on = !$('tryCard').hidden; c.hidden = !on; if (on) { const u = new URL(document.querySelector('#tryCard .trylinks a').href); u.searchParams.delete('mode'); c.href = u.href; } } if ($('pbBook').hidden) return; const key = state.m + state.sc + state.v; if (key !== lastKey) { lastKey = key; tp = 0; }
     const W = fl.clientWidth; if (!W) return; fl.style.columnWidth = W + 'px'; tpN = Math.max(1, Math.round((fl.scrollWidth + GAP) / (W + GAP))); tp = Math.min(tp, tpN - 1);
     fl.style.transform = `translateX(${-tp * (W + GAP)}px)`; $('pbPg').textContent = tpN > 1 ? `${tp + 1} / ${tpN}쪽` : '';
     $('pbPrev').disabled = cur === 0 && tp === 0; $('pbNext').disabled = cur === SEQ.length - 1 && tp === tpN - 1;
