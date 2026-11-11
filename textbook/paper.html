@@ -486,7 +486,8 @@ body.paper .tabs button.bad[aria-pressed="true"]{border-color:var(--bad);border-
 .pb .checks::before{content:"✓ 자세 확인하기";font-weight:700;font-size:16.5px;color:var(--good);break-after:avoid}
 .pb .checks.fix{border-color:#c9daf2;background:#f3f8ff}
 .pb .checks.fix::before{content:"→ 이렇게 고쳐요";color:#2a6fb5}
-.pb .checks{break-inside:avoid}
+.pb .checks li,.pb .steps li{break-inside:avoid}
+.pb .checks li:first-child{break-before:avoid}
 .pb .card h3,.pb .card h2{break-after:avoid}
 .pb .pg-flow>.try,.pb .pg-flow>#labCard,.pb .pg-flow>.detail{break-inside:avoid}
 body.paper:not(.bodymap) .pg-flow>section:has(#mlist),body.paper.bodymap .pg-flow>.vcard{display:none}
@@ -558,6 +559,47 @@ body.paper:not(.bodymap) .pg-flow>section:has(#mlist),body.paper.bodymap .pg-flo
   body.paper .mi{min-height:25px;font-size:12.5px}
   .toc-mv{min-height:54px;padding:4px 10px}.toc-mv b{font-size:17px}.pb-toc .pg{padding-block:10px;gap:6px}
 }
+
+/* 바른 자세 단계 + 유튜브 */
+.steps{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px}
+.steps[hidden],.yt[hidden]{display:none}
+.steps button{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;font:inherit;color:inherit;background:color-mix(in srgb,var(--ink) 4%,transparent);border:1.5px solid transparent;border-radius:12px;padding:9px 11px;cursor:pointer;line-height:1.55}
+.steps button[aria-pressed="true"]{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,transparent)}
+.steps .sn{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);font-weight:700;font-size:14px;margin-top:1px}
+.steps b{margin-right:6px}
+.steps .sh{font-size:13.5px;font-weight:700;color:var(--muted)}
+.yt{display:flex;align-items:center;min-height:46px;margin-top:12px;padding:8px 12px;border-radius:12px;border:1.5px solid #f1b7b0;background:#fff3f1;color:#b3261e;font-weight:700;font-size:15px;text-decoration:none}
+.pb .steps{font-size:18px}
+.pb .steps,.pb .checks{display:block}
+.pb .steps li,.pb .checks li{margin-top:6px}
+.pb .checks::before{display:block}
+.pb .steps .sh{break-after:avoid}
+.pb .steps button{background:#f6f1e4;color:var(--pink)}
+.pb .steps button[aria-pressed="true"]{border-color:var(--good);background:#eaf7ec}
+.pb .steps .sn{background:var(--navy);color:#fff}
+.pb .steps .sh+li{break-before:avoid}
+.pb .yt{font-size:16px;break-inside:avoid}
+/* 종이 버전: 항상 보이는 네 탭 */
+.nv-frame{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;flex:1 1 100%;order:5}
+.nv-frame button{height:44px;border-radius:12px;border:0;background:rgba(255,255,255,.14);color:#fff!important;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap}
+.nv-frame button i{font-style:normal}
+.nv-frame button small{font-size:11.5px;font-weight:600;opacity:.8}
+.nv-frame button[aria-selected="true"]{background:#fff;color:var(--navy)!important}
+.nv-frame button:disabled{opacity:.35}
+.nv-sel.m{flex:1 1 110px}.nv-sel.s{flex:2 1 150px}
+.rot-tip{position:fixed;left:50%;top:150px;transform:translateX(-50%);z-index:9;max-width:calc(100% - 24px);border:0;border-radius:999px;background:#fff;color:var(--navy)!important;font-weight:700;font-size:14px;padding:10px 16px;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+@media (orientation:landscape){
+  .nv-frame{flex:0 0 auto;order:0;display:flex}
+  .nv-frame button{padding:0 10px;height:42px;font-size:14.5px}
+  .nv-frame button i,.nv-frame button small{display:none}
+  .nv-sel.m{flex:0 1 118px}.nv-sel.s{flex:1 1 130px}
+  .pb-pager .turn{padding:0 12px}
+}
+@media (orientation:landscape) and (min-width:1000px){.nv-frame button i{display:inline}}
+
+.pb .steps button{padding:7px 10px;line-height:1.5}
+.pb .steps li,.pb .checks li{margin-top:5px}
+@media (orientation:landscape) and (max-height:440px){.pb .steps{font-size:17px}.pb .vcard p,.pb .detail p,.pb .card p,.pb .checks,.pb .why{font-size:17.5px;line-height:1.55}.pg-text{padding:10px 14px}}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -618,8 +660,10 @@ body.paper:not(.bodymap) .pg-flow>section:has(#mlist),body.paper.bodymap .pg-flo
         <h3 id="vmove"></h3>
         <h2 id="vname"></h2>
         <p id="vdesc"></p>
+        <ol class="steps" id="vsteps" hidden></ol>
         <div class="why" id="vwhy" hidden></div>
         <ul class="checks" id="vchecks"></ul>
+        <a class="yt" id="vyt" hidden target="_blank" rel="noopener"></a>
       </section>
       <section class="card bodycard" id="bodyCard" hidden><h3>이 근육을 많이 쓰는 운동</h3><h2 id="bmName"></h2><div class="bmlist" id="bmList"></div></section>
       <section class="card bquiz" id="quizCard" hidden><h3>확인 문제</h3><p class="qq" id="qQ"></p><div class="qo" id="qO"></div><p class="qf" id="qF"></p></section>
@@ -2435,6 +2479,19 @@ function focusStage() { // 폰에서는 무엇을 누르든 3D 화면이 보이�
   if (r.top >= 0 && r.bottom <= innerHeight + 4) return; // 3D가 다 보이면 그대로
   const el = !sc.hidden && !document.body.classList.contains('book') && sc.offsetHeight + col.offsetHeight < innerHeight ? sc : col;
   scrollTo({ top: el.getBoundingClientRect().top + scrollY - 6, behavior: reduce ? 'auto' : 'smooth' }); }
+// 바른 자세 단계별 설명: [동작 단계(0~1), 제목, 설명] — 누르면 3D가 그 단계에서 멈춰요
+const STEPS = {
+  'squat:base': [[0, '준비', '발을 어깨너비로 벌리고 발끝은 살짝 바깥으로 둬요. 가슴을 펴고 배에 힘을 줘요.'], [.45, '내려가기', '엉덩이를 뒤로 빼면서 의자에 앉듯이 내려가요. 무릎은 발끝과 같은 방향으로 굽혀요.'], [1, '가장 낮은 자세', '허벅지가 바닥과 수평이 될 때까지 앉아요. 발 전체로 바닥을 누르고 허리는 곧게 지켜요.'], [.5, '일어서기', '발바닥으로 바닥을 밀면서 엉덩이와 무릎을 함께 펴요. 끝까지 서면 엉덩이에 힘을 줘요.']],
+  'lunge:base': [[0, '준비', '골반 너비로 서서 한 발을 크게 앞으로 내디뎌요. 상체는 곧게 세워요.'], [.5, '내려가기', '상체를 세운 채 몸을 수직으로 내려요. 앞으로 쏠리지 않게 해요.'], [1, '가장 낮은 자세', '앞 무릎은 발목 위에, 뒤 무릎은 바닥 가까이에 와요. 두 무릎 모두 약 90°예요.'], [.5, '올라오기', '앞발 뒤꿈치로 바닥을 밀며 올라와요. 앞 무릎이 안으로 모이지 않게 해요.']],
+  'pushup:base': [[0, '준비', '손을 어깨 바로 아래에 짚고 머리부터 발까지 일직선을 만들어요. 배와 엉덩이에 힘을 줘요.'], [.5, '내려가기', '팔꿈치를 몸 옆 45° 정도로 굽히며 천천히 내려가요. 몸통은 판자처럼 그대로예요.'], [1, '가장 낮은 자세', '가슴이 바닥 가까이 올 때까지 내려가요. 허리가 처지거나 엉덩이가 들리지 않게 해요.'], [.5, '밀어 올리기', '손바닥으로 바닥을 밀어 팔을 펴요. 몸 전체가 한 덩어리로 올라와요.']],
+  'pull:base': [[0, '준비', '무릎을 살짝 굽히고 엉덩이를 뒤로 빼서 상체를 숙여요. 등은 곧게, 덤벨은 어깨 아래로 늘어뜨려요.'], [.25, '당기기', '팔꿈치를 몸 옆으로 붙여 뒤로 보내며 덤벨을 배꼽 쪽으로 당겨요.'], [.5, '가장 위', '어깨뼈를 등 가운데로 모아요. 어깨가 귀 쪽으로 올라가지 않게 해요.'], [.75, '내리기', '덤벨을 천천히 내려 팔을 펴요. 상체 각도는 그대로 지켜요.']],
+  'hinge:base': [[0, '준비', '골반 너비로 서서 무릎을 살짝만 굽혀요. 가슴을 펴고 배에 힘을 줘요.'], [.5, '고관절 접기', '엉덩이를 뒤 벽에 대듯이 뒤로 빼며 상체를 숙여요. 무릎은 더 굽히지 않아요.'], [1, '가장 낮은 자세', '등을 곧게 편 채 허벅지 뒤가 당길 때까지 숙여요. 막대나 무게는 다리에 가깝게 둬요.'], [.5, '일어서기', '엉덩이를 앞으로 밀며 일어서요. 허리가 아니라 엉덩이 힘으로 올라와요.']],
+  'plank:base': [[0, '자세 만들기', '팔꿈치를 어깨 바로 아래에 두고 발끝을 세워 몸을 들어요.'], [.2, '일직선 맞추기', '머리, 어깨, 엉덩이, 발뒤꿈치가 한 줄이 되게 해요. 시선은 손 사이 바닥이에요.'], [.6, '버티기', '배와 엉덩이에 힘을 주고 숨을 참지 말고 고르게 쉬어요.'], [1, '끝내기', '허리가 처지기 시작하면 바로 멈춰요. 무너진 자세로 버티는 것보다 짧게 여러 번이 좋아요.']] };
+function renderSteps(vk) { const M = state.def, ol = $('vsteps'), st = (vk === 'good' && STEPS[state.m + ':' + state.sc]) || null; ol.hidden = !st;
+  ol.innerHTML = !st ? '' : '<li class="sh">따라 해 보기 · 누르면 3D가 그 단계에서 멈춰요</li>' + st.map(([t, ti, tx], i) => `<li><button type="button" data-t="${t}"><span class="sn">${i + 1}</span><span><b>${ti}</b>${tx}</span></button></li>`).join('');
+  ol.querySelectorAll('button').forEach(b => b.onclick = () => { state.playing = false; state.t = +b.dataset.t; syncPlay(); slider.value = Math.round(state.t * 1000); ol.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); });
+  const yt = $('vyt'), q = M.bodyMap ? '' : M.neutral ? `${M.name} ${MOVES[state.m].name}` : `${(M.sceneLabel || M.name).replace(/[①②③④]/g, '')} 바른 자세`;
+  yt.hidden = !q; yt.href = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q); yt.textContent = `▶ 유튜브에서 "${q}" 영상 찾기`; }
 function renderScenes() { const M = MOVES[state.m], sc = M.scenes || [], framed = sc.some(x => FRAME.some(fr => fr[0] === x[1]));
   scenesEl.hidden = !sc.length || state.m === 'body'; if (scenesEl.hidden) return; const g = state.grp;
   const tabs = !framed ? '' : `<div class="frame" role="tablist" aria-label="기본, 응용, 일상에서, 스포츠에서">${FRAME.map(([k, lb]) => { const n = sc.filter(x => x[1] === k).length;
@@ -2484,6 +2541,7 @@ function setVariant(vk, fromMove) {
   $('vmove').innerHTML = M.neutral || M.bodyMap ? `<span class="crumb">${MOVES[state.m].name} › ${M.name}</span>` : `<span class="crumb">${MOVES[state.m].name} › ${(FRAME.find(fr => fr[0] === state.grp) || [0, state.grp || ''])[1]} › ${M.sceneLabel}</span><span class="vbadge ${bad ? 'bad' : 'ok'}">${bad ? (M.badLabel || '다치기 쉬운 자세') : '바른 자세'}</span>`;
   $('vcard').classList.toggle('bad', bad); $('vname').textContent = v.name; $('vdesc').textContent = v.desc;
   const why = $('vwhy'); why.hidden = !v.why; why.textContent = v.why ? '왜 문제일까? ' + v.why : '';
+  renderSteps(vk);
   const ul = $('vchecks'); ul.className = 'checks' + (bad ? ' fix' : ''); ul.innerHTML = ((bad ? v.fix : v.checks) || v.checks || v.fix || []).map(x => `<li>${x}</li>`).join('');
   ghostBtn.disabled = !bad || !!M.noGhost; ghostBtn.hidden = ghostBtn.disabled; state.ghost = bad && !M.noGhost; syncGhost();
   setView(v.view || M.defaultView || 'diag');
@@ -2746,7 +2804,7 @@ if (PAPER) {
   const root = document.createElement('div'); root.id = 'pb'; root.className = 'pb';
   root.innerHTML = `<header class="pb-nav"><button type="button" class="nv-home" id="pbHome" aria-label="차례">☰</button>
       <label class="nv-sel m"><select id="selM" aria-label="움직임 고르기"><optgroup label="움직임">${MV.map(k => `<option value="${k}">${MOVES[k].name}</option>`).join('')}</optgroup><optgroup label="더 배우기"><option value="fitness">체력 요소</option><option value="train">트레이닝 원리</option><option value="body">몸 지도</option></optgroup></select></label>
-      <label class="nv-sel g" id="selGw"><select id="selG" aria-label="기본, 응용, 일상에서, 스포츠에서"></select></label>
+      <div class="nv-frame" id="nvFrame" role="tablist" aria-label="기본, 응용, 일상에서, 스포츠에서"></div>
       <label class="nv-sel s" id="selSw"><select id="selS" aria-label="장면 고르기"></select></label></header>
     <main class="pb-main"><div class="pb-toc" id="pbToc" hidden></div>
       <div class="pb-book" id="pbBook"><section class="pg pg-l" id="pgL"><div class="pg-text" id="pgText"><div class="pg-flow" id="pgFlow"></div></div></section>
@@ -2762,11 +2820,12 @@ if (PAPER) {
     const W = fl.clientWidth; if (!W) return; fl.style.columnWidth = W + 'px'; tpN = Math.max(1, Math.round((fl.scrollWidth + GAP) / (W + GAP))); tp = Math.min(tp, tpN - 1);
     fl.style.transform = `translateX(${-tp * (W + GAP)}px)`; $('pbPg').textContent = tpN > 1 ? `${tp + 1} / ${tpN}쪽` : '';
     $('pbPrev').disabled = cur === 0 && tp === 0; $('pbNext').disabled = cur === SEQ.length - 1 && tp === tpN - 1;
-    $('pbNext').textContent = tp < tpN - 1 ? '다음 쪽 ›' : '다음 장면 ›'; $('pbPrev').textContent = tp > 0 ? '‹ 앞 쪽' : '‹ 이전 장면'; }
+    $('pbNext').textContent = tp < tpN - 1 ? '다음 쪽 ›' : '다음 장면 ›'; $('pbPrev').textContent = mqPort.matches ? (tp > 0 ? '‹ 앞 쪽' : '‹ 이전 장면') : '‹'; }
   setInterval(flow, 350);
   function sync() { const p = SEQ[cur], M = MOVES[p.m], sc = M.scenes || []; $('selM').value = p.m; const framed = MV.includes(p.m);
-    $('selGw').hidden = !framed; $('selSw').hidden = p.m === 'body';
-    if (framed) $('selG').innerHTML = FRAME.map(([g, lb]) => { const n = sc.filter(x => x[1] === g).length; return `<option value="${g}"${n ? '' : ' disabled'}${g === p.g ? ' selected' : ''}>${lb} (${n || '준비 중'})</option>`; }).join('');
+    $('nvFrame').hidden = !framed; $('selSw').hidden = p.m === 'body';
+    if (framed) { $('nvFrame').innerHTML = FRAME.map(([g, lb]) => { const n = sc.filter(x => x[1] === g).length; return `<button type="button" role="tab" data-g="${g}" aria-selected="${g === p.g}"${n ? '' : ' disabled'}><span>${lb.replace('에서', '<i>에서</i>')}</span><small>${n}</small></button>`; }).join('');
+      $('nvFrame').querySelectorAll('button').forEach(b => b.onclick = () => show(SEQ.findIndex(x => x.m === p.m && x.g === b.dataset.g))); }
     $('selS').innerHTML = sc.filter(x => !framed || x[1] === p.g).map(x => `<option value="${x[0]}"${x[0] === p.sc ? ' selected' : ''}>${x[2].sceneLabel || x[2].name}</option>`).join('');
     if (MV.includes(p.m) || p.m === 'fitness' || p.m === 'train') tocMove = p.m; tp = 0; flow(); }
   function show(i) { cur = clamp(i, 0, SEQ.length - 1); started = true; const p = SEQ[cur];
@@ -2775,7 +2834,6 @@ if (PAPER) {
   $('pbNext').onclick = () => { if (tp < tpN - 1) { tp++; flow(); } else if (cur < SEQ.length - 1) show(cur + 1); };
   $('pbPrev').onclick = () => { if (tp > 0) { tp--; flow(); } else if (cur > 0) show(cur - 1); };
   $('selM').onchange = e => show(firstOf(e.target.value));
-  $('selG').onchange = e => { const m = SEQ[cur].m; show(SEQ.findIndex(p => p.m === m && p.g === e.target.value)); };
   $('selS').onchange = e => show(idxOf(SEQ[cur].m, e.target.value));
   window.__pbMus = () => { const d = $('dname').closest('section'), W = $('pgFlow').clientWidth; tp = Math.round(d.offsetLeft / (W + GAP)); flow(); };
   window.__pbGoScene = (m, sc) => { const i = idxOf(m, sc); if (i >= 0) show(i); };
@@ -2796,6 +2854,8 @@ if (PAPER) {
     $('pbToc').querySelectorAll('.toc-row').forEach(b => b.onclick = () => show(+b.dataset.i));
     $('tocBack').onclick = () => openToc(null); if ($('tocResume')) $('tocResume').onclick = () => show(cur); }
   $('pbHome').onclick = () => openToc(null);
+  { let seen = false; try { seen = !!sessionStorage.getItem('rot-tip'); } catch (e) { } if (!seen && mqPort.matches) { root.insertAdjacentHTML('beforeend', '<button type="button" class="rot-tip" id="rotTip">↻ 가로로 돌리면 더 크게 보여요 ✕</button>');
+    const hide = () => { $('rotTip')?.remove(); try { sessionStorage.setItem('rot-tip', '1'); } catch (e) { } }; $('rotTip').onclick = hide; setTimeout(hide, 7000); mqPort.addEventListener('change', hide); } }
   mqPort.addEventListener('change', () => { resize(); setView(state.view); flow(); });
   document.addEventListener('keydown', e => { if (!$('pbToc').hidden || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return; if (e.key === 'ArrowRight' || e.key === 'PageDown') $('pbNext').click(); else if (e.key === 'ArrowLeft' || e.key === 'PageUp') $('pbPrev').click(); });
   window.__pbShow = show; sync(); openToc(null);
