@@ -606,6 +606,36 @@ body.paper .tabs button{font-size:16.5px}
 .pb .mrow .nm{font-size:17px}.pb .mrow .nm small{font-size:13.5px}
 .toc-row{font-size:18px}
 @media (orientation:landscape) and (max-height:440px){.pb .vcard h2{font-size:20px}.pb .vcard p,.pb .detail p,.pb .card p,.pb .checks,.pb .why{font-size:17px}body.paper .tabs button{font-size:15.5px}}
+
+/* 종이 교과서: 자세 탭이 곧 제목 → 설명 칸 안의 중복 제목 숨김 */
+.pb .vcard h3,.pb .vcard h2{display:none}
+/* 가로 다시 짜기: 위 한 줄(움직임 + 바로 가기), 책이 화면 전체, 화살표는 오른쪽 쪽 위 */
+@media (orientation:landscape){
+  .pb{grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto minmax(0,1fr)}
+  .pb-top{display:contents}
+  .logo{display:none;grid-row:1;grid-column:1;color:#fff;align-self:center;padding-left:12px}
+  .pb-side{grid-row:1;grid-column:2;display:flex;gap:5px;padding:5px 8px;overflow-x:auto;scrollbar-width:none;grid-auto-rows:auto}
+  .pb-side button{flex:0 0 auto;min-width:0;min-height:38px;padding:0 13px;border-radius:999px;font-size:14.5px}
+  .pb-pills{grid-row:1;grid-column:3;display:flex;gap:5px;padding:5px 8px 5px 0;margin:0}
+  .pb-pills button{min-height:38px;padding:0 12px;font-size:14px;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.45)}
+  .pb-pills button[aria-current="true"]{background:var(--lime);color:var(--navy);border-color:var(--lime)}
+  .pb-main{grid-row:2;grid-column:1/-1;padding:0 6px 6px}
+  .pb-th{display:none}
+  .pb-book .pg-l{grid-template-rows:auto minmax(0,1fr);padding:8px 16px 16px 12px}
+  .pb-book .pg-r{grid-template-rows:auto minmax(0,1fr);padding:8px 12px 16px 16px}
+  .pb-path{padding-right:98px}
+  .pb-book .turn{top:8px;transform:none;width:44px;height:40px;min-height:40px;border-radius:12px}
+  #pbPrev{left:auto;right:60px}#pbNext{right:12px}
+  .pb-book .pno{bottom:0}.pno-l{left:14px}.pno-r{right:14px}
+  body.paper .stage .ctrl{flex-wrap:nowrap;justify-content:flex-start}
+  body.paper .ctrl button{min-height:42px;min-width:42px;padding:0 9px}
+  body.paper .mini{width:124px;padding:4px}
+  body.paper .mini .mi:nth-child(n+5){display:none}
+  body.paper .mi{min-height:25px;font-size:12.5px}
+  body.paper .mini .mh{font-size:12px;padding:0 4px}
+  .pg-text{padding:10px 14px}
+}
+@media (orientation:landscape) and (min-width:1000px){.logo{display:flex}}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -2475,7 +2505,7 @@ function syncGhost() { ghostBtn.setAttribute('aria-pressed', state.ghost); ghost
 let camGoal = null;
 const VIEWDIR = { diag: V(.62, .42, .66), side: V(1, .28, .02), front: V(0, .3, 1), back: V(.01, .36, -1) };
 function camFor(k) { const c = state.def.variants[state.v]?.cam || state.def.cam, tg = V(c.x || 0, c.y, c.z), narrow = stage.clientWidth < 560;
-  return [tg.clone().addScaledVector(VIEWDIR[k].clone().normalize(), c.dist * (PAPER ? .8 : narrow ? 1.02 : 1)), tg]; }
+  return [tg.clone().addScaledVector(VIEWDIR[k].clone().normalize(), c.dist * (PAPER ? (matchMedia('(orientation:portrait)').matches ? 1.08 : .9) : narrow ? 1.02 : 1)), tg]; }
 function setView(k) { state.view = k; camGoal = camFor(k); document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === k)); }
 const scenesEl = $('scenes'), mqNarrow = matchMedia('(max-width:900px)');
 function focusStage() { // 폰에서는 무엇을 누르든 3D 화면이 보이게
@@ -2604,7 +2634,7 @@ function updatePanel() {
 
 // ---------- 그리기 ----------
 function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < 560 ? 46 : 36; const mn = document.getElementById('mini'), ox = mn && mn.offsetWidth && !mn.classList.contains('closed') ? (mn.offsetWidth + 10) / 2 : 0; // 근육 패널만큼 인형을 왼쪽으로
-  if (ox) camera.setViewOffset(w, h, ox, 0, w, h); else camera.clearViewOffset(); camera.updateProjectionMatrix(); }
+  const oy = PAPER ? Math.min(28, h * .11) : 0; if (ox || oy) camera.setViewOffset(w, h, ox, oy, w, h); else camera.clearViewOffset(); camera.updateProjectionMatrix(); }
 new ResizeObserver(resize).observe(canvas); resize();
 const clock = new THREE.Clock(); let time = 0;
 function loop() {
@@ -2794,7 +2824,7 @@ if (PAPER) {
   const NAVX = [['home', '🏠', '홈', '홈'], ['move', '🏃', '움직임', '움직임'], ['fitness', '💓', '체력 요소', '체력 요소'], ['train', '🏋️', '트레이닝 원리', '훈련 원리'], ['body', '🧍', '몸 지도', '몸 지도']];
   const root = document.createElement('div'); root.id = 'pb'; root.className = 'pb';
   root.innerHTML = `<header class="pb-top"><span class="logo">🏃 3D 체육 교과서<small>중·고등학교 체육</small></span>
-      <nav class="pb-pills" aria-label="바로 가기">${NAVX.filter(n => n[0] !== 'move').map(n => `<button type="button" data-nav="${n[0]}">${n[1]} ${n[2]}</button>`).join('')}</nav></header>
+      <nav class="pb-pills" aria-label="바로 가기">${NAVX.filter(n => n[0] !== 'move').map(n => `<button type="button" data-nav="${n[0]}">${n[3]}</button>`).join('')}</nav></header>
     <nav class="pb-side" aria-label="움직임">${MV.map(k => `<button type="button" data-mv="${k}">${MOVES[k].name}</button>`).join('')}</nav>
     <main class="pb-main">
       <div class="pb-toc" id="pbToc" hidden></div>
@@ -2806,7 +2836,7 @@ if (PAPER) {
       </div></main>
     <nav class="pb-bar" aria-label="메뉴">${NAVX.map(n => `<button type="button" data-nav="${n[0]}"><i>${n[1]}</i>${n[3]}</button>`).join('')}</nav>`;
   document.body.prepend(root);
-  $('pbPlate').append($('stage')); $('pgL').insertBefore($('tabs'), $('pgText'));
+  $('pbPlate').append($('stage')); $('pgL').insertBefore($('tabs'), $('pgText')); $('pgR').append($('pbPrev'));
   $('pgText').append($('vcard'), $('prCard'), $('bodyCard'), $('labCard'), $('tryCard'), $('dname').closest('section'), $('mlist').closest('section'));
   $('miniT').textContent = '주로 쓰는 근육'; $('miniT').onclick = null;
   const mqPort = matchMedia('(orientation:portrait)'); let cur = 0, started = false, tocMove = 'squat';
@@ -2844,7 +2874,7 @@ if (PAPER) {
   root.querySelectorAll('[data-nav]').forEach(b => b.onclick = () => { const k = b.dataset.nav;
     if (k === 'home') openToc(null); else if (k === 'move') openToc(MV.includes(tocMove) ? tocMove : 'squat'); else show(firstOf(k), 1); });
   root.querySelectorAll('[data-mv]').forEach(b => b.onclick = () => show(firstOf(b.dataset.mv), 1));
-  mqPort.addEventListener('change', () => resize());
+  mqPort.addEventListener('change', () => { resize(); setView(state.view); });
   document.addEventListener('keydown', e => { if (!$('pbToc').hidden || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return; if (e.key === 'ArrowRight' || e.key === 'PageDown') $('pbNext').click(); else if (e.key === 'ArrowLeft' || e.key === 'PageUp') $('pbPrev').click(); });
   window.__pbShow = show; sync(); openToc(null);
 }
