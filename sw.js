@@ -1,6 +1,6 @@
 // 한 번 받은 파일을 기기에 저장해서, 다음부터는 체육관 와이파이가 약해도 빨리 열리게 해요
-const CACHE = 'squat-coach-v1';
-const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'lib/vision_bundle.mjs',
+const CACHE = 'squat-coach-v2';
+const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'lib/vision_bundle.mjs', 'lib/supabase.js',
   'lib/wasm/vision_wasm_internal.js', 'lib/wasm/vision_wasm_internal.wasm', 'models/pose_landmarker_lite.task'];
 self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())));

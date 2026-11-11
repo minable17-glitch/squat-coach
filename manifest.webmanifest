@@ -1,7 +1,7 @@
 {
-  "name": "스쿼트 코치",
-  "short_name": "스쿼트 코치",
-  "description": "카메라로 스쿼트 자세를 실시간으로 봐 주고, 게임과 형성평가를 하는 체육 수업용 웹앱",
+  "name": "자세 코치",
+  "short_name": "자세 코치",
+  "description": "카메라로 스쿼트·푸시업 자세를 실시간으로 봐 주고, 게임·형성평가·온라인 대결을 하는 체육 수업용 웹앱",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
