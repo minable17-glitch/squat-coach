@@ -583,6 +583,18 @@ body.paper #ghost::after{content:"겹쳐 보기";font-size:14px}
   body.paper .mini{width:124px}
   body.paper .mini .mi:nth-child(n+5){display:none}
 }
+
+@media (orientation:portrait){
+  .pb-th{display:none}
+  .pb-book{grid-template-rows:auto 0 minmax(0,1fr) auto minmax(0,1.35fr) auto;row-gap:5px}
+  body.paper .mini{width:118px;padding:4px}
+  body.paper .mini .mi:nth-child(n+4){display:none}
+  body.paper .mi{min-height:26px;font-size:12.5px}
+  body.paper .mini .mh{font-size:12px;padding:0 4px}
+  .pg-text{padding:10px 12px;gap:8px}
+  .pb .checks,.pb .why{margin-top:6px;padding:8px 10px}
+  .pb-book .turn{min-height:42px}
+}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -2452,7 +2464,7 @@ function syncGhost() { ghostBtn.setAttribute('aria-pressed', state.ghost); ghost
 let camGoal = null;
 const VIEWDIR = { diag: V(.62, .42, .66), side: V(1, .28, .02), front: V(0, .3, 1), back: V(.01, .36, -1) };
 function camFor(k) { const c = state.def.variants[state.v]?.cam || state.def.cam, tg = V(c.x || 0, c.y, c.z), narrow = stage.clientWidth < 560;
-  return [tg.clone().addScaledVector(VIEWDIR[k].clone().normalize(), c.dist * (narrow ? 1.02 : 1)), tg]; }
+  return [tg.clone().addScaledVector(VIEWDIR[k].clone().normalize(), c.dist * (PAPER ? .8 : narrow ? 1.02 : 1)), tg]; }
 function setView(k) { state.view = k; camGoal = camFor(k); document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === k)); }
 const scenesEl = $('scenes'), mqNarrow = matchMedia('(max-width:900px)');
 function focusStage() { // 폰에서는 무엇을 누르든 3D 화면이 보이게
