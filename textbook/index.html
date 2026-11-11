@@ -11,7 +11,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600;700&family=Noto+Serif+KR:wght@400;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
 /* Layout: 위 = 기본 동작 고르기(움직임 지도) · 가운데 = 3D 체육관 매트 · 오른쪽(폰은 아래) = 자세·근육·일상과 응용 */
 :root{
@@ -313,6 +313,19 @@ body.bodymap #scenes,body.bodymap .mini,body.bodymap .stagecol .tabs,body.bodyma
 .bmrow .nm small{display:block;font-weight:400;font-size:11.5px;color:var(--muted)}
 .bmrow .bar{height:7px;border-radius:4px;background:color-mix(in srgb,var(--ink) 10%,transparent);overflow:hidden}
 .bmrow .bar i{display:block;height:100%;background:var(--muscle)}
+
+/* 책상 위 3D 책 버전 */
+body.b3d{background:#cfd6d1}
+body.b3d .layout{grid-template-columns:minmax(0,1fr)}
+body.b3d .stagecol{position:relative;top:auto}
+body.b3d .stagecol .stage{height:min(80vh,760px)}
+body.b3d aside{grid-template-columns:repeat(auto-fit,minmax(300px,1fr));align-items:start}
+body.b3d .mini,body.b3d .hint,body.b3d .tocbtn{display:none}
+body.b3d .stagecol .tabs,body.b3d .bookbar{background:#2f5d50}
+body.b3d .stage{background:#cfd6d1}
+body.b3d .chips .chip,body.b3d .aimbox{background:rgba(35,40,43,.82)}
+@media (min-width:901px){body.b3d #goalCard,body.b3d #vcard{display:none}}
+@media (max-width:900px){body.b3d .stage canvas{height:min(56vh,520px)}}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -416,6 +429,7 @@ body.bodymap #scenes,body.bodymap .mini,body.bodymap .stagecol .tabs,body.bodyma
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+const BOOK3D = /[?&]book3d\b/.test(location.search); // 책상 위 3D 책 버전
 
 const D = Math.PI / 180;
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
@@ -2251,7 +2265,7 @@ canvas.addEventListener('pointermove', e => { if (e.buttons) return; const h = h
 const labelsEl = $('labels'), pool = {}, tmp = new THREE.Vector3();
 function lbl(key, cls) { if (!pool[key]) { const d = document.createElement('div'); d.className = 'lbl ' + cls; labelsEl.appendChild(d); pool[key] = d; } return pool[key]; }
 function place(el, pos, text) {
-  tmp.copy(pos).project(camera); const vis = tmp.z < 1 && Math.abs(tmp.x) < 1.05 && Math.abs(tmp.y) < 1.05; el.hidden = !vis; if (!vis) return;
+  tmp.copy(pos); if (BOOK3D) { if (POPS < .95) { el.hidden = true; return; } tmp.applyMatrix4(POP.matrixWorld); } tmp.project(camera); const vis = tmp.z < 1 && Math.abs(tmp.x) < 1.05 && Math.abs(tmp.y) < 1.05; el.hidden = !vis; if (!vis) return;
   el.style.left = ((tmp.x + 1) / 2 * canvas.clientWidth) + 'px'; el.style.top = ((1 - tmp.y) / 2 * canvas.clientHeight) + 'px'; if (el.textContent !== text) el.textContent = text;
 }
 function updateLabels() {
@@ -2282,7 +2296,7 @@ function updatePanel() {
 }
 
 // ---------- 그리기 ----------
-function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < 560 ? 46 : 36; const mn = document.getElementById('mini'), ox = mn && !mn.classList.contains('closed') ? (mn.offsetWidth + 10) / 2 : 0; // 근육 패널만큼 인형을 왼쪽으로
+function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < 560 ? 46 : 36; const mn = document.getElementById('mini'), ox = mn && mn.offsetWidth && !mn.classList.contains('closed') ? (mn.offsetWidth + 10) / 2 : 0; // 근육 패널만큼 인형을 왼쪽으로
   if (ox) camera.setViewOffset(w, h, ox, 0, w, h); else camera.clearViewOffset(); camera.updateProjectionMatrix(); }
 new ResizeObserver(resize).observe(canvas); resize();
 const clock = new THREE.Clock(); let time = 0;
@@ -2295,10 +2309,91 @@ function loop() {
   if (state.ghost) ghost.update(state.def, 'good', state.t, time);
   { const multi = state.def.variants[state.v]?.multi || []; extras.forEach((f, i) => { const m = multi[i]; f.g.visible = !!m; if (m) { f.g.position.x = m.x; f.update(m.def, m.v, state.t, time); } });
     fig.g.position.x = 0; if (state.def.livePanel && time - (state.panelAt || 0) > .3) { state.panelAt = time; $('prCard').innerHTML = state.def.panel(state.v, state.t); } }
-  controls.update(); renderer.render(scene, camera);
+  if (BOOK3D) book3dTick(dt); controls.update(); renderer.render(scene, camera);
   updateLabels(); updateChips(); updatePanel();
   requestAnimationFrame(loop);
 }
+
+// ---------- 책상 위 3D 책 (BOOK3D) ----------
+let POP = null, POPS = 1, POPROT = -.75, FL = null;
+const BW = 1.1, BDP = 1.5, BTOP = .07, PAGE_Y = BTOP + .035, POP_SC = .46, PPX = 900, PPY = 1227;
+const VIEW_ROT = { diag: -.75, side: -Math.PI / 2, front: 0, back: Math.PI };
+let leftPage, rightPage, sheet, sheetGeo, sheetX0, sheetFront, sheetBack;
+const TEXC = new Map();
+if (BOOK3D) {
+  document.body.classList.add('b3d');
+  POP = new THREE.Group(); for (const ch of [...scene.children]) if (!ch.isLight) POP.add(ch);
+  POP.position.set(BW / 2 + .02, PAGE_Y, -.15); POP.add(CHAIR_G); POP.scale.setScalar(POP_SC); POP.rotation.y = POPROT; scene.add(POP);
+  scene.background = new THREE.Color(0xcfd6d1); scene.fog = new THREE.Fog(0xcfd6d1, 6, 14);
+  for (const e in ENVS) ENVS[e].visible = false;
+  const desk = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), new THREE.MeshStandardMaterial({ color: 0xc3cbc5, roughness: .95 })); desk.rotation.x = -Math.PI / 2; desk.receiveShadow = true; scene.add(desk);
+  const bendY = ax => BTOP + .035 * (1 - Math.pow(1 - Math.min(1, ax / .2), 2));
+  const cover = new THREE.Mesh(new THREE.BoxGeometry(2 * BW + .1, .03, BDP + .08), new THREE.MeshStandardMaterial({ color: 0x2f5d50, roughness: .8 })); cover.position.y = .015; cover.castShadow = cover.receiveShadow = true; scene.add(cover);
+  for (const sd of [1, -1]) { const st = new THREE.Mesh(new THREE.BoxGeometry(BW - .01, BTOP - .03, BDP - .01), new THREE.MeshStandardMaterial({ color: 0xeee7d8, roughness: .9 })); st.position.set(sd * BW / 2, .03 + (BTOP - .03) / 2, 0); st.castShadow = st.receiveShadow = true; scene.add(st); }
+  const pageGeo = sd => { const g = new THREE.PlaneGeometry(BW, BDP, 48, 1); g.rotateX(-Math.PI / 2); g.translate(sd * BW / 2, 0, 0); const p = g.attributes.position; for (let i = 0; i < p.count; i++) p.setY(i, bendY(Math.abs(p.getX(i)))); g.computeVertexNormals(); return g; };
+  const pm = () => new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .92, side: THREE.DoubleSide });
+  leftPage = new THREE.Mesh(pageGeo(-1), pm()); rightPage = new THREE.Mesh(pageGeo(1), pm()); leftPage.receiveShadow = rightPage.receiveShadow = true; scene.add(leftPage, rightPage);
+  sheetGeo = new THREE.PlaneGeometry(BW, BDP, 48, 1); sheetGeo.rotateX(-Math.PI / 2); sheetGeo.translate(BW / 2, 0, 0);
+  sheetX0 = Float32Array.from({ length: sheetGeo.attributes.position.count }, (_, i) => sheetGeo.attributes.position.getX(i));
+  sheetFront = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .92, side: THREE.FrontSide }); sheetBack = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .92, side: THREE.BackSide });
+  sheet = new THREE.Group(); const sf = new THREE.Mesh(sheetGeo, sheetFront), sb = new THREE.Mesh(sheetGeo, sheetBack); sf.castShadow = sb.castShadow = true; sheet.add(sf, sb); sheet.visible = false; scene.add(sheet);
+  setEnv = () => { for (const e in ENVS) ENVS[e].visible = false; };
+  camFor = () => { const narrow = canvas.clientWidth < 560; return narrow ? [V(.5, 1.6, 1.75), V(.5, .32, -.02)] : [V(.1, 1.95, 2.15), V(.06, .18, .12)]; };
+  const sv = setView; setView = k => { sv(k); POPROT = VIEW_ROT[k] ?? -.75; };
+  controls.minDistance = 1.2; controls.maxDistance = 5; controls.maxPolarAngle = Math.PI * .45; controls.minAzimuthAngle = -Math.PI * .45; controls.maxAzimuthAngle = Math.PI * .45;
+  // 아치 과녁은 책 밖으로 나가므로 숨김
+  PROPS.archery.children.slice(0, 3).forEach(c => c.visible = false);
+  document.fonts?.ready.then(() => { TEXC.clear(); if (state.book != null) setPages(state.book); });
+}
+function shapeSheet(base, k) { const p = sheetGeo.attributes.position;
+  for (let i = 0; i < p.count; i++) { const x0 = sheetX0[i]; let x, y; if (Math.abs(k) < 1e-4) { x = Math.cos(base) * x0; y = Math.sin(base) * x0; } else { x = (Math.sin(base + k * x0) - Math.sin(base)) / k; y = (Math.cos(base) - Math.cos(base + k * x0)) / k; } p.setX(i, x); p.setY(i, y + PAGE_Y + .004); }
+  p.needsUpdate = true; sheetGeo.computeVertexNormals(); }
+const SERIF = '"Noto Serif KR", serif', SANS = '"IBM Plex Sans KR", sans-serif';
+function wrapT(g, text, x, y, maxW, lh, maxY = 1e9) { let line = '';
+  for (const w of String(text).split(' ')) { const t = line ? line + ' ' + w : w; if (g.measureText(t).width > maxW && line) { if (y > maxY) return y; g.fillText(line, x, y); y += lh; line = w; } else line = t; }
+  if (line && y <= maxY) { g.fillText(line, x, y); y += lh; } return y; }
+function paper(g, sd) { g.fillStyle = '#fbf8f1'; g.fillRect(0, 0, PPX, PPY);
+  for (let i = 0; i < 1800; i++) { g.fillStyle = `rgba(120,100,60,${Math.random() * .035})`; g.fillRect(Math.random() * PPX, Math.random() * PPY, 2, 2); }
+  const gx = sd < 0 ? PPX : 0, gr = g.createLinearGradient(gx, 0, gx + (sd < 0 ? -140 : 140), 0); gr.addColorStop(0, 'rgba(90,70,40,.22)'); gr.addColorStop(1, 'rgba(90,70,40,0)'); g.fillStyle = gr; g.fillRect(0, 0, PPX, PPY); }
+function pageDef(p) { const M = MOVES[p.m]; return (M.scenes || [['base', '', M]]).find(x => x[0] === p.sc)[2]; }
+function drawLeftPage(i) { const c = document.createElement('canvas'); c.width = PPX; c.height = PPY; const g = c.getContext('2d'); paper(g, -1);
+  const p = PAGES[i], d = pageDef(p), vk = d.variants.good ? 'good' : Object.keys(d.variants)[0], v = d.variants[vk], x = 90, mw = PPX - 190, maxY = PPY - 120; let y = 120;
+  g.fillStyle = '#c8372b'; g.font = `600 22px ${SANS}`; g.fillText(`${p.ui + 1}단원 ${BOOK[p.ui].t} · ${p.ui + 1}-${p.ci + 1} ${MOVES[p.m].name}`, x, y); y += 70;
+  g.fillStyle = '#23282b'; g.font = `700 52px ${SERIF}`; y = wrapT(g, p.label, x, y, mw, 64) + 6; g.fillStyle = '#c8372b'; g.fillRect(x, y - 26, 60, 5); y += 26;
+  const goal = goalOf(p); g.font = `600 23px ${SANS}`; const gh = 50 + Math.ceil(g.measureText(goal).width / (mw - 30)) * 36;
+  g.fillStyle = 'rgba(200,55,43,.07)'; g.beginPath(); g.roundRect(x - 8, y - 6, mw + 16, gh, 12); g.fill(); g.fillStyle = '#c8372b'; g.font = `700 20px ${SANS}`; g.fillText('이 쪽에서 배울 것', x + 12, y + 26);
+  g.fillStyle = '#2d3336'; g.font = `600 23px ${SANS}`; y = wrapT(g, goal, x + 12, y + 62, mw - 30, 36) + 24;
+  g.fillStyle = '#2d3336'; g.font = `400 25px ${SERIF}`; y = wrapT(g, v.desc, x, y + 10, mw, 42, maxY) + 16;
+  const ck = v.checks || []; if (ck.length && y < maxY - 100) { g.fillStyle = '#23282b'; g.font = `700 22px ${SANS}`; g.fillText(d.neutral ? '정리' : '바른 자세 확인', x, y + 10); y += 52;
+    g.font = `400 23px ${SERIF}`; for (const t of ck) { if (y > maxY) break; g.fillStyle = '#2f8a4e'; g.fillText('✓', x, y); g.fillStyle = '#2d3336'; y = wrapT(g, t, x + 36, y, mw - 40, 36, maxY) + 4; } }
+  const bad = Object.entries(d.variants).filter(([k, b]) => k !== vk && !b.ok); if (bad.length && y < maxY - 60 && !d.neutral) { y += 18; g.fillStyle = '#c2410c'; g.font = `700 22px ${SANS}`; g.fillText('⚠ 이런 자세는 조심', x, y); y += 40;
+    g.font = `400 23px ${SERIF}`; for (const [, b] of bad) { if (y > maxY) break; g.fillStyle = '#c2410c'; g.fillText('•', x, y); g.fillStyle = '#2d3336'; y = wrapT(g, b.name, x + 28, y, mw - 30, 36, maxY) + 2; } }
+  g.fillStyle = '#8a8475'; g.font = `400 22px ${SERIF}`; g.textAlign = 'center'; g.fillText(String(2 * i + 2), PPX / 2, PPY - 50); return c; }
+function drawRightPage(i) { const c = document.createElement('canvas'); c.width = PPX; c.height = PPY; const g = c.getContext('2d'); paper(g, 1);
+  const p = PAGES[i], d = pageDef(p); g.strokeStyle = 'rgba(80,70,50,.3)'; g.lineWidth = 2; g.setLineDash([10, 10]); g.beginPath(); g.ellipse(PPX / 2 + 20, PPY * .58, 250, 150, 0, 0, Math.PI * 2); g.stroke(); g.setLineDash([]);
+  g.fillStyle = '#4a4f52'; g.font = `700 30px ${SERIF}`; g.textAlign = 'center'; g.fillText(d.sceneLabel || p.label, PPX / 2, PPY - 150);
+  g.fillStyle = '#8a8475'; g.font = `400 21px ${SANS}`; g.fillText('위의 탭으로 자세를 바꾸고, 인형이나 근육을 눌러 보세요', PPX / 2, PPY - 108);
+  g.font = `400 22px ${SERIF}`; g.fillText(String(2 * i + 3), PPX / 2, PPY - 50); return c; }
+function mkTexC(c, mirror) { const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; if (mirror) { t.wrapS = THREE.RepeatWrapping; t.repeat.x = -1; t.offset.x = 1; } return t; }
+function texOf(i) { if (TEXC.has(i)) { const e = TEXC.get(i); TEXC.delete(i); TEXC.set(i, e); return e; }
+  const l = drawLeftPage(i), e = { L: mkTexC(l), LM: mkTexC(l, true), R: mkTexC(drawRightPage(i)) }; TEXC.set(i, e);
+  while (TEXC.size > 8) { const k = TEXC.keys().next().value; const o = TEXC.get(k); o.L.dispose(); o.LM.dispose(); o.R.dispose(); TEXC.delete(k); } return e; }
+function setPages(i) { if (!BOOK3D) return; const e = texOf(i); leftPage.material.map = e.L; rightPage.material.map = e.R; leftPage.material.needsUpdate = rightPage.material.needsUpdate = true; }
+const easeOutBack = x => 1 + 2.2 * Math.pow(x - 1, 3) + 1.2 * Math.pow(x - 1, 2);
+function book3dTick(dt) {
+  if (FL) { FL.p = Math.min(1, FL.p + dt / (reduce ? .05 : 1.1)); const p = FL.p, e = p * p * (3 - 2 * p), base = FL.dir > 0 ? e * Math.PI : (1 - e) * Math.PI;
+    shapeSheet(base, FL.dir * -1.5 * Math.sin(Math.PI * p) / BW); POPS = p < .42 ? 1 - ss(0, .42, p) : p < .58 ? 0 : easeOutBack(clamp((p - .58) / .42));
+    if (p >= .5 && !FL.swapped) { FL.swapped = true; FL.go(FL.to, 0); }
+    if (p >= 1) { const t = texOf(FL.to); if (FL.dir > 0) leftPage.material.map = t.L; else rightPage.material.map = t.R; leftPage.material.needsUpdate = rightPage.material.needsUpdate = true; sheet.visible = false; FL = null; POPS = 1; } }
+  POP.scale.set(POP_SC, POP_SC * Math.max(.001, POPS), POP_SC); POP.visible = POPS > .01;
+  POP.rotation.y += (POPROT - POP.rotation.y) * Math.min(1, dt * 6);
+}
+function book3dGo(i, dir, go) { if (FL) return; const cur = state.book; i = clamp(i, 0, PAGES.length - 1);
+  if (!dir || cur == null || i === cur) { go(i, 0); setPages(i); return; }
+  const a = texOf(cur), b = texOf(i);
+  if (dir > 0) { sheetFront.map = a.R; sheetBack.map = b.LM; rightPage.material.map = b.R; } else { sheetFront.map = b.R; sheetBack.map = a.LM; leftPage.material.map = b.L; }
+  sheetFront.needsUpdate = sheetBack.needsUpdate = rightPage.material.needsUpdate = leftPage.material.needsUpdate = true; shapeSheet(dir > 0 ? 0 : Math.PI, 0); sheet.visible = true;
+  FL = { dir, to: i, p: 0, swapped: false, go }; }
 setMove('squat'); { const g = camFor('diag'); camera.position.copy(g[0]); controls.target.copy(g[1]); camGoal = null; }
 syncPlay(); slider.value = Math.round(state.t * 1000);
 $('load').remove(); window.__state = state; window.__setMove = setMove; window.__setVariant = setVariant; window.__ready = true;
@@ -2342,6 +2437,7 @@ function renderToc() {
   const last = store.get('book-pos', null), r = $('cvResume'); r.hidden = last == null || !PAGES[last]; if (!r.hidden) { r.textContent = `이어서 읽기 · ${PAGES[last].label}`; r.onclick = () => enterBook(last); }
   $('cvStart').classList.toggle('cv-main', r.hidden);
 }
+function goalOf(p) { return GOALS[pkey(p)] || (p.neutral ? `${p.label}을(를) 3D로 보며 뜻과 예를 이해해요.` : `${p.label}의 바른 자세와 흐트러진 자세를 비교하고, 어떤 근육이 일하는지 찾아요.`); }
 function openCover() { renderToc(); $('cover').hidden = false; $('cover').scrollTop = 0; document.body.style.overflow = 'hidden'; }
 function closeCover() { $('cover').hidden = true; document.body.style.overflow = ''; }
 function enterBook(i) { document.body.classList.add('book'); $('bookbar').hidden = false; closeCover(); goPage(i, 0); }
@@ -2352,7 +2448,7 @@ function goPage(i, dir = 1) {
   H1.textContent = `${p.ui + 1}단원 ${u.t}`; $('eyebrow').textContent = '3D 체육 교과서 · 책으로 읽기';
   $('bkUnit').textContent = `${p.ui + 1}-${p.ci + 1} ${MOVES[p.m].name}`; $('bkTitle').textContent = p.label; $('bkNum').textContent = `${i + 1} / ${PAGES.length}`;
   $('bkBar').style.width = ((i + 1) / PAGES.length * 100) + '%'; $('bkPrev').disabled = i === 0; $('bkNext').disabled = i === PAGES.length - 1;
-  $('goalCard').hidden = false; $('goalTxt').textContent = GOALS[pkey(p)] || (p.neutral ? `${p.label}을(를) 3D로 보며 뜻과 예를 이해해요.` : `${p.label}의 바른 자세와 흐트러진 자세를 비교하고, 어떤 근육이 일하는지 찾아요.`);
+  $('goalCard').hidden = false; $('goalTxt').textContent = goalOf(p);
   const q = QUIZ[pkey(p)]; $('quizCard').hidden = !q;
   if (q) { const order = [0, 1, 2].map(k => (k + i) % 3); $('qQ').textContent = q[0]; $('qF').textContent = ''; $('qO').innerHTML = order.map(k => `<button type="button" data-k="${k}">${q[1][k]}</button>`).join('');
     $('qO').querySelectorAll('button').forEach(b => b.onclick = () => { const ok = b.dataset.k === '0'; b.classList.add(ok ? 'right' : 'wrong'); if (!ok) $('qO').querySelector('[data-k="0"]').classList.add('right');
@@ -2366,7 +2462,9 @@ $('bkPrev').onclick = () => goPage(state.book - 1, -1); $('bkNext').onclick = $(
 $('bkToc').onclick = $('openCover').onclick = openCover; $('cvStart').onclick = () => enterBook(0); $('cvFree').onclick = freeMode; $('cvBody').onclick = () => { freeMode(); setMove('body'); focusStage(); };
 document.addEventListener('keydown', e => { if (state.book == null || !$('cover').hidden || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
   if (e.key === 'ArrowRight' || e.key === 'PageDown') goPage(state.book + 1, 1); else if (e.key === 'ArrowLeft' || e.key === 'PageUp') goPage(state.book - 1, -1); });
-state.book = null; if (!/[?&]free\b/.test(location.search)) openCover();
+state.book = null;
+if (BOOK3D) { const g0 = goPage; goPage = (i, dir = 1) => book3dGo(i, dir, g0); $('cvFree').hidden = $('cvBody').hidden = true; $('eyebrow').textContent = '3D 체육 교과서 · 책'; }
+if (!/[?&]free\b/.test(location.search) || BOOK3D) openCover();
 loop();
 </script>
 <script>
