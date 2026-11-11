@@ -293,13 +293,20 @@ body.book #moves,body.book #scenes,body.book header p{display:none}
 @media (max-width:900px){.tocbtn{padding:5px 12px;min-height:36px;font-size:13px}.bookbar{border-radius:0;padding:6px 8px 8px}.bookbar button{min-width:38px;min-height:38px}.bk-t b{font-size:14.5px}}
 
 /* 몸 지도 */
+body.bodymap #bodyCard{order:-2}
+body.bodymap #vcard{order:-1}
+.bmg{display:grid;gap:4px}
+.bmg+.bmg{margin-top:10px}
+.bmg>b{font-size:12.5px;letter-spacing:.04em;display:flex;align-items:center;gap:6px}
+.bmg>b i{width:8px;height:8px;border-radius:2px}
+.bmrow .go{color:var(--muted);font-size:18px;text-align:center}
 body.bodymap #scenes,body.bodymap .mini,body.bodymap .stagecol .tabs,body.bodymap .ctrl .play,body.bodymap .ctrl .scrub{display:none}
 .move[data-m="body"]{border-style:solid;border-color:#ff6b5b}
 .move[data-m="body"] .no{color:#d9480f}
 .bodycard{border-left:4px solid #ff6b5b}
 .bodycard h2 small{display:block;font-size:12.5px;font-weight:400;color:var(--muted)}
 .bmlist{display:grid;gap:4px;margin-top:8px}
-.bmrow{display:grid;grid-template-columns:22px minmax(0,1fr) 80px;align-items:center;gap:8px;width:100%;text-align:left;font:inherit;color:inherit;background:var(--bg);border:1px solid transparent;border-radius:9px;padding:6px 8px;min-height:46px;cursor:pointer}
+.bmrow{display:grid;grid-template-columns:minmax(0,1fr) 70px 16px;align-items:center;gap:8px;width:100%;text-align:left;font:inherit;color:inherit;background:var(--bg);border:1px solid transparent;border-radius:9px;padding:6px 8px;min-height:46px;cursor:pointer}
 .bmrow:hover{border-color:var(--line)}
 .bmrow .rk{font-family:var(--f-num);font-weight:600;color:var(--muted);text-align:center}
 .bmrow .nm{font-size:14px;font-weight:600;line-height:1.25}
@@ -368,7 +375,7 @@ body.bodymap #scenes,body.bodymap .mini,body.bodymap .stagecol .tabs,body.bodyma
         <div class="why" id="vwhy" hidden></div>
         <ul class="checks" id="vchecks"></ul>
       </section>
-      <section class="card bodycard" id="bodyCard" hidden><h3>이 근육을 많이 쓰는 동작</h3><h2 id="bmName"></h2><div class="bmlist" id="bmList"></div></section>
+      <section class="card bodycard" id="bodyCard" hidden><h3>이 근육을 많이 쓰는 운동</h3><h2 id="bmName"></h2><div class="bmlist" id="bmList"></div></section>
       <section class="card bquiz" id="quizCard" hidden><h3>확인 문제</h3><p class="qq" id="qQ"></p><div class="qo" id="qO"></div><p class="qf" id="qF"></p></section>
       <button type="button" class="bk-big" id="bkNext2" hidden>다음 쪽 →</button>
       <section class="card">
@@ -1694,13 +1701,18 @@ function muscleUses(id) {
         for (let k = 0; k < 8; k++) { const t = (k + .5) / 8; try { const P = build(d.spec(v.p(t), t)), a = d.act(vk, P, t);
           for (const mid in a) { const x = Array.isArray(a[mid]) ? Math.max(...a[mid]) : +a[mid] || 0; mx[mid] = Math.max(mx[mid] || 0, x); } } catch (e) { } }
         USES_CACHE.push({ m, sc, label: d.sceneLabel || M.name, move: M.name, mx }); } } }
-  return USES_CACHE.filter(x => (x.mx[id] || 0) >= .45).sort((a, b) => b.mx[id] - a.mx[id]).slice(0, 10).map(x => ({ ...x, v: x.mx[id] }));
+  return USES_CACHE.filter(x => (x.mx[id] || 0) >= .4).sort((a, b) => b.mx[id] - a.mx[id]).map(x => ({ ...x, v: x.mx[id] }));
 }
+function showBodyList() { if (!mqNarrow.matches) return; const col = $('stagecol').getBoundingClientRect(), card = $('bodyCard').getBoundingClientRect();
+  if (card.top > innerHeight - 120 || card.top < col.bottom - 4) scrollTo({ top: scrollY + card.top - col.bottom - 6, behavior: reduce ? 'auto' : 'smooth' }); }
 function renderBodyCard() {
   const card = $('bodyCard'), on = !!state.def?.bodyMap; card.hidden = !on; if (!on) return;
   const id = state.sel, [nm, easy] = MUSCLES[id], list = muscleUses(id);
   $('bmName').innerHTML = `${nm}<small>${easy}</small>`;
-  $('bmList').innerHTML = list.length ? list.map((x, i) => `<button type="button" class="bmrow" data-m="${x.m}" data-sc="${x.sc}"><span class="rk">${i + 1}</span><span class="nm">${x.label}<small>${x.move}</small></span><span class="bar"><i style="width:${Math.round(x.v * 100)}%"></i></span></button>`).join('') : '<p class="foot">이 근육을 크게 쓰는 장면이 아직 없어요.</p>';
+  const GR = [['기본 움직임', ['squat', 'lunge', 'pushup', 'hinge', 'plank'], '#2f8a4e'], ['기능성 운동', ['func'], '#2a78c4'], ['스포츠', ['archery'], '#d9480f'], ['체력 요소', ['fitness'], '#0c8599']];
+  const row = x => `<button type="button" class="bmrow" data-m="${x.m}" data-sc="${x.sc}"><span class="nm">${x.label}${['func', 'fitness', 'archery'].includes(x.m) ? '' : `<small>${x.move}</small>`}</span><span class="bar"><i style="width:${Math.round(x.v * 100)}%"></i></span><span class="go">›</span></button>`;
+  const html = GR.map(([g, ms, col]) => { const xs = list.filter(x => ms.includes(x.m)).slice(0, 5); return xs.length ? `<div class="bmg"><b style="color:${col}"><i style="background:${col}"></i>${g}</b>${xs.map(row).join('')}</div>` : ''; }).join('');
+  $('bmList').innerHTML = html || '<p class="foot">이 근육을 크게 쓰는 장면이 아직 없어요.</p>';
   $('bmList').querySelectorAll('[data-m]').forEach(b => b.onclick = () => { setMove(b.dataset.m); setScene(b.dataset.sc); focusStage(); });
 }
 // ---------- 체력 요소: 요소마다 대표 운동을 3D로 ----------
@@ -2188,7 +2200,7 @@ function setScene(key) {
   chipsEl.innerHTML = D0.readouts.map((r, i) => `<div class="chip">${r[0]}<b id="r${i}">–</b></div>`).join('') + (D0.depth || D0.straight ? '<div class="chip" id="rx"></div>' : '') + (D0.com ? '<div class="chip" id="rc"></div>' : '');
   if (D0.cycle === 'loop') { state.t = 0; state.phase = 0; }
   { const mn = $('mini'), want = mqNarrow.matches && !!D0.aimBox; if (want !== mn.classList.contains('closed') && (want || state.miniAuto)) { $('miniT').click(); } state.miniAuto = want; }
-  document.body.classList.toggle('bodymap', !!D0.bodyMap); if (!D0.bodyMap) $('bodyCard').hidden = true;
+  document.body.classList.toggle('bodymap', !!D0.bodyMap); state.bmReady = false; if (!D0.bodyMap) $('bodyCard').hidden = true;
   state.sel = D0.bodyMap && MUSCLES[state.sel] ? state.sel : D0.muscles[0]; setVariant(D0.neutral ? Object.keys(D0.variants)[0] : 'good', true); syncPlay();
 }
 function setVariant(vk, fromMove) {
@@ -2209,7 +2221,7 @@ function select(id) {
   for (const k in rows) { rows[k].r.setAttribute('aria-pressed', k === id); rows[k].m?.setAttribute('aria-pressed', k === id); }
   $('dname').innerHTML = `${nm}<small>${easy}</small>`; $('ddesc').textContent = desc;
   const n = $('dnote'), note = state.def.notes?.[id]?.[state.v]; n.hidden = !note; n.textContent = note || '';
-  renderBodyCard();
+  renderBodyCard(); if (state.def?.bodyMap && state.bmReady) showBodyList(); state.bmReady = !!state.def?.bodyMap;
 }
 function showUse(key, jump) {
   const [g, i] = key.split(':'), [n, d, sc] = MOVES[state.m].uses[g][+i], lab = USE_GROUPS.find(x => x[0] === g)[1];
