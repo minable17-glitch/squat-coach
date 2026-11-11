@@ -108,7 +108,13 @@ td.y{color:var(--good)} td.n{color:var(--bad)}
       <button type="button" data-depth="1" aria-pressed="true">허벅지 수평</button>
       <button type="button" data-depth="0.7" aria-pressed="false">초보 기준</button>
     </div>
+    <div class="seg" role="group" aria-label="무릎 위치 판정">
+      <button type="button" data-kf="38" aria-pressed="false">무릎 엄격</button>
+      <button type="button" data-kf="45" aria-pressed="true">무릎 보통</button>
+      <button type="button" data-kf="0" aria-pressed="false">무릎 판정 끄기</button>
+    </div>
     <span class="grow"></span>
+    <a class="iconbtn" href="https://claude.ai/artifact/EeGvg8K49sdJwxZ39vaAwu" target="_blank" rel="noopener" style="text-decoration:none">3D 교과서</a>
     <button type="button" class="iconbtn" id="flip" hidden>카메라 전환</button>
   </header>
   <main>
@@ -123,6 +129,7 @@ td.y{color:var(--good)} td.n{color:var(--bad)}
       <div class="chips" id="chips">
         <div class="chip" id="cKnee">무릎 각도 <b>–</b></div>
         <div class="chip" id="cTorso">상체 기울기 <b>–</b></div>
+        <div class="chip" id="cKF">무릎 위치 <b>–</b></div>
         <div class="chip" id="cExtra">뒤꿈치 <b>–</b></div>
       </div>
       <div class="timer" id="timer" hidden>60</div>
@@ -136,8 +143,9 @@ td.y{color:var(--good)} td.n{color:var(--bad)}
         <ol>
           <li>기기를 허리 높이에 세우고 <b>2~3 m</b> 떨어져요.</li>
           <li><b>머리부터 발끝까지</b> 화면에 다 나오게 서요.</li>
-          <li>옆에서 찍으면 <b>깊이·상체·뒤꿈치</b>를, 앞에서 찍으면 <b>깊이·무릎 모임</b>을 봐요.</li>
+          <li>옆에서 찍으면 <b>깊이·무릎 위치·상체</b>를, 앞에서 찍으면 <b>깊이·무릎 모임</b>을 봐요.</li>
           <li>처음에 똑바로 서서 1초 멈추면 준비가 끝나요.</li>
+          <li><b>바른 자세로 한 스쿼트만 개수로 인정</b>돼요. 잘못하면 화면에 바로 알려 줘요.</li>
         </ol>
         <div><button type="button" class="big" id="start">카메라 켜기</button></div>
         <p class="err" id="err" hidden></p>
@@ -169,7 +177,8 @@ const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const DEG = 180 / Math.PI;
 
 // ---------- 설정과 상태 ----------
-const S = { mode: 'practice', view: 'side', target: 1, facing: 'user', running: false,
+const S = { mode: 'practice', view: 'side', target: 1, kneeLimit: 45, // 정강이가 수직에서 이 각도보다 더 기울면 '무릎이 나옴'
+  facing: 'user', running: false,
   game: { sec: 30, on: false, end: 0, score: 0, combo: 0, best: 0 }, test: { n: 5 } };
 const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
 
@@ -223,6 +232,10 @@ function analyze(raw, W, H) {
   if (S.view === 'side') { const lift = ((J('toe').y - J('heel').y) - C.footDy) / C.leg; E.heelRun = lift > .1 ? (E.heelRun || 0) + 1 : 0; M.heelLift = E.heelRun >= 6; M.heelVal = lift; }
   if (S.view === 'front') { const kw = Math.abs(J('knee').x - Jo('knee').x), aw = Math.abs(J('ankle').x - Jo('ankle').x); M.kneeRatio = kw / Math.max(1, aw); M.valgus = M.depth > .45 && M.kneeRatio < .8; }
   M.lean = S.view === 'side' && M.torso > 50;
+  if (S.view === 'side') { // 바라보는 방향(뒤꿈치→발끝)으로 무릎이 발끝보다 얼마나 나갔는지
+    // 정강이(발목→무릎)가 앞으로 기운 각도로 잼. 많이 기울수록 무릎이 발끝보다 앞으로 나간 것
+    const dir = Math.sign(J('toe').x - J('heel').x) || 1, shin = Math.atan2((J('knee').x - J('ankle').x) * dir, J('ankle').y - J('knee').y) * DEG;
+    M.kneeFwdVal = shin; E.kfRun = S.kneeLimit && M.depth > .3 && shin > S.kneeLimit ? (E.kfRun || 0) + 1 : 0; M.kneeOver = E.kfRun >= 3; }
   return M;
 }
 
@@ -232,11 +245,11 @@ function track(M) {
   if (!M.ready || M.depth == null) return null;
   if (E.phase === 'up' && M.depth > .35) { E.phase = 'down'; E.rep = { maxDepth: 0, minKnee: 180, maxTorso: 0, heel: false, valgus: false }; }
   if (E.phase === 'down') {
-    const r = E.rep; (r.trace ||= []).push([+M.depth.toFixed(2), Math.round(M.knee), +(M.heelVal ?? M.kneeRatio ?? 0).toFixed(3)]); r.maxDepth = Math.max(r.maxDepth, M.depth); r.minKnee = Math.min(r.minKnee, M.knee);
-    if (S.view === 'side') { r.maxTorso = Math.max(r.maxTorso, M.torso); r.heel ||= M.heelLift; } else r.valgus ||= M.valgus;
+    const r = E.rep; (r.trace ||= []).push([+M.depth.toFixed(2), Math.round(M.knee), +(M.heelVal ?? M.kneeRatio ?? 0).toFixed(3), Math.round(M.kneeFwdVal ?? 0)]); r.maxDepth = Math.max(r.maxDepth, M.depth); r.minKnee = Math.min(r.minKnee, M.knee);
+    if (S.view === 'side') { r.maxTorso = Math.max(r.maxTorso, M.torso); r.heel ||= M.heelLift; r.kneeOver ||= M.kneeOver; r.maxKF = Math.max(r.maxKF ?? -1, M.kneeFwdVal ?? -1); } else r.valgus ||= M.valgus;
     if (M.depth < .15) { E.phase = 'up';
-      const res = { depth: r.maxDepth >= S.target, torso: S.view !== 'side' || r.maxTorso <= 50, heel: S.view !== 'side' || !r.heel, knee: S.view !== 'front' || !r.valgus, minKnee: Math.round(r.minKnee), maxTorso: Math.round(r.maxTorso), view: S.view };
-      res.good = res.depth && res.torso && res.knee; /* 뒤꿈치는 정확도가 낮아 참고로만 */ if (r.trace) res.trace = r.trace.filter((_, i) => i % 3 === 0); E.reps.push(res); E.rep = null; return res; }
+      const res = { depth: r.maxDepth >= S.target, torso: S.view !== 'side' || r.maxTorso <= 50, heel: S.view !== 'side' || !r.heel, knee: S.view !== 'front' || !r.valgus, kneeFwd: S.view !== 'side' || !S.kneeLimit || !r.kneeOver, minKnee: Math.round(r.minKnee), maxTorso: Math.round(r.maxTorso), view: S.view };
+      res.good = res.depth && res.torso && res.knee && res.kneeFwd; /* 뒤꿈치는 정확도가 낮아 참고로만 */ if (r.trace) res.trace = r.trace.filter((_, i) => i % 3 === 0); E.reps.push(res); E.rep = null; return res; }
   }
   return null;
 }
@@ -249,6 +262,7 @@ function liveCue(M) {
   if (!M.ready) return ['똑바로 서서 잠깐 멈춰요', 'warn'];
   if (E.phase === 'down') {
     if (M.valgus) return ['무릎을 바깥으로!', 'bad'];
+    if (M.kneeOver) return ['무릎이 나왔어요! 엉덩이를 뒤로', 'bad'];
     if (M.heelLift) return ['뒤꿈치를 붙여요', 'warn'];
     if (M.lean) return ['가슴을 들어요!', 'bad'];
     if (M.depth >= S.target) return ['좋아요! 이제 일어나요', 'good'];
@@ -258,9 +272,10 @@ function liveCue(M) {
 }
 function repCue(r) {
   if (r.good) return r.heel ? ['완벽해요!', 'good'] : ['좋아요! 뒤꿈치도 붙여 봐요', 'good'];
-  if (!r.depth) return ['조금 더 깊이 앉아요', 'warn'];
-  if (!r.knee) return ['무릎이 안으로 모였어요', 'bad'];
-  if (!r.torso) return ['상체가 너무 숙여졌어요', 'bad'];
+  if (!r.knee) return ['인정 안 됨: 무릎이 안으로 모였어요', 'bad'];
+  if (!r.kneeFwd) return ['인정 안 됨: 무릎이 너무 나왔어요', 'bad'];
+  if (!r.depth) return ['인정 안 됨: 더 깊이 앉아요', 'warn'];
+  if (!r.torso) return ['인정 안 됨: 상체가 너무 숙여졌어요', 'bad'];
   return ['다시 해 봐요', 'warn'];
 }
 
@@ -274,6 +289,7 @@ function draw(M) {
   const bad = new Set();
   if (M.lean) { bad.add('11-23'); bad.add('12-24'); }
   if (M.valgus) { bad.add('23-25'); bad.add('24-26'); bad.add('25-27'); bad.add('26-28'); }
+  if (M.kneeOver) { bad.add('25-27'); bad.add('26-28'); }
   if (M.heelLift) { bad.add('27-29'); bad.add('28-30'); bad.add('29-31'); bad.add('30-32'); }
   g.lineCap = 'round';
   for (const [a, b] of BONES) { const p = lm[a], q = lm[b]; if (p.v < .4 || q.v < .4) continue;
@@ -293,12 +309,13 @@ function updateHUD(M) {
   const d = M?.depth ?? 0; $('meterFill').style.height = clamp(d / 1.2) * 100 + '%'; $('meterTarget').style.top = (S.target / 1.2) * 100 + '%';
   chip('cKnee', '무릎 각도', M?.visible && M.knee ? Math.round(M.knee) + '°' : '–', '');
   if (S.view === 'side') { chip('cTorso', '상체 기울기', M?.visible && M.torso != null ? Math.round(M.torso) + '°' : '–', M?.lean ? 'bad' : '');
+    $('cKF').hidden = false; chip('cKF', '무릎 위치', !S.kneeLimit ? '판정 끔' : M?.ready && M.kneeFwdVal != null ? (M.kneeOver ? '너무 나옴' : '좋음') : '–', M?.kneeOver ? 'bad' : (M?.ready ? 'good' : ''));
     chip('cExtra', '뒤꿈치(참고)', M?.ready ? (M.heelLift ? '들림?' : '붙음') : '–', M?.heelLift ? 'bad' : ''); }
-  else { chip('cTorso', '깊이', M?.ready ? Math.round(d * 100) + '%' : '–', d >= S.target ? 'good' : '');
+  else { $('cKF').hidden = true; chip('cTorso', '깊이', M?.ready ? Math.round(d * 100) + '%' : '–', d >= S.target ? 'good' : '');
     chip('cExtra', '무릎 너비', M?.kneeRatio ? (M.valgus ? '모임' : '좋음') : '–', M?.valgus ? 'bad' : (M?.kneeRatio ? 'good' : '')); }
   const good = E.reps.filter(r => r.good).length;
   $('countNum').textContent = S.mode === 'game' ? S.game.score : (S.mode === 'test' ? `${E.reps.length}/${S.test.n}` : good);
-  $('countSub').innerHTML = S.mode === 'game' ? `점수 · 바른 스쿼트 <span class="ok">${good}</span>` : `바른 스쿼트 <span class="ok">${good}</span> · 전체 ${E.reps.length}`;
+  $('countSub').innerHTML = S.mode === 'game' ? `점수 · 인정 <span class="ok">${good}</span> · 인정 안 됨 ${E.reps.length - good}` : S.mode === 'test' ? `시도 횟수 · 바른 자세 <span class="ok">${good}</span>` : `인정 개수 · 인정 안 됨 ${E.reps.length - good}`;
 }
 
 // ---------- 모드 ----------
@@ -307,21 +324,21 @@ function onRep(r) {
   if (r.good) sfx.good(); else sfx.bad();
   if (S.mode === 'game' && S.game.on) {
     if (r.good) { S.game.combo++; const add = 10 + (S.game.combo >= 3 ? 5 * (S.game.combo - 2) : 0); S.game.score += add; pop('+' + add, '#3ddc84'); }
-    else { S.game.combo = 0; pop('아쉬워요', '#ff6b4a'); }
+    else { S.game.combo = 0; pop('✗ 인정 안 됨', '#ff6b4a'); }
     $('combo').hidden = S.game.combo < 2; $('combo').textContent = `🔥 ${S.game.combo} 콤보`;
-  } else pop(r.good ? '✓' : '✗', r.good ? '#3ddc84' : '#ff6b4a');
+  } else pop(r.good ? '+1' : '✗ 인정 안 됨', r.good ? '#3ddc84' : '#ff6b4a');
   if (S.mode === 'test' && E.reps.length >= S.test.n) setTimeout(showTestResult, 900);
 }
 function mostCommonMiss(reps) {
-  const m = { depth: 0, knee: 0, torso: 0, heel: 0 }; for (const r of reps) for (const k in m) if (!r[k]) m[k]++;
+  const m = { depth: 0, knee: 0, kneeFwd: 0, torso: 0, heel: 0 }; for (const r of reps) for (const k in m) if (!r[k]) m[k]++;
   const heel = m.heel; m.heel = 0; const top = Object.entries(m).sort((a, b) => b[1] - a[1])[0];
   return top[1] ? top[0] : heel >= 2 ? 'heel' : null;
 }
-const TIPS = { depth: '허벅지가 바닥과 수평이 될 때까지 앉아 보세요. 의자에 앉듯 엉덩이를 뒤로 빼면 더 깊이 앉을 수 있어요.',
+const TIPS = { kneeFwd: '무릎이 발끝보다 많이 나왔어요. 무릎을 앞으로 내미는 대신 의자에 앉듯 엉덩이를 뒤로 빼며 앉아 보세요. 무게는 발 한가운데에 두세요.', depth: '허벅지가 바닥과 수평이 될 때까지 앉아 보세요. 의자에 앉듯 엉덩이를 뒤로 빼면 더 깊이 앉을 수 있어요.',
   knee: '무릎이 안으로 모였어요. 무릎을 둘째 발가락 방향으로 밀어 내고, 엉덩이 옆 근육(중둔근)에 힘을 주세요.',
   heel: '뒤꿈치가 떴어요. 발 전체로 바닥을 누르고, 종아리·발목 스트레칭을 해 보세요.',
   torso: '상체가 많이 숙여졌어요. 가슴을 펴고 앞을 보며, 팔을 앞으로 뻗어 균형을 잡아 보세요.' };
-const LABEL = { depth: '깊이', knee: '무릎', heel: '뒤꿈치(참고)', torso: '상체' };
+const LABEL = { depth: '깊이', knee: '무릎 모임', kneeFwd: '무릎 위치', heel: '뒤꿈치(참고)', torso: '상체' };
 function startGame() {
   $('gameSetup').hidden = true; E.reps = []; Object.assign(S.game, { score: 0, combo: 0, on: false });
   $('combo').hidden = true; const cd = $('countdown'); cd.hidden = false; let n = 3; $('cdNum').textContent = n; sfx.tick();
@@ -343,7 +360,7 @@ function endGame() {
 function showTestResult() {
   const reps = E.reps.slice(0, S.test.n), good = reps.filter(r => r.good).length, miss = mostCommonMiss(reps);
   const grade = good >= 4 ? ['잘함', 'var(--good)'] : good >= 2 ? ['보통', 'var(--warn)'] : ['노력 필요', 'var(--bad)'];
-  const cols = S.view === 'side' ? ['depth', 'torso', 'heel'] : ['depth', 'knee'];
+  const cols = S.view === 'side' ? ['depth', 'kneeFwd', 'torso', 'heel'] : ['depth', 'knee'];
   const rows = reps.map((r, i) => `<tr><td>${i + 1}</td>${cols.map(k => `<td class="${r[k] ? 'y' : 'n'}">${r[k] ? '✓' : '✗'}</td>`).join('')}<td>${r.minKnee}°</td>${S.view === 'side' ? `<td>${r.maxTorso}°</td>` : ''}</tr>`).join('');
   showResult(`<h2>스쿼트 형성평가</h2>
     <div class="grade" style="color:${grade[1]}">${grade[0]}</div>
@@ -369,6 +386,10 @@ document.querySelectorAll('[data-depth]').forEach(b => b.onclick = () => { S.tar
 document.querySelectorAll('[data-sec]').forEach(b => b.onclick = () => { S.game.sec = +b.dataset.sec; document.querySelectorAll('[data-sec]').forEach(x => x.setAttribute('aria-pressed', x === b));
   const best = +(store.get(`squat-best-${S.game.sec}-${S.view}`) || 0); $('best').textContent = best ? `이 기기 최고 기록: ${best}점` : ''; });
 $('goGame').onclick = startGame;
+document.querySelectorAll('[data-kf]').forEach(b => b.onclick = () => { S.kneeLimit = +b.dataset.kf || 0; document.querySelectorAll('[data-kf]').forEach(x => x.setAttribute('aria-pressed', x === b)); });
+{ const q = new URLSearchParams(location.search); // 예: ?mode=game&view=side
+  if (['practice', 'game', 'test'].includes(q.get('mode'))) { S.mode = q.get('mode'); document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === S.mode)); }
+  if (['side', 'front'].includes(q.get('view'))) { S.view = q.get('view'); document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === S.view)); } }
 
 // ---------- 카메라와 모델 ----------
 let landmarker = null, stream = null, lastT = -1;
