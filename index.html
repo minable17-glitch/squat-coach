@@ -208,7 +208,11 @@ body.battling .cue{top:calc(172px + env(safe-area-inset-top,0px))}
         <p id="gameDesc"></p>
         <div class="choices" role="group" aria-label="시간">
           <button type="button" data-sec="30" aria-pressed="true">30초</button>
-          <button type="button" data-sec="60" aria-pressed="false">60초</button>
+          <button type="button" data-sec="60" aria-pressed="false">1분</button>
+          <button type="button" data-sec="120" aria-pressed="false">2분</button>
+          <button type="button" data-sec="180" aria-pressed="false">3분</button>
+          <button type="button" data-sec="300" aria-pressed="false">5분</button>
+          <button type="button" data-sec="600" aria-pressed="false">10분</button>
         </div>
         <p id="best" class="note"></p>
         <div class="row"><button type="button" class="big" id="goGame">시작!</button></div>
@@ -480,6 +484,7 @@ const TIPS = { kneeFwd: '무릎이 발끝보다 많이 나왔어요. 무릎을 �
 const LABEL = { depth: '깊이', knee: '무릎 모임', kneeFwd: '무릎 위치', heel: '뒤꿈치(참고)', torso: '상체', line: '몸 일직선' };
 const tipFor = k => TIPS[k === 'depth' && S.ex === 'pushup' ? 'pushDepth' : k];
 const missBox = (reps, head) => { const miss = mostCommonMiss(reps); return miss ? `<div class="tip"><b>${head}: ${LABEL[miss]}</b><br>${tipFor(miss)}</div>` : (reps.length ? '<div class="tip"><b>모든 기준을 지켰어요. 훌륭해요!</b></div>' : ''); };
+const secLabel = n => n < 60 ? n + '초' : n / 60 + '분', clock = left => left > 60 ? Math.floor(Math.ceil(left) / 60) + ':' + String(Math.ceil(left) % 60).padStart(2, '0') : String(Math.ceil(left));
 const bestKey = () => `best-${S.ex}-${S.game.sec}-${S.view}`;
 function countdown(done) {
   const cd = $('countdown'); cd.hidden = false; let n = 3; $('cdNum').textContent = n; sfx.tick();
@@ -494,7 +499,7 @@ function endGame() {
   const good = myGood(), all = E.reps.length;
   const best = +(store.get(bestKey()) || 0), isBest = S.game.score > best; if (isBest) store.set(bestKey(), S.game.score);
   let maxCombo = 0, c = 0; for (const r of E.reps) { c = r.good ? c + 1 : 0; maxCombo = Math.max(maxCombo, c); }
-  showResult(`<h2>${EXN[S.ex]} ${S.game.sec}초 챌린지 끝!</h2>
+  showResult(`<h2>${EXN[S.ex]} ${secLabel(S.game.sec)} 챌린지 끝!</h2>
     <div class="grade" style="color:var(--good)">${S.game.score}점</div>
     ${isBest ? '<p style="color:var(--warn);font-weight:700">🏆 이 기기 최고 기록!</p>' : `<p class="note">이 기기 최고 기록 ${best}점</p>`}
     <div class="stats"><div class="stat"><b>${good}</b><span>바른 ${EXN[S.ex]}</span></div><div class="stat"><b>${all}</b><span>전체</span></div><div class="stat"><b>${maxCombo}</b><span>최고 콤보</span></div></div>
@@ -706,7 +711,7 @@ function loop() {
     const c = liveCue(M); if (c) setCue(c[0], c[1]);
     draw(M); updateHUD(M);
   }
-  if (S.game.on) { const left = Math.max(0, (S.game.end - performance.now()) / 1000); $('timer').textContent = Math.ceil(left); $('timer').classList.toggle('low', left <= 5);
+  if (S.game.on) { const left = Math.max(0, (S.game.end - performance.now()) / 1000); $('timer').textContent = clock(left); $('timer').classList.toggle('low', left <= 5);
     if (left <= 0) endGame(); }
   if (B.st === 'play') { const left = Math.max(0, (B.end - performance.now()) / 1000), el = $('btm'); if (el) { el.textContent = Math.ceil(left); el.classList.toggle('low', left <= 5); }
     if (left <= 0) endBattle(); }
