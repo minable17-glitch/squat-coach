@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14191c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="../icon-192.png">
+<link rel="apple-touch-icon" href="../icon-192.png">
+<title>던지기 원리</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: 위 한 줄 메뉴(교과서로 · 두 가지 원리 탭) / 가로: 왼쪽 설명과 조작, 오른쪽 그림 / 세로: 위 그림, 아래 설명. 화면 스크롤 없음 */
+:root{--navy:#14284b;--paper:#fbf5e6;--pline:#e2d6bb;--lime:#d7f25a;--ink:#1c2434;--muted:#5c6475;--good:#2f8a4e;--bad:#c2410c;--blue:#2a6fb5;
+  --f:'IBM Plex Sans KR',system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;--fn:'IBM Plex Mono',ui-monospace,Menlo,monospace;color-scheme:light}
+*{box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:var(--navy);color:var(--ink);font-family:var(--f);font-size:17px;line-height:1.55}
+button{font:inherit;color:inherit;cursor:pointer}
+.app{height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr);gap:6px;padding:max(6px,env(safe-area-inset-top,0px)) max(8px,env(safe-area-inset-right,0px)) max(6px,env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+.nav{display:flex;gap:6px;min-width:0}
+.nav a,.nav button{display:flex;align-items:center;justify-content:center;height:46px;padding:0 14px;border-radius:12px;border:0;font-weight:700;font-size:15.5px;white-space:nowrap;text-decoration:none}
+.nav a{flex:none;background:#fff;color:var(--navy)}
+.nav button{flex:1 1 0;min-width:0;background:rgba(255,255,255,.14);color:#fff;overflow:hidden;text-overflow:ellipsis}
+.nav button[aria-selected="true"]{background:var(--lime);color:var(--navy)}
+.main{min-height:0;display:grid;gap:8px;grid-template-rows:minmax(0,1fr) minmax(0,1.05fr)}
+.view,.panel{min-height:0;min-width:0;border-radius:14px;overflow:hidden}
+.view{position:relative;background:#eef4fb}
+.view canvas{display:block;width:100%;height:100%;touch-action:none}
+.result{position:absolute;left:170px;right:8px;top:8px;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:5px;pointer-events:none}
+.again{position:absolute;right:8px;bottom:8px;min-height:44px;padding:0 14px;border-radius:12px;border:0;background:var(--navy);color:#fff;font-weight:700;font-size:15px}
+.chip{background:rgba(255,255,255,.94);border:1.5px solid var(--pline);border-radius:10px;padding:4px 10px;font-size:14px;font-weight:600;color:var(--muted)}
+.chip b{font-family:var(--fn);color:var(--navy);margin-left:4px}
+.chip.ok{border-color:var(--good);color:var(--good)}.chip.no{border-color:var(--bad);color:var(--bad)}
+.panel{background:var(--paper);padding:12px 14px;display:grid;gap:8px;align-content:start;overflow-y:auto}
+.panel h1{margin:0;font-size:22px;line-height:1.3;color:var(--navy)}
+.panel h1 span{background:linear-gradient(transparent 58%,#ffe066 58%,#ffe066 92%,transparent 92%);padding:0 3px}
+.panel p{margin:0;font-size:17px}
+.key{border:1.5px solid #f3d3a6;background:#fff7e8;border-radius:12px;padding:8px 12px;font-size:16.5px}
+.key b{color:var(--bad)}
+.opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.opts button{min-height:52px;border-radius:12px;border:2px solid var(--pline);background:#fff;font-weight:700;font-size:15px;line-height:1.25;padding:4px 6px}
+.opts button small{display:block;font-weight:600;font-size:12px;color:var(--muted)}
+.opts button[aria-pressed="true"]{border-color:var(--navy);background:var(--lime)}
+.row{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--muted)}
+.row input{flex:1;min-width:0;height:36px;accent-color:var(--navy)}
+.go{min-height:48px;border-radius:12px;border:0;background:var(--navy);color:#fff;font-weight:700;font-size:16px}
+.bars{display:grid;gap:4px;font-size:14px;font-weight:600}
+.bar{display:grid;grid-template-columns:104px minmax(0,1fr) 62px;align-items:center;gap:8px}
+.bar i{display:block;height:14px;border-radius:7px;background:#e6dcc4;overflow:hidden}
+.bar i u{display:block;height:100%;border-radius:7px;background:var(--blue);transition:width .3s}
+.bar.off{color:#a9a08a}.bar.off u{width:0!important}
+.bar b{font-family:var(--fn);text-align:right;color:var(--navy)}
+[hidden]{display:none!important}
+@media (orientation:portrait){.main{grid-template-rows:minmax(0,.8fr) minmax(0,1fr)}.nav button{font-size:14px;padding:0 6px}.nav a{padding:0 10px;font-size:14px}}
+@media (orientation:landscape){
+  .main{grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)}
+  .panel{order:-1}
+}
+@media (orientation:landscape) and (max-height:440px){
+  body{font-size:16px}.nav a,.nav button{height:42px;font-size:15px}
+  .panel{padding:10px 12px;gap:7px}.panel h1{font-size:19px}.panel p{display:none}.key{font-size:15px;padding:6px 10px}
+  .opts button{min-height:46px;font-size:14px}.go{min-height:42px}.row input{height:28px}
+}
+</style>
+
+<div class="app">
+  <nav class="nav" role="tablist" aria-label="던지기 원리">
+    <a href="paper.html" id="back" aria-label="교과서로 돌아가기">‹ 교과서</a>
+    <button type="button" role="tab" data-tab="release" aria-selected="true">① 타점과 공의 길</button>
+    <button type="button" role="tab" data-tab="chain" aria-selected="false">② 어깨를 쓰는 던지기</button>
+  </nav>
+  <div class="main">
+    <div class="view"><canvas id="cv" aria-label="옆에서 본 던지기 그림. 던지는 사람, 공이 날아가는 길, 포수 미트가 보입니다."></canvas><div class="result" id="result"></div><button type="button" class="again" id="again">⚾ 다시 던지기</button></div>
+    <section class="panel" id="pRelease">
+      <h1><span>공은 손을 떠나는 순간의 방향으로 날아가요</span></h1>
+      <p>팔은 어깨를 중심으로 원을 그려요. 공을 <b>어디서 놓느냐(타점)</b>에 따라 공이 떠나는 방향이 달라져요.</p>
+      <div class="opts" id="relOpts">
+        <button type="button" data-a="-34">일찍 놓기<small>머리 뒤에서</small></button>
+        <button type="button" data-a="fit">알맞게 놓기<small>머리 위 살짝 앞</small></button>
+        <button type="button" data-a="22">늦게 놓기<small>몸 앞 아래에서</small></button>
+      </div>
+      <label class="row">일찍<input id="ang" type="range" min="-45" max="35" step="1" value="-6" aria-label="공을 놓는 타점">늦게</label>
+      <div class="key" id="relKey"></div>
+    </section>
+    <section class="panel" id="pChain" hidden>
+      <h1><span>몸을 차례로 쓸수록 공이 빨라져요</span></h1>
+      <p>다리 → 허리 → 어깨 → 팔꿈치 → 손목 순서로 힘이 채찍처럼 전달돼요. 쓰는 부위가 늘면 빠르기가 더해져요.</p>
+      <div class="opts" id="chOpts">
+        <button type="button" data-l="1">팔로만<small>밀어 던지기</small></button>
+        <button type="button" data-l="2">어깨까지<small>팔꿈치를 높이</small></button>
+        <button type="button" data-l="3">온몸으로<small>다리·허리·어깨</small></button>
+      </div>
+      <div class="bars" id="bars">
+        <div class="bar" data-n="1"><span>팔꿈치·손목</span><i><u style="width:48%"></u></i><b>40 km/h</b></div>
+        <div class="bar" data-n="2"><span>어깨 회전</span><i><u style="width:26%"></u></i><b>+22</b></div>
+        <div class="bar" data-n="3"><span>다리·허리</span><i><u style="width:26%"></u></i><b>+21</b></div>
+      </div>
+      <div class="key" id="chKey"></div>
+    </section>
+  </div>
+</div>
+
+<script>
+// 옆에서 본 단순한 던지기 모형. 팔 길이 0.7 m, 어깨 높이 1.45 m, 포수 미트까지 15 m, 공기 저항은 넣지 않았어요.
+const $ = id => document.getElementById(id), D = Math.PI / 180, G = 9.8, R = .7, DIST = 15, MITT = [.6, 1.5];
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cv = $('cv'), g = cv.getContext('2d');
+const S = { tab: 'release', ang: -6, lvl: 2, anim: null, trails: [] };
+const SPEED = { 1: 11, 2: 17, 3: 23 }; // m/s
+const shoulder = l => l === 3 ? [.35, 1.5] : [0, 1.45];
+// 타점 각도 a(도): 0 = 손이 머리 바로 위, -는 뒤(일찍), +는 앞(늦게). 공은 원의 접선 방향으로 떠나요.
+function launch(a, v, sh = [0, 1.45]) { const t = a * D; return { x: sh[0] + R * Math.sin(t), y: sh[1] + R * Math.cos(t), vx: v * Math.cos(t), vy: -v * Math.sin(t) }; }
+function path(L) { const pts = []; let end = null;
+  for (let t = 0; t < 4; t += .01) { const x = L.x + L.vx * t, y = L.y + L.vy * t - .5 * G * t * t; if (y <= 0) { end = { ground: x, t }; pts.push([x, 0]); break; } if (x >= DIST) { end = { h: y, t }; pts.push([DIST, y]); break; } pts.push([x, y]); }
+  return { pts, end: end || { h: 99, t: 4 } }; }
+function fitAngle(v, sh) { let best = 0, bd = 1e9; for (let a = -45; a <= 20; a += .25) { const e = path(launch(a, v, sh)).end; if (e.h == null) continue; const d = Math.abs(e.h - 1.05); if (d < bd) { bd = d; best = a; } } return bd < .5 ? best : null; }
+const FIT = fitAngle(20), CH_A = fitAngle(23, [.35, 1.5]);
+// ---- 그리기
+let W = 0, H = 0, sc = 1, ox = 0, oy = 0;
+function resize() { const r = cv.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2); W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0); draw(); }
+const X = x => ox + x * sc, Y = y => oy - y * sc;
+function line(pts, color, w, dash) { g.beginPath(); pts.forEach(([x, y], i) => i ? g.lineTo(X(x), Y(y)) : g.moveTo(X(x), Y(y))); g.strokeStyle = color; g.lineWidth = w; g.setLineDash(dash || []); g.lineCap = 'round'; g.lineJoin = 'round'; g.stroke(); g.setLineDash([]); }
+function dot(x, y, r, color) { g.beginPath(); g.arc(X(x), Y(y), r, 0, 7); g.fillStyle = color; g.fill(); }
+function person(sh, el, hand, lean, step) { // 막대 사람: 머리, 몸통, 다리, 던지는 팔(어깨→팔꿈치→손)
+  const hip = [sh[0] - lean * .55, sh[1] - .55], c = '#14284b', w = Math.max(3, sc * .07);
+  line([hip, [hip[0] - .25, 0]], c, w); line([hip, [hip[0] + .15 + step, .45], [hip[0] + .3 + step, 0]], c, w);
+  line([hip, sh], c, w * 1.25); dot(sh[0] + lean * .1 + .02, sh[1] + .22, Math.max(6, sc * .13), c);
+  line([sh, el, hand], '#c2410c', w); dot(el[0], el[1], w * .7, '#c2410c'); }
+function scene(maxY) { const pad = 14, top = 12; sc = Math.min((W - pad * 2) / (DIST + 2.2), (H - top - 46) / maxY); ox = pad + sc * 1.1; oy = H - 44;
+  g.clearRect(0, 0, W, H); g.fillStyle = '#eef4fb'; g.fillRect(0, 0, W, H); g.fillStyle = '#d9cfae'; g.fillRect(0, oy, W, H - oy); g.fillStyle = '#b9ad88'; g.fillRect(0, oy, W, 3);
+  g.fillStyle = '#5c6475'; g.font = '600 12px IBM Plex Sans KR, sans-serif'; g.textAlign = 'center';
+  for (let m = 0; m <= DIST; m += 5) { g.fillRect(X(m) - 1, oy, 2, 6); g.fillText(m + ' m', X(m), oy + 20); }
+  // 포수 미트: 이 높이로 들어오면 성공
+  g.fillStyle = 'rgba(47,138,78,.18)'; g.fillRect(X(DIST) - 5, Y(MITT[1]), 10, (MITT[1] - MITT[0]) * sc); g.strokeStyle = '#2f8a4e'; g.lineWidth = 2; g.strokeRect(X(DIST) - 5, Y(MITT[1]), 10, (MITT[1] - MITT[0]) * sc);
+  g.fillStyle = '#2f8a4e'; g.font = '700 12.5px IBM Plex Sans KR, sans-serif'; g.textAlign = 'right'; g.fillText('포수 미트', X(DIST) - 10, Y(MITT[1]) - 5); }
+function inset(sh, el, hand, a, vdir) { // 왼쪽 위: 팔 동작 크게 보기
+  const iw = Math.min(150, W * .36), ih = Math.min(150, H * .52), s0 = sc, x0 = ox, y0 = oy; g.save();
+  g.fillStyle = 'rgba(255,255,255,.96)'; g.strokeStyle = '#e2d6bb'; g.lineWidth = 1.5; g.beginPath(); g.roundRect(8, 8, iw, ih, 12); g.fill(); g.stroke(); g.beginPath(); g.roundRect(8, 8, iw, ih, 12); g.clip();
+  sc = Math.min(iw, ih) / 2.5; ox = 8 + iw * .46 - sh[0] * sc; oy = 8 + ih * .93 + (sh[1] - 1.5) * sc * .0 ; oy = 8 + ih - 6 + 0; oy = 8 + ih * .5 + sh[1] * sc + sc * .12;
+  if (a != null) { const arc = []; for (let d = -70; d <= 50; d += 4) arc.push([sh[0] + R * Math.sin(d * D), sh[1] + R * Math.cos(d * D)]); line(arc, '#9aa6b8', 2, [4, 5]); }
+  person(sh, el, hand, S.tab === 'chain' && S.lvl === 3 ? .25 : 0, S.tab === 'chain' && S.lvl === 3 ? .3 : 0);
+  if (vdir) { const tip = [hand[0] + vdir[0] * .55, hand[1] + vdir[1] * .55]; line([hand, tip], '#2a6fb5', 3); const n = [-vdir[1], vdir[0]]; line([[tip[0] - vdir[0] * .14 + n[0] * .08, tip[1] - vdir[1] * .14 + n[1] * .08], tip, [tip[0] - vdir[0] * .14 - n[0] * .08, tip[1] - vdir[1] * .14 - n[1] * .08]], '#2a6fb5', 3); }
+  dot(hand[0], hand[1], 6, '#fff'); g.strokeStyle = '#c2410c'; g.lineWidth = 2.5; g.beginPath(); g.arc(X(hand[0]), Y(hand[1]), 6, 0, 7); g.stroke();
+  g.restore(); sc = s0; ox = x0; oy = y0; g.fillStyle = '#5c6475'; g.font = '700 12px IBM Plex Sans KR, sans-serif'; g.textAlign = 'left'; g.fillText(a != null ? '놓는 타점 (끌어서 옮기기)' : '팔 동작', 16, 8 + ih + 15); }
+function armPose(lvl, p) { // p: 0 준비 → 1 놓는 순간. [어깨, 팔꿈치, 손]
+  const sh = lvl === 3 ? [-.05 + .4 * p, 1.5] : [0, 1.45], e = p * p * (3 - 2 * p);
+  if (lvl === 1) { const el = [sh[0] + .22, sh[1] - .22], f = (150 - 95 * e) * D; return [sh, el, [el[0] + .36 * Math.sin(f) * .9 + .0, el[1] + .36 * Math.cos(f)]]; } // 팔꿈치가 처진 채 팔뚝만 펴기
+  const ua = (-115 + 150 * e) * D, el = [sh[0] + .34 * Math.sin(ua), sh[1] + .34 * Math.cos(ua) * .55 + .04], lag = (1 - e) * 85 * D, fa = ua - lag + 25 * D * e - 30 * D;
+  return [sh, el, [el[0] + .38 * Math.sin(fa), el[1] + .38 * Math.cos(fa)]]; }
+function draw() { if (!W) return; const now = performance.now(), A = S.anim, k = A ? Math.min(1, (now - A.t0) / A.dur) : 1;
+  if (S.tab === 'release') { const L = launch(S.ang, 20), P = path(L); scene(Math.max(4.5, Math.min(9.5, Math.max(...P.pts.map(p => p[1])) + .8)));
+    S.trails.forEach(t => line(t, 'rgba(92,100,117,.3)', 2, [5, 6])); line(P.pts, A ? 'rgba(42,111,181,.35)' : '#2a6fb5', 3, A ? [5, 6] : null);
+    const sw = A ? Math.min(1, k / .3) : 1, a = A ? -110 + (S.ang + 110) * sw : S.ang, sh = [0, 1.45], hand = [R * Math.sin(a * D), 1.45 + R * Math.cos(a * D)], el = [hand[0] * .5, 1.45 + (hand[1] - 1.45) * .5];
+    person(sh, el, hand, 0, 0);
+    if (A && k > .3) { const f = (k - .3) / .7, i = Math.min(P.pts.length - 1, Math.floor(f * (P.pts.length - 1))); line(P.pts.slice(0, i + 1), '#2a6fb5', 3); dot(P.pts[i][0], P.pts[i][1], 6, '#fff'); g.strokeStyle = '#c2410c'; g.lineWidth = 2.5; g.beginPath(); g.arc(X(P.pts[i][0]), Y(P.pts[i][1]), 6, 0, 7); g.stroke(); }
+    else if (!A) { const e = P.pts[P.pts.length - 1]; dot(e[0], e[1], 6, '#c2410c'); }
+    inset(sh, el, hand, S.ang, [Math.cos(S.ang * D), -Math.sin(S.ang * D)]);
+  } else { const v = SPEED[S.lvl], sh = shoulder(S.lvl), a = CH_A, L = launch(a, v, sh), P = path(L); scene(5.2);
+    const need = fitAngle(v, sh); if (need != null && P.end.h == null) line(path(launch(need, v, sh)).pts, 'rgba(194,65,12,.55)', 2.5, [6, 7]);
+    S.trails.forEach(t => line(t, 'rgba(92,100,117,.3)', 2, [5, 6])); line(P.pts, A ? 'rgba(42,111,181,.35)' : '#2a6fb5', 3, A ? [5, 6] : null);
+    const sw = A ? Math.min(1, k / .35) : 1, [s2, el, hand] = armPose(S.lvl, sw); person(s2, el, hand, S.lvl === 3 ? .25 * sw : 0, S.lvl === 3 ? .3 * sw : 0);
+    if (A && k > .35) { const f = (k - .35) / .65, i = Math.min(P.pts.length - 1, Math.floor(f * (P.pts.length - 1))); line(P.pts.slice(0, i + 1), '#2a6fb5', 3); dot(P.pts[i][0], P.pts[i][1], 6, '#fff'); g.strokeStyle = '#c2410c'; g.lineWidth = 2.5; g.beginPath(); g.arc(X(P.pts[i][0]), Y(P.pts[i][1]), 6, 0, 7); g.stroke(); }
+    else if (!A) { const e = P.pts[P.pts.length - 1]; dot(e[0], e[1], 6, '#c2410c'); }
+    inset(s2, el, hand, null, null); }
+  if (A) { if (k >= 1) { S.anim = null; draw(); } else requestAnimationFrame(draw); } }
+// ---- 결과와 설명
+const kmh = v => Math.round(v * 3.6);
+function verdict(e) { if (e.h == null) return ['no', `미트 앞 ${(DIST - e.ground).toFixed(1)} m에서 땅에 닿음`]; if (e.h > MITT[1]) return ['no', `미트보다 ${(e.h - MITT[1]).toFixed(1)} m 높게 지나감`]; if (e.h < MITT[0]) return ['no', '미트보다 낮게 들어옴']; return ['ok', '미트에 쏙!']; }
+function update() { let html = '';
+  if (S.tab === 'release') { const L = launch(S.ang, 20), e = path(L).end, up = Math.round(-S.ang), [c, t] = verdict(e);
+    html = `<span class="chip">공이 떠나는 방향<b>${up > 0 ? '위로 ' + up + '°' : up < 0 ? '아래로 ' + -up + '°' : '수평'}</b></span><span class="chip">날아간 시간<b>${e.t.toFixed(2)}초</b></span><span class="chip ${c}">${t}</span>`;
+    $('relKey').innerHTML = S.ang < FIT - 8 ? '<b>일찍 놓으면</b> 손이 아직 위로 올라가는 중이라 공이 위로 떠나요. 높은 <b>포물선</b>을 그리고, 도착도 늦어요.'
+      : S.ang > FIT + 8 ? '<b>늦게 놓으면</b> 손이 이미 내려가는 중이라 공이 아래로 떠나요. 미트에 가기 전에 <b>땅에 꽂혀요.</b>'
+      : '<b>알맞은 타점</b>에서는 공이 거의 앞으로 떠나요. 중력만큼만 살짝 떨어지며 <b>직선에 가깝게</b> 미트로 들어가요.';
+    $('relOpts').querySelectorAll('button').forEach(b => { const a = b.dataset.a === 'fit' ? FIT : +b.dataset.a; b.setAttribute('aria-pressed', Math.abs(a - S.ang) < 4); }); $('ang').value = S.ang;
+  } else { const v = SPEED[S.lvl], sh = shoulder(S.lvl), e = path(launch(CH_A, v, sh)).end, [c, t] = verdict(e), need = fitAngle(v, sh);
+    html = `<span class="chip">공 빠르기<b>${kmh(v)} km/h</b></span><span class="chip ${c}">${t}</span>${c === 'no' && need != null ? `<span class="chip">미트까지 보내려면<b>위로 ${Math.round(-need)}° 띄워야</b></span>` : ''}`;
+    $('chKey').innerHTML = S.lvl === 1 ? '<b>팔로만</b> 밀어 던지면 팔꿈치가 어깨보다 낮고, 쓰는 근육이 작아 공이 느려요. 멀리 보내려면 높이 띄워야 해서 <b>포물선</b>이 돼요. 팔꿈치 안쪽에도 무리가 가요.'
+      : S.lvl === 2 ? '팔꿈치를 <b>어깨 높이</b>로 들고 어깨를 돌리면, 팔꿈치가 먼저 나오고 손이 채찍 끝처럼 따라와요. 공이 훨씬 빨라져요.'
+      : '<b>발을 내딛고 허리를 돌린 힘</b>이 어깨와 팔로 차례로 전해져요. 가장 빠르고, 같은 타점에서도 <b>직선에 가깝게</b> 날아가요.';
+    $('chOpts').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.l === S.lvl));
+    $('bars').querySelectorAll('.bar').forEach(b => b.classList.toggle('off', +b.dataset.n > S.lvl)); }
+  $('result').innerHTML = html; draw(); }
+function throwIt() { if (reduce) { update(); return; } const P = S.tab === 'release' ? path(launch(S.ang, 20)) : path(launch(CH_A, SPEED[S.lvl], shoulder(S.lvl)));
+  S.anim = { t0: performance.now(), dur: 900 + P.end.t * 900 }; S.pending = P.pts; requestAnimationFrame(draw); }
+function keepTrail() { const P = S.tab === 'release' ? path(launch(S.ang, 20)) : path(launch(CH_A, SPEED[S.lvl], shoulder(S.lvl))); S.trails.push(P.pts); if (S.trails.length > 3) S.trails.shift(); }
+function setAng(a, go) { keepTrail(); S.ang = Math.max(-45, Math.min(35, a)); update(); if (go) throwIt(); }
+$('relOpts').querySelectorAll('button').forEach(b => b.onclick = () => setAng(b.dataset.a === 'fit' ? FIT : +b.dataset.a, true));
+$('ang').oninput = e => { S.anim = null; S.ang = +e.target.value; update(); };
+$('ang').onchange = () => throwIt();
+$('again').onclick = throwIt;
+$('chOpts').querySelectorAll('button').forEach(b => b.onclick = () => { keepTrail(); S.lvl = +b.dataset.l; update(); throwIt(); });
+document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { S.tab = b.dataset.tab; S.trails = []; S.anim = null; document.querySelectorAll('[data-tab]').forEach(x => x.setAttribute('aria-selected', x === b));
+  $('pRelease').hidden = S.tab !== 'release'; $('pChain').hidden = S.tab !== 'chain'; update(); throwIt(); });
+// 왼쪽 위 그림에서 손(타점)을 끌어 옮기기
+let drag = false;
+function pick(e) { const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, iw = Math.min(150, W * .36), ih = Math.min(150, H * .52); if (S.tab !== 'release') return null; if (!drag && (x > 8 + iw || y > 8 + ih)) return null;
+  const s = Math.min(iw, ih) / 2.5, cx = 8 + iw * .46, cy = 8 + ih * .5 + 1.45 * s + s * .12 - 1.45 * s; return Math.atan2(x - cx, cy - y) / D; }
+cv.addEventListener('pointerdown', e => { const a = pick(e); if (a == null) return; drag = true; cv.setPointerCapture(e.pointerId); S.anim = null; keepTrail(); S.ang = Math.max(-45, Math.min(35, Math.round(a))); update(); });
+cv.addEventListener('pointermove', e => { if (!drag) return; const a = pick(e); if (a != null) { S.ang = Math.max(-45, Math.min(35, Math.round(a))); update(); } });
+cv.addEventListener('pointerup', () => { if (drag) { drag = false; throwIt(); } });
+new ResizeObserver(resize).observe(cv); S.ang = FIT; update(); window.__S = S; window.__ready = true;
+</script>

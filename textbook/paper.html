@@ -613,6 +613,11 @@ body.paper:not(.bodymap) .pg-flow>section:has(#mlist),body.paper.bodymap .pg-flo
 .st-cam[hidden]{display:none}
 .pb .pg-flow>.try{display:none}
 @media (orientation:portrait){.st-cam{min-height:42px;padding:0 11px;font-size:14px}}
+
+.toc-link{display:grid;gap:0;text-align:left;min-height:66px;padding:8px 12px;border-radius:14px;border:2px solid #e3b7b0;background:#fff3f1;align-content:center;text-decoration:none;color:inherit}
+.toc-link b{font-size:16px;color:var(--navy);line-height:1.3}.toc-link span{font-size:12.5px;color:var(--pmuted);line-height:1.35}
+.toc-extra{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (orientation:portrait){.toc-extra .toc-link{min-height:54px;grid-auto-flow:column;justify-content:space-between;align-items:center}}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -2860,7 +2865,7 @@ if (PAPER) {
     const cnt = k => FRAME.map(([g, lb]) => `${lb.replace('에서', '')} ${MOVES[k].scenes.filter(x => x[1] === g).length}`).join(' · ');
     $('pbToc').innerHTML = `<section class="pg pg-l toc-l"><span class="ribbon">차례</span><h1><span>3D 체육 교과서</span></h1><p class="toc-desc">움직임을 고르면 기본 · 응용 · 일상에서 · 스포츠에서 장면이 나와요.</p>
         <div class="toc-moves">${MV.map((k, n) => `<button type="button" class="toc-mv" data-m="${k}" aria-pressed="${k === tocMove}"><small>운동 ${n + 1}</small><b>${MOVES[k].name}</b><span>${cnt(k)}</span></button>`).join('')}</div>
-        <div class="toc-extra"><button type="button" class="toc-mv x1" data-m="fitness"><b>💓 체력 요소</b><span>체력의 5가지 영역</span></button><button type="button" class="toc-mv x2" data-m="train"><b>🏋️ 트레이닝 원리</b><span>효과적인 운동 방법</span></button><button type="button" class="toc-mv x3" data-m="body"><b>🧍 몸 지도</b><span>근육으로 운동 찾기</span></button></div>
+        <div class="toc-extra"><button type="button" class="toc-mv x1" data-m="fitness"><b>💓 체력 요소</b><span>체력의 5가지 영역</span></button><button type="button" class="toc-mv x2" data-m="train"><b>🏋️ 트레이닝 원리</b><span>효과적인 운동 방법</span></button><button type="button" class="toc-mv x3" data-m="body"><b>🧍 몸 지도</b><span>근육으로 운동 찾기</span></button><a class="toc-link x4" href="throw.html"><b>⚾ 던지기 원리</b><span>타점과 공의 길</span></a></div>
         ${started ? '<button type="button" class="toc-resume" id="tocResume">보던 장면으로 돌아가기 ›</button>' : ''}</section>
       <section class="pg pg-r toc-r">${chapter(tocMove)}</section>`;
     $('pbToc').dataset.view = view; $('pbToc').hidden = false; $('pbBook').hidden = true; root.dataset.toc = '1';
