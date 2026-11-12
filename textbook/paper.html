@@ -741,6 +741,31 @@ body.paper .ctrl .play{min-width:46px;font-size:17px}
   .pb[data-focus="text"] .sbar,.pb[data-focus="text"] .mini,.pb[data-focus="text"] .ctrl,.pb[data-focus="text"] .st-cam,.pb[data-focus="text"] .thbox,.pb[data-focus="text"] .thadj,.pb[data-focus="text"] .aimbox{display:none!important}
   body.paper .ctrl button{min-width:42px;padding:0 8px}
 }
+
+/* 3D 전체 화면: 글은 3D 위에 카드로 */
+.st-full{position:absolute;right:8px;bottom:62px;z-index:5;width:46px;height:46px;border-radius:12px;border:1.5px solid var(--pline);background:#fff;color:var(--navy);font-size:20px;font-weight:700;cursor:pointer;box-shadow:0 2px 4px rgba(60,40,10,.12)}
+.tx-fold{display:none}
+.pb[data-full="1"] .pb-book{display:block;position:relative}
+.pb[data-full="1"] .pb-book .pg{display:contents}
+.pb[data-full="1"] .plate{position:absolute;inset:0;height:auto}
+.pb[data-full="1"] .fcover{display:none!important}
+.pb[data-full="1"] .pg-text{position:absolute;z-index:5;margin:0;left:8px;right:8px;bottom:64px;height:34%;background:rgba(255,255,255,.94);box-shadow:0 6px 18px rgba(20,40,75,.25);padding:34px 14px 10px}
+.pb[data-full="1"] .tx-fold{display:block;position:absolute;right:8px;top:4px;z-index:2;font:inherit;font-size:13px;font-weight:700;border:0;background:var(--navy);color:#fff!important;border-radius:999px;padding:4px 12px;min-height:28px;cursor:pointer}
+.pb[data-full="1"][data-fold="1"] .pg-text{height:38px;padding:0;overflow:hidden;background:transparent;border-color:transparent;box-shadow:none}
+.pb[data-full="1"][data-fold="1"] .pg-flow{visibility:hidden}
+.pb[data-full="1"] .sbar,.pb[data-full="1"] .mini,.pb[data-full="1"] .ctrl,.pb[data-full="1"] .st-cam,.pb[data-full="1"] .thbox,.pb[data-full="1"] .thadj,.pb[data-full="1"] .aimbox{display:revert}
+.pb[data-full="1"] .sbar{display:flex!important}
+.pb[data-full="1"] .ctrl{display:flex!important}
+@media (orientation:landscape){
+  .pb[data-full="1"] .pg-text{right:auto;width:40%;height:auto;top:calc(var(--sbh,48px) + 22px);bottom:62px}
+  .pb[data-full="1"][data-fold="1"] .pg-text{top:auto;height:38px}
+}
+
+body.paper .stage{z-index:auto}
+.pb[data-full="1"] .pg-text{z-index:30}
+
+.pb[data-full="1"] .tx-fold{right:auto;left:8px}
+.pb[data-full="1"][data-fold="1"] .pg-text{right:auto;width:120px}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -2844,7 +2869,9 @@ function updatePanel() {
 
 // ---------- 그리기 ----------
 function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < 560 ? 46 : 36; const mn = document.getElementById('mini'), ox = mn && mn.offsetWidth && !mn.classList.contains('closed') ? (mn.offsetWidth + 10) / 2 : 0; // 근육 패널만큼 인형을 왼쪽으로
-  const oy = PAPER ? Math.min(28, h * .11) : 0; if (ox || oy) camera.setViewOffset(w, h, ox, oy, w, h); else camera.clearViewOffset(); camera.updateProjectionMatrix(); }
+  const oy = PAPER ? Math.min(28, h * .11) : 0, pbr = PAPER && document.getElementById('pb'), ox2 = pbr && pbr.dataset.full === '1' && pbr.dataset.fold !== '1' && w > h ? ox - w * .2 : ox; // 전체 화면(가로): 글 카드만큼 인형을 오른쪽으로
+  if (ox2 !== ox) { camera.setViewOffset(w, h, ox2, oy, w, h); camera.updateProjectionMatrix(); return; }
+  if (ox || oy) camera.setViewOffset(w, h, ox, oy, w, h); else camera.clearViewOffset(); camera.updateProjectionMatrix(); }
 new ResizeObserver(() => { resize(); if (state.def?.cam?.fitW) camGoal = camFor(state.view); }).observe(canvas); resize();
 const clock = new THREE.Clock(); let time = 0;
 function loop() {
@@ -3061,7 +3088,7 @@ if (PAPER) {
   $('stage').insertAdjacentHTML('beforeend', '<a class="st-cam" id="stCam" target="_blank" rel="noopener" hidden>📷 평가</a>');
   const mqPort = matchMedia('(orientation:portrait)'), GAP = 32; let cur = 0, started = false, tocMove = 'squat', tp = 0, tpN = 1, lastKey = '';
   const idxOf = (m, sc) => SEQ.findIndex(p => p.m === m && p.sc === sc), firstOf = m => SEQ.findIndex(p => p.m === m);
-  function flow() { const fl = $('pgFlow'); $('stage').style.setProperty('--sbh', $('sbar').offsetHeight + 'px'); $('nvYt').hidden = $('vyt').hidden || !$('pbToc').hidden; $('nvYt').href = $('vyt').href; { const c = $('stCam'), on = !$('tryCard').hidden; c.hidden = !on; if (on) { const u = new URL(document.querySelector('#tryCard .trylinks a').href); u.searchParams.delete('mode'); c.href = u.href; } } if ($('pbBook').hidden) return; const key = state.m + state.sc + state.v; if (key !== lastKey) { lastKey = key; tp = 0; sbarSync(); }
+  function flow() { const fl = $('pgFlow'); if (root.dataset.full === '1' && root.dataset.fold === '1') { $('pbPg').textContent = ''; $('pbNext').textContent = '다음 장면 ›'; tp = 0; tpN = 1; return; } $('stage').style.setProperty('--sbh', $('sbar').offsetHeight + 'px'); $('nvYt').hidden = $('vyt').hidden || !$('pbToc').hidden; $('nvYt').href = $('vyt').href; { const c = $('stCam'), on = !$('tryCard').hidden; c.hidden = !on; if (on) { const u = new URL(document.querySelector('#tryCard .trylinks a').href); u.searchParams.delete('mode'); c.href = u.href; } } if ($('pbBook').hidden) return; const key = state.m + state.sc + state.v; if (key !== lastKey) { lastKey = key; tp = 0; sbarSync(); }
     const W = fl.clientWidth; if (!W) return; fl.style.columnWidth = W + 'px'; tpN = Math.max(1, Math.round((fl.scrollWidth + GAP) / (W + GAP))); tp = Math.min(tp, tpN - 1);
     fl.style.transform = `translateX(${-tp * (W + GAP)}px)`; $('pbPg').textContent = tpN > 1 ? `${tp + 1} / ${tpN}쪽` : '';
     $('pbPrev').disabled = cur === 0 && tp === 0; $('pbNext').disabled = cur === SEQ.length - 1 && tp === tpN - 1;
@@ -3103,6 +3130,12 @@ if (PAPER) {
   $('stage').insertAdjacentHTML('beforeend', '<button type="button" class="fcover st-cover" id="stCover" aria-label="3D 화면 크게 보기"><span>눌러서 3D 크게</span></button>');
   $('pgText').insertAdjacentHTML('beforeend', '<button type="button" class="fcover tx-cover" id="txCover" aria-label="글 크게 보기"><span>눌러서 글 크게</span></button>');
   const setFocus = w => { root.dataset.focus = w; setTimeout(() => { resize(); flow(); }, 60); setTimeout(flow, 400); };
+  // 3D 전체 화면: 3D가 화면을 다 쓰고, 글은 3D 위에 카드로 겹쳐 보임
+  $('stage').insertAdjacentHTML('beforeend', '<button type="button" class="st-full" id="stFull" aria-label="3D 전체 화면">⛶</button>');
+  $('pgText').insertAdjacentHTML('afterbegin', '<button type="button" class="tx-fold" id="txFold">글 접기 ▾</button>');
+  const setFull = on => { root.dataset.full = on ? '1' : ''; root.dataset.fold = ''; $('stFull').textContent = on ? '✕' : '⛶'; $('stFull').setAttribute('aria-label', on ? '전체 화면 끝내기' : '3D 전체 화면'); $('txFold').textContent = '글 접기 ▾'; setTimeout(() => { resize(); flow(); }, 60); setTimeout(flow, 400); };
+  $('stFull').onclick = () => setFull(root.dataset.full !== '1');
+  $('txFold').onclick = () => { const f = root.dataset.fold !== '1'; root.dataset.fold = f ? '1' : ''; $('txFold').textContent = f ? '글 펴기 ▴' : '글 접기 ▾'; setTimeout(() => { resize(); flow(); }, 60); };
   $('stCover').onclick = () => setFocus('3d'); $('txCover').onclick = () => setFocus('text'); root.dataset.focus = '3d';
   { let seen = false; try { seen = !!sessionStorage.getItem('rot-tip'); } catch (e) { } if (!seen && mqPort.matches) { root.insertAdjacentHTML('beforeend', '<button type="button" class="rot-tip" id="rotTip">↻ 가로로 돌리면 더 크게 보여요 ✕</button>');
     const hide = () => { $('rotTip')?.remove(); try { sessionStorage.setItem('rot-tip', '1'); } catch (e) { } }; $('rotTip').onclick = hide; setTimeout(hide, 7000); mqPort.addEventListener('change', hide); } }
