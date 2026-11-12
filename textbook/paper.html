@@ -766,6 +766,26 @@ body.paper .stage{z-index:auto}
 
 .pb[data-full="1"] .tx-fold{right:auto;left:8px}
 .pb[data-full="1"][data-fold="1"] .pg-text{right:auto;width:120px}
+
+/* 전체 화면 버튼은 항상 오른쪽 아래 맨 끝, 글 카드보다 위 */
+.st-full{bottom:8px;right:8px;z-index:40}
+.st-cam{right:60px}
+body.paper .stage .ctrl{right:152px}
+@media (orientation:portrait){
+  .st-cam span{display:none}
+  .st-cam{padding:0;width:46px;justify-content:center;font-size:18px}
+  body.paper .stage .ctrl{right:112px}
+  /* 전체 화면(세로): 글은 오른쪽 옆에, 쓰는 근육은 아래 한 줄로 */
+  .pb[data-full="1"] .pg-text{left:auto;right:8px;width:50%;top:calc(var(--sbh,96px) + 14px);bottom:116px;height:auto;padding:36px 12px 8px}
+  .pb[data-full="1"][data-fold="1"] .pg-text{bottom:auto;height:38px;width:112px;padding:0}
+  .pb[data-full="1"] .tx-fold{left:auto;right:8px}
+  .pb[data-full="1"] .pg-text p,.pb[data-full="1"] .pg-text .checks,.pb[data-full="1"] .pg-text .why,.pb[data-full="1"] .pg-text .steps{font-size:16.5px;line-height:1.5}
+  .pb[data-full="1"] .pg-text h2{font-size:19px}
+  body.paper .pb[data-full="1"] .mini{top:auto!important;bottom:62px;left:8px;right:8px;width:auto;padding:4px;display:block}
+  .pb[data-full="1"] .mini .mh{display:none}
+  .pb[data-full="1"] .mini .ml{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+  body.paper .pb[data-full="1"] .mi{min-height:34px;font-size:13.5px}
+}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -2869,7 +2889,7 @@ function updatePanel() {
 
 // ---------- 그리기 ----------
 function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < 560 ? 46 : 36; const mn = document.getElementById('mini'), ox = mn && mn.offsetWidth && !mn.classList.contains('closed') ? (mn.offsetWidth + 10) / 2 : 0; // 근육 패널만큼 인형을 왼쪽으로
-  const oy = PAPER ? Math.min(28, h * .11) : 0, pbr = PAPER && document.getElementById('pb'), ox2 = pbr && pbr.dataset.full === '1' && pbr.dataset.fold !== '1' && w > h ? ox - w * .2 : ox; // 전체 화면(가로): 글 카드만큼 인형을 오른쪽으로
+  const oy = PAPER ? Math.min(28, h * .11) : 0, pbr = PAPER && document.getElementById('pb'), fullOn = pbr && pbr.dataset.full === '1', ox2 = !fullOn ? ox : w > h ? (pbr.dataset.fold !== '1' ? ox - w * .2 : ox) : (pbr.dataset.fold !== '1' ? w * .24 : .001); // 전체 화면(가로): 글 카드만큼 인형을 오른쪽으로
   if (ox2 !== ox) { camera.setViewOffset(w, h, ox2, oy, w, h); camera.updateProjectionMatrix(); return; }
   if (ox || oy) camera.setViewOffset(w, h, ox, oy, w, h); else camera.clearViewOffset(); camera.updateProjectionMatrix(); }
 new ResizeObserver(() => { resize(); if (state.def?.cam?.fitW) camGoal = camFor(state.view); }).observe(canvas); resize();
@@ -3085,7 +3105,7 @@ if (PAPER) {
     $('nvTitle').textContent = p ? (p.d.sceneLabel || p.d.name) : ''; $('stage').style.setProperty('--sbh', $('sbar').offsetHeight + 'px'); }
   $('pgFlow').append($('vcard'), $('prCard'), $('bodyCard'), $('labCard'), $('tryCard'), $('dname').closest('section'), $('mlist').closest('section'));
   $('miniT').textContent = '주로 쓰는 근육'; $('miniT').onclick = null;
-  $('stage').insertAdjacentHTML('beforeend', '<a class="st-cam" id="stCam" target="_blank" rel="noopener" hidden>📷 평가</a>');
+  $('stage').insertAdjacentHTML('beforeend', '<a class="st-cam" id="stCam" target="_blank" rel="noopener" hidden>📷<span> 평가</span></a>');
   const mqPort = matchMedia('(orientation:portrait)'), GAP = 32; let cur = 0, started = false, tocMove = 'squat', tp = 0, tpN = 1, lastKey = '';
   const idxOf = (m, sc) => SEQ.findIndex(p => p.m === m && p.sc === sc), firstOf = m => SEQ.findIndex(p => p.m === m);
   function flow() { const fl = $('pgFlow'); if (root.dataset.full === '1' && root.dataset.fold === '1') { $('pbPg').textContent = ''; $('pbNext').textContent = '다음 장면 ›'; tp = 0; tpN = 1; return; } $('stage').style.setProperty('--sbh', $('sbar').offsetHeight + 'px'); $('nvYt').hidden = $('vyt').hidden || !$('pbToc').hidden; $('nvYt').href = $('vyt').href; { const c = $('stCam'), on = !$('tryCard').hidden; c.hidden = !on; if (on) { const u = new URL(document.querySelector('#tryCard .trylinks a').href); u.searchParams.delete('mode'); c.href = u.href; } } if ($('pbBook').hidden) return; const key = state.m + state.sc + state.v; if (key !== lastKey) { lastKey = key; tp = 0; sbarSync(); }
