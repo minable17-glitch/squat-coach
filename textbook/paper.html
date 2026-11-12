@@ -697,6 +697,36 @@ body.paper .thl{display:none}
 
 .st-cam{padding:0 11px}
 @media (orientation:landscape){body.paper .stage .ctrl{gap:5px;right:92px}body.paper .ctrl button{min-width:40px;padding:0 8px}}
+
+/* 3D 화면 안의 버튼 줄: 바른 자세 · 옳지 않은 자세 ▾ / 기본 · 응용 ▾ · 일상 ▾ · 스포츠 ▾ */
+body.paper .stage .tabs,.pb .nv-frame,.pb #selSw{display:none!important}
+.nv-title{flex:1 1 0;min-width:0;align-self:center;color:#fff;font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
+.sbar{position:absolute;left:8px;right:8px;top:8px;z-index:4;display:grid;gap:5px;pointer-events:none}
+.sb-row{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;pointer-events:none}
+.sb-row::-webkit-scrollbar{display:none}
+.sb{position:relative;flex:0 0 auto;display:flex;align-items:center;min-height:42px;max-width:190px;padding:0 12px;border-radius:12px;border:2px solid var(--pline);background:#fff;color:var(--pmuted);font:inherit;font-size:14.5px;font-weight:700;white-space:nowrap;cursor:pointer;pointer-events:auto;box-shadow:0 2px 4px rgba(60,40,10,.12)}
+.sb span{overflow:hidden;text-overflow:ellipsis}
+.sb select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:16px}
+.sb.on{background:var(--lime);border-color:#b9d53f;color:var(--navy)}
+.sb.good.on{background:#eaf7ec;border-color:var(--good);color:var(--good)}
+.sb.bad{color:var(--bad)}
+.sb.bad.on{background:#fff0e6;border-color:var(--bad);color:var(--bad)}
+body.paper .mini,body.paper .aimbox,.thbox,body.paper .thbox,.thadj,body.paper .thadj{top:104px}
+@media (orientation:portrait){
+  .pb-book{grid-template-rows:minmax(0,1.12fr) minmax(0,1fr)}
+  body.paper .mini,body.paper .aimbox,body.paper .thbox,body.paper .thadj{top:104px}
+}
+@media (orientation:landscape) and (max-height:440px){.sb{min-height:40px;font-size:14px;padding:0 10px}body.paper .mini,body.paper .aimbox,body.paper .thbox,body.paper .thadj{top:98px}body.paper .mini .mi:nth-child(n+4){display:none}}
+
+/* 3D를 더 크게, 글 칸은 좁게. 버튼 줄은 자리가 되면 한 줄로 */
+.sbar{display:flex;flex-wrap:wrap;gap:5px}
+.sb-row{display:contents}
+body.paper .mini,body.paper .aimbox,.thbox,body.paper .thbox,.thadj,body.paper .thadj{top:calc(var(--sbh,48px) + 14px)!important}
+@media (orientation:landscape){.pb-book{grid-template-columns:minmax(0,.62fr) minmax(0,1.38fr)}}
+@media (orientation:portrait){.pb-book{grid-template-rows:minmax(0,1.5fr) minmax(0,1fr)}}
+
+.pb .vcard p,.pb .detail p,.pb .card p,.pb .why{break-inside:auto;orphans:2;widows:2}
+.pb .why{-webkit-box-decoration-break:clone;box-decoration-break:clone}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -840,7 +870,9 @@ function build(S) {
   const head = neck.clone().addScaledVector(dirA(S.head ?? S.up * .45), .14);
   for (const s of [1, -1]) {
     const f = S.feet[s], hip = hipC.clone().add(V(s * .1, 0, 0));
-    const knee = ik(hip, f.ankle, L.thigh, L.shank, S.kneePole[s]);
+    let knee = ik(hip, f.ankle, L.thigh, L.shank, S.kneePole[s]);
+    if (S.kneePole[s].z > 0 && s * knee.x < .06) { const p0 = S.kneePole[s], p1 = V(s * .3, 0, 1); let lo = 0, hi = 1;
+      for (let i = 0; i < 10; i++) { const m = (lo + hi) / 2, kk = ik(hip, f.ankle, L.thigh, L.shank, p0.clone().lerp(p1, m)); if (s * kk.x < .06) lo = m; else { hi = m; knee = kk; } } }
     const sh = neck.clone().addScaledVector(dirA(S.up), -.05).add(V(s * .19, 0, 0));
     let el, wr; const A = S.arms;
     if (A.mode === 'angle') { const pk = v => Array.isArray(v) ? v[s === 1 ? 0 : 1] : (v || 0), ab = pk(A.abd), fl = pk(A.flex);
@@ -2771,7 +2803,7 @@ function place(el, pos, text) {
 }
 function updateLabels() {
   const used = new Set();
-  if (state.sel && !state.def.noLabel) { const m = fig.muscles.find(x => x.sp.id === state.sel && x.s !== -1); if (m) { place(lbl('sel', ''), m.mesh.position, MUSCLES[state.sel][0]); used.add('sel'); } }
+  if (state.sel && !state.def.noLabel && !PAPER) { const m = fig.muscles.find(x => x.sp.id === state.sel && x.s !== -1); if (m) { place(lbl('sel', ''), m.mesh.position, MUSCLES[state.sel][0]); used.add('sel'); } }
   for (const d of fig.dangers) { if (!d.mesh.visible || used.has(d.key)) continue; const e = lbl(d.key, 'warn'); place(e, d.mesh.position, DANGERS[d.key]); e.style.opacity = d.mesh.material.opacity / .55; used.add(d.key); }
   const vr = state.def.variants[state.v], multi = vr?.multi || [];
   if (vr?.mainLabel) { place(lbl('who', 'who'), fig.P.head.clone().add(V(0, .22, 0)), vr.mainLabel); used.add('who'); }
@@ -2989,19 +3021,33 @@ if (PAPER) {
   root.innerHTML = `<header class="pb-nav"><button type="button" class="nv-home" id="pbHome" aria-label="차례">☰</button>
       <label class="nv-sel m"><select id="selM" aria-label="움직임 고르기"><optgroup label="움직임">${MV.map(k => `<option value="${k}">${MOVES[k].name}</option>`).join('')}</optgroup><optgroup label="더 배우기"><option value="fitness">체력 요소</option><option value="train">트레이닝 원리</option><option value="body">몸 지도</option></optgroup></select></label>
       <div class="nv-frame" id="nvFrame" role="tablist" aria-label="기본, 응용, 일상에서, 스포츠에서"></div>
-      <label class="nv-sel s" id="selSw"><select id="selS" aria-label="장면 고르기"></select></label><a class="nv-yt" id="nvYt" target="_blank" rel="noopener" aria-label="유튜브에서 이 동작 영상 찾기">▶ 영상</a></header>
+      <label class="nv-sel s" id="selSw"><select id="selS" aria-label="장면 고르기"></select></label><span class="nv-title" id="nvTitle"></span><a class="nv-yt" id="nvYt" target="_blank" rel="noopener" aria-label="유튜브에서 이 동작 영상 찾기">▶ 영상</a></header>
     <main class="pb-main"><div class="pb-toc" id="pbToc" hidden></div>
       <div class="pb-book" id="pbBook"><section class="pg pg-l" id="pgL"><div class="pg-text" id="pgText"><div class="pg-flow" id="pgFlow"></div></div></section>
         <section class="pg pg-r" id="pgR"><div class="plate" id="pbPlate"></div></section></div></main>
     <footer class="pb-pager"><button type="button" class="turn" id="pbPrev">‹ 이전</button><span class="pgdots" id="pbPg"></span><button type="button" class="turn nx" id="pbNext">다음 ›</button></footer>`;
   document.body.prepend(root);
   $('pbPlate').append($('stage')); $('stage').append($('tabs'));
+  $('stage').insertAdjacentHTML('beforeend', '<div class="sbar" id="sbar"><div class="sb-row" id="sbV"></div><div class="sb-row" id="sbS"></div></div>');
+  const selHtml = (cls, label, on, opts) => `<label class="sb sel ${cls}${on ? ' on' : ''}"><span>${label} ▾</span><select aria-label="${label}"><option value="" disabled${on ? '' : ' selected'} hidden>${label}</option>${opts}</select></label>`;
+  function sbarSync() { const M = state.def, vs = Object.entries(M.variants), p = SEQ[cur]; let hv = '', hs = '';
+    if (vs.length > 1) { if (M.variants.good) { const rest = vs.filter(([k]) => k !== 'good'), allBad = rest.every(([, v]) => !v.ok), curBad = state.v !== 'good';
+        hv = `<button type="button" class="sb good${curBad ? '' : ' on'}" data-v="good">✓ 바른 자세</button>` + selHtml('bad', curBad ? '⚠ ' + (M.variants[state.v].short || M.variants[state.v].name.split(' → ')[0]) : allBad ? '⚠ 옳지 않은 자세' : '비교 자세', curBad, rest.map(([k, v]) => `<option value="${k}"${k === state.v ? ' selected' : ''}>${v.name}</option>`).join(''));
+      } else hv = selHtml('', M.variants[state.v].name, true, vs.map(([k, v]) => `<option value="${k}"${k === state.v ? ' selected' : ''}>${v.name}</option>`).join('')); }
+    if (p && p.m !== 'body') { const sc = MOVES[p.m].scenes || [];
+      if (MV.includes(p.m)) hs = FRAME.map(([g, lb]) => { const xs = sc.filter(x => x[1] === g), on = p.g === g; if (!xs.length) return ''; const short = lb.replace('에서', '');
+          return xs.length === 1 ? `<button type="button" class="sb${on ? ' on' : ''}" data-sc="${xs[0][0]}">${short}</button>` : selHtml('', on ? (p.d.sceneLabel || p.d.name) : short, on, xs.map(x => `<option value="${x[0]}"${x[0] === p.sc ? ' selected' : ''}>${x[2].sceneLabel || x[2].name}</option>`).join('')); }).join('');
+      else hs = selHtml('', p.d.sceneLabel || p.d.name, true, sc.map(x => `<option value="${x[0]}"${x[0] === p.sc ? ' selected' : ''}>${x[2].sceneLabel || x[2].name}</option>`).join('')); }
+    $('sbV').innerHTML = hv; $('sbS').innerHTML = hs; $('sbV').hidden = !hv; $('sbS').hidden = !hs;
+    $('sbV').querySelectorAll('[data-v]').forEach(b => b.onclick = () => { setVariant(b.dataset.v); sbarSync(); }); $('sbV').querySelectorAll('select').forEach(el => el.onchange = () => { setVariant(el.value); sbarSync(); });
+    $('sbS').querySelectorAll('[data-sc]').forEach(b => b.onclick = () => show(idxOf(p.m, b.dataset.sc))); $('sbS').querySelectorAll('select').forEach(el => el.onchange = () => show(idxOf(p.m, el.value)));
+    $('nvTitle').textContent = p ? (p.d.sceneLabel || p.d.name) : ''; $('stage').style.setProperty('--sbh', $('sbar').offsetHeight + 'px'); }
   $('pgFlow').append($('vcard'), $('prCard'), $('bodyCard'), $('labCard'), $('tryCard'), $('dname').closest('section'), $('mlist').closest('section'));
   $('miniT').textContent = '주로 쓰는 근육'; $('miniT').onclick = null;
   $('stage').insertAdjacentHTML('beforeend', '<a class="st-cam" id="stCam" target="_blank" rel="noopener" hidden>📷 평가</a>');
   const mqPort = matchMedia('(orientation:portrait)'), GAP = 32; let cur = 0, started = false, tocMove = 'squat', tp = 0, tpN = 1, lastKey = '';
   const idxOf = (m, sc) => SEQ.findIndex(p => p.m === m && p.sc === sc), firstOf = m => SEQ.findIndex(p => p.m === m);
-  function flow() { const fl = $('pgFlow'); $('nvYt').hidden = $('vyt').hidden || !$('pbToc').hidden; $('nvYt').href = $('vyt').href; { const c = $('stCam'), on = !$('tryCard').hidden; c.hidden = !on; if (on) { const u = new URL(document.querySelector('#tryCard .trylinks a').href); u.searchParams.delete('mode'); c.href = u.href; } } if ($('pbBook').hidden) return; const key = state.m + state.sc + state.v; if (key !== lastKey) { lastKey = key; tp = 0; }
+  function flow() { const fl = $('pgFlow'); $('stage').style.setProperty('--sbh', $('sbar').offsetHeight + 'px'); $('nvYt').hidden = $('vyt').hidden || !$('pbToc').hidden; $('nvYt').href = $('vyt').href; { const c = $('stCam'), on = !$('tryCard').hidden; c.hidden = !on; if (on) { const u = new URL(document.querySelector('#tryCard .trylinks a').href); u.searchParams.delete('mode'); c.href = u.href; } } if ($('pbBook').hidden) return; const key = state.m + state.sc + state.v; if (key !== lastKey) { lastKey = key; tp = 0; sbarSync(); }
     const W = fl.clientWidth; if (!W) return; fl.style.columnWidth = W + 'px'; tpN = Math.max(1, Math.round((fl.scrollWidth + GAP) / (W + GAP))); tp = Math.min(tp, tpN - 1);
     fl.style.transform = `translateX(${-tp * (W + GAP)}px)`; $('pbPg').textContent = tpN > 1 ? `${tp + 1} / ${tpN}쪽` : '';
     $('pbPrev').disabled = cur === 0 && tp === 0; $('pbNext').disabled = cur === SEQ.length - 1 && tp === tpN - 1;
