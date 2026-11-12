@@ -831,6 +831,86 @@ body.paper .stage .ctrl{right:152px}
 .toc-row.ex small{margin-left:8px;font-size:12.5px;font-weight:500;color:var(--pmuted)}
 .toc-row.ex em{font-style:normal;color:#f28c38;font-size:14px;letter-spacing:-1px;white-space:nowrap}
 .toc-row.ex em i{font-style:normal;color:#e2d6bb;border:0;transform:none;flex:none}
+
+/* ===== 글로 읽는 교과서 (READER) ===== */
+html.reader,body.reader{height:100%;overflow:hidden;background:#e9e2d2}
+body.reader .page{display:none}
+.rd{--paper:#fffdf7;--ink:#1f2630;--muted:#5c6475;--navy:#14284b;--acc:#c8372b;--good:#2f8a4e;--bad:#c2410c;height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr);color:var(--ink)}
+.rd button,.rd select{font:inherit;color:inherit;cursor:pointer}
+.rd-top{display:flex;align-items:center;gap:10px;padding:max(8px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));background:var(--navy);color:#fff}
+.rd-logo{font-weight:700;font-size:16px;white-space:nowrap}
+.rd-sel{flex:1;min-width:0;max-width:280px;margin-left:auto}
+.rd-sel select{width:100%;height:42px;border-radius:10px;border:0;background:#fff;color:var(--navy);font-weight:700;font-size:16px;padding:0 10px}
+.rd-body{min-height:0;display:grid;grid-template-columns:minmax(0,1fr)}
+.rd-page{min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--paper);padding:22px max(18px,env(safe-area-inset-left,0px)) 80px;font-size:18px;line-height:1.75}
+.rd-page>*{max-width:680px;margin-left:auto;margin-right:auto}
+.rd-kick{margin-bottom:0;font-size:14px;font-weight:700;color:var(--acc);letter-spacing:.04em}
+.rd-page h1{font-family:'Noto Serif KR',serif;font-size:34px;line-height:1.25;margin-top:4px;margin-bottom:4px;color:var(--navy)}
+.rd-lead{color:var(--muted);margin-top:0}
+.rd-toc{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:12px 0 18px;border-bottom:1px solid #e7dfcd;font-size:14.5px}
+.rd-toc b{width:100%;font-size:12.5px;color:var(--muted);margin-top:6px}
+.rd-toc a{color:var(--navy);text-decoration:none;border:1px solid #d8cfba;border-radius:999px;padding:4px 11px;background:#fff}
+.rd-grp{margin-top:34px;margin-bottom:0;font-size:13px;font-weight:700;letter-spacing:.08em;color:#fff;background:var(--navy);display:inline-block!important;padding:3px 12px;border-radius:6px}
+.rd-sec{padding-top:10px}
+.rd-sec h2{font-family:'Noto Serif KR',serif;font-size:25px;line-height:1.35;margin:18px 0 8px;color:var(--navy);display:flex;align-items:baseline;gap:10px}
+.rd-no{font-family:var(--f-num);font-size:15px;color:var(--acc);font-weight:600}
+.rd-sec h3{font-size:18px;margin:22px 0 6px;color:var(--navy)}
+.rd-sec p{margin:0 0 10px}
+.rd-def{border-left:4px solid #7048e8;background:#f6f2ff;padding:10px 14px;border-radius:0 10px 10px 0}
+.rd-def b{color:#7048e8;margin-right:6px}
+.rd-why b{color:var(--bad)}
+.rd-steps{padding-left:1.4em;margin:0}
+.rd-steps li{margin-bottom:6px}
+.rd-box{border:1.5px solid #e2d6bb;border-radius:12px;padding:12px 14px;margin:12px 0;background:#fff}
+.rd-box>b{display:block;margin-bottom:4px}
+.rd-box ul{margin:4px 0 0;padding-left:1.2em}
+.rd-box.ok{border-color:#bfe3c8;background:#f3fbf4}.rd-box.ok>b{color:var(--good)}
+.rd-box.bad{border-color:#f3c9a6;background:#fff7ef}.rd-box.bad>b{color:var(--bad)}
+.rd-box.cmp>b{color:#2a6fb5}
+.rd-box p{font-size:17px}
+.rd-figbtn{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;min-height:56px;margin:12px 0;padding:10px 14px;border-radius:12px;border:2px dashed #b9c3d4;background:#f4f7fb;text-align:left}
+.rd-figbtn.good{border-color:#9fd0ad;background:#f1f9f3}
+.rd-figbtn.bad{border-color:#f0b48a;background:#fff4ea}
+.rd-figbtn.on{border-style:solid;border-color:var(--navy);box-shadow:0 0 0 2px rgba(20,40,75,.15)}
+.rd-fignum{font-size:12.5px;font-weight:700;color:#fff;background:var(--navy);border-radius:6px;padding:2px 8px;white-space:nowrap}
+.rd-figname{font-weight:700;font-size:16px;line-height:1.4}
+.rd-figgo{font-size:14px;font-weight:700;color:var(--navy);white-space:nowrap}
+.rd-next{display:block;width:100%;min-height:56px;margin-top:40px!important;border:0;border-radius:14px;background:var(--navy);color:#fff!important;font-weight:700;font-size:17px}
+.rd-fig{display:none;flex-direction:column;background:#1b2125;min-height:0}
+.rd-fighead{display:flex;align-items:center;gap:8px;padding:8px 10px;color:#fff;font-size:14.5px}
+.rd-fighead b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rd-x{width:44px;height:44px;border-radius:12px;border:0;background:rgba(255,255,255,.14);color:#fff!important;font-size:18px}
+.rd-tabs{display:flex;gap:6px;overflow-x:auto;padding:0 10px 8px;scrollbar-width:none}
+.rd-tabs::-webkit-scrollbar{display:none}
+.rd-tabs button{flex:0 0 auto;min-height:40px;padding:0 12px;border-radius:10px;border:1.5px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#eef2f3!important;font-size:14px;font-weight:700;white-space:nowrap}
+.rd-tabs button[aria-pressed="true"]{background:#d7f25a;border-color:#d7f25a;color:var(--navy)!important}
+.rd-tabs button.bad[aria-pressed="true"]{background:#ff922b;border-color:#ff922b;color:#1b2125!important}
+.rd-stage{flex:1;min-height:0;position:relative}
+body.reader .rd-stage .stage{display:block;position:absolute;inset:0;height:auto;min-height:0;border-radius:0}
+body.reader .rd-stage .stage canvas{height:100%;min-height:0}
+body.reader .rd-stage .stage .ctrl{position:absolute;left:8px;right:8px;bottom:8px;flex-wrap:nowrap;gap:5px}
+body.reader .rd-stage .scrub span,body.reader .rd-stage .hint{display:none}
+body.reader .rd-stage .chips{display:none}
+/* 폰(세로): 그림을 누르면 3D가 화면 위로 올라옴 */
+@media (max-width:899px){
+  .rd[data-open="1"] .rd-fig{display:flex;position:fixed;inset:0;z-index:50;padding-bottom:env(safe-area-inset-bottom,0px)}
+  .rd-page{font-size:17.5px}
+  .rd-page h1{font-size:30px}
+}
+/* 넓은 화면·가로: 왼쪽 글, 오른쪽 그림이 늘 보임 */
+@media (min-width:900px){
+  .rd-body{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .rd-fig{display:flex}
+  .rd-x{display:none}
+}
+
+body.reader .rd-stage .ctrl .scrub{display:none}
+body.reader .rd-stage .ctrl button{white-space:nowrap;min-height:42px;padding:0 10px;font-size:14px}
+body.reader .rd-stage .views{display:flex;gap:4px;flex:0 0 auto}
+body.reader .rd-stage #ghost,body.reader .rd-stage .ctrl [data-view="diag"]{font-size:0}
+body.reader .rd-stage #ghost::after{content:"겹쳐 보기";font-size:14px}
+body.reader .rd-stage .ctrl [data-view="diag"]::after{content:"↗";font-size:17px}
+body.reader .rd-stage .ctrl{justify-content:flex-start;background:none;padding:0}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -940,7 +1020,8 @@ body.paper .stage .ctrl{right:152px}
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 const BOOK3D = /[?&]book3d\b/.test(location.search); // 책상 위 3D 책 버전
-const PAPER = true; // 종이 교과서 버전(세로 한 쪽 · 가로 두 쪽)
+const PAPER = true;
+const READER = /[?&]reader\b/.test(location.search); // 글로 읽는 교과서: 그림을 누르면 3D // 종이 교과서 버전(세로 한 쪽 · 가로 두 쪽)
 
 const D = Math.PI / 180;
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
@@ -2898,7 +2979,7 @@ function camFor(k) { const c = state.def.variants[state.v]?.cam || state.def.cam
 function setView(k) { state.view = k; camGoal = camFor(k); document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === k)); }
 const scenesEl = $('scenes'), mqNarrow = matchMedia('(max-width:900px)');
 function focusStage() { // 폰에서는 무엇을 누르든 3D 화면이 보이게
-  if (PAPER || !mqNarrow.matches || document.body.classList.contains('land')) return; const col = $('stagecol'), r = col.getBoundingClientRect(), sc = $('scenes');
+  if (PAPER || READER || !mqNarrow.matches || document.body.classList.contains('land')) return; const col = $('stagecol'), r = col.getBoundingClientRect(), sc = $('scenes');
   if (r.top >= 0 && r.bottom <= innerHeight + 4) return; // 3D가 다 보이면 그대로
   const el = !sc.hidden && !document.body.classList.contains('book') && sc.offsetHeight + col.offsetHeight < innerHeight ? sc : col;
   scrollTo({ top: el.getBoundingClientRect().top + scrollY - 6, behavior: reduce ? 'auto' : 'smooth' }); }
@@ -3010,7 +3091,7 @@ function place(el, pos, text) {
 }
 function updateLabels() {
   const used = new Set();
-  if (state.sel && !state.def.noLabel && !PAPER) { const m = fig.muscles.find(x => x.sp.id === state.sel && x.s !== -1); if (m) { place(lbl('sel', ''), m.mesh.position, MUSCLES[state.sel][0]); used.add('sel'); } }
+  if (state.sel && !state.def.noLabel && !PAPER && !READER) { const m = fig.muscles.find(x => x.sp.id === state.sel && x.s !== -1); if (m) { place(lbl('sel', ''), m.mesh.position, MUSCLES[state.sel][0]); used.add('sel'); } }
   for (const d of fig.dangers) { if (!d.mesh.visible || used.has(d.key)) continue; const e = lbl(d.key, 'warn'); place(e, d.mesh.position, DANGERS[d.key]); e.style.opacity = d.mesh.material.opacity / .55; used.add(d.key); }
   const vr = state.def.variants[state.v], multi = vr?.multi || [];
   if (vr?.mainLabel) { place(lbl('who', 'who'), fig.P.head.clone().add(V(0, .22, 0)), vr.mainLabel); used.add('who'); }
@@ -3204,7 +3285,7 @@ document.addEventListener('keydown', e => { if (state.book == null || !$('cover'
   if (e.key === 'ArrowRight' || e.key === 'PageDown') goPage(state.book + 1, 1); else if (e.key === 'ArrowLeft' || e.key === 'PageUp') goPage(state.book - 1, -1); });
 // 가로 화면: 왼쪽 3D, 오른쪽 설명, 화면 스크롤 없음
 const mqLand = matchMedia('(orientation:landscape) and (max-height:560px)');
-function syncLand() { const on = mqLand.matches && !BOOK3D && !PAPER; document.body.classList.toggle('land', on); document.documentElement.classList.toggle('land', on); if (on) scrollTo(0, 0); resize(); }
+function syncLand() { const on = mqLand.matches && !BOOK3D && !PAPER && !READER; document.body.classList.toggle('land', on); document.documentElement.classList.toggle('land', on); if (on) scrollTo(0, 0); resize(); }
 mqLand.addEventListener('change', syncLand); syncLand();
 $('landBtn').onclick = async () => { const b = $('landBtn'); try { await document.documentElement.requestFullscreen(); await screen.orientation.lock('landscape'); }
   catch (e) { b.textContent = '폰을 가로로 돌려 주세요'; setTimeout(() => b.textContent = '↻ 가로로 크게 보기', 3500); } };
@@ -3317,6 +3398,56 @@ if (PAPER) {
   document.addEventListener('keydown', e => { if (!$('pbToc').hidden || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return; if (e.key === 'ArrowRight' || e.key === 'PageDown') $('pbNext').click(); else if (e.key === 'ArrowLeft' || e.key === 'PageUp') $('pbPrev').click(); });
   window.__pbShow = show; sync(); openToc(null);
 }
+// ---------- 글로 읽는 교과서 (READER): 본문을 읽다가 그림을 누르면 3D가 열림 ----------
+if (READER) {
+  document.body.classList.add('reader'); document.documentElement.classList.add('reader');
+  const CH = [['squat', '움직임'], ['lunge', '움직임'], ['pushup', '움직임'], ['pull', '움직임'], ['throw', '움직임'], ['hinge', '움직임'], ['plank', '움직임'], ['fitness', '이론'], ['train', '이론']];
+  const esc = x => String(x ?? '');
+  const root = document.createElement('div'); root.className = 'rd'; root.id = 'rd';
+  root.innerHTML = `<header class="rd-top"><span class="rd-logo">3D 체육 교과서</span><label class="rd-sel"><select id="rdCh" aria-label="단원 고르기">${CH.map(([k, g], i) => `<option value="${k}">${i + 1}. ${MOVES[k].name}</option>`).join('')}</select></label></header>
+    <div class="rd-body"><article class="rd-page" id="rdPage"></article>
+      <aside class="rd-fig" id="rdFig" aria-label="3D 그림"><div class="rd-fighead"><b id="rdFigT">그림을 누르면 여기에 3D가 나와요</b><button type="button" class="rd-x" id="rdX" aria-label="3D 닫기">✕</button></div><div class="rd-tabs" id="rdTabs"></div><div class="rd-stage" id="rdStage"></div></aside></div>`;
+  document.body.prepend(root);
+  $('rdStage').append($('stage'));
+  let figNo = 0;
+  const fig = (m, sc, v, label, kind) => { figNo++; return `<button type="button" class="rd-figbtn ${kind || ''}" data-m="${m}" data-sc="${sc}" data-v="${v}"><span class="rd-fignum">그림 ${figNo}</span><span class="rd-figname">${label}</span><span class="rd-figgo">3D로 보기 ›</span></button>`; };
+  function scenePart(m, sc, d, n) { const vs = Object.entries(d.variants), good = d.variants.good ? 'good' : vs[0][0], gv = d.variants[good], steps = STEPS[m + ':' + sc];
+    let h = `<section class="rd-sec" id="sec-${m}-${sc}"><h2><span class="rd-no">${n}</span>${esc(d.sceneLabel || d.name)}</h2>`;
+    if (d.neutral) {
+      if (d.panel) { const tmp = document.createElement('div'); tmp.innerHTML = d.panel(good, 0); const key = tmp.querySelector('.key'); if (key) h += `<p class="rd-def"><b>뜻</b> ${key.textContent}</p>`; }
+      vs.forEach(([k, v]) => { h += `<h3>${esc(v.name)}</h3><p>${esc(v.desc)}</p>`; if (v.why) h += `<p class="rd-why"><b>왜?</b> ${esc(v.why)}</p>`; h += fig(m, sc, k, v.name, v.warn ? 'bad' : ''); });
+      return h + '</section>'; }
+    h += `<p>${esc(gv.desc)}</p>` + fig(m, sc, good, `${d.sceneLabel || d.name} · 바른 자세`, 'good');
+    if (steps) h += `<h3>따라 해 보기</h3><ol class="rd-steps">${steps.map(([t, ti, tx]) => `<li><b>${ti}</b> ${tx}</li>`).join('')}</ol>`;
+    if (gv.checks?.length) h += `<div class="rd-box ok"><b>✓ 자세 확인하기</b><ul>${gv.checks.map(c => `<li>${c}</li>`).join('')}</ul></div>`;
+    const bad = vs.filter(([k, v]) => k !== good);
+    if (bad.length) { h += `<h3>${bad.every(([, v]) => !v.ok) ? '이런 자세는 조심해요' : '비교해 보기'}</h3>`;
+      bad.forEach(([k, v]) => { h += `<div class="rd-box ${v.ok ? 'cmp' : 'bad'}"><b>${v.ok ? '' : '⚠ '}${esc(v.name)}</b><p>${esc(v.desc)}</p>${v.why ? `<p><b>왜 문제일까?</b> ${esc(v.why)}</p>` : ''}${v.fix ? `<p><b>이렇게 고쳐요</b> ${v.fix.join(' · ')}</p>` : ''}${fig(m, sc, k, v.name, v.ok ? '' : 'bad')}</div>`; }); }
+    return h + '</section>'; }
+  function render(m) { const M = MOVES[m], sc = M.scenes || [['base', '기본', M]], ci = CH.findIndex(c => c[0] === m); figNo = 0;
+    const framed = sc.some(x => FRAME.some(fr => fr[0] === x[1]));
+    let h = `<p class="rd-kick">${ci + 1}단원 · ${CH[ci][1]}</p><h1>${esc(M.name)}</h1><p class="rd-lead">${esc(M.pattern || '')}</p>`;
+    const groups = framed ? FRAME.map(([g, lb]) => [lb, sc.filter(x => x[1] === g)]).filter(([, xs]) => xs.length) : [['', sc]];
+    h += `<nav class="rd-toc">${groups.map(([lb, xs]) => `${lb ? `<b>${lb}</b>` : ''}${xs.map(([k, , d]) => `<a href="#sec-${m}-${k}">${esc(d.sceneLabel || d.name)}</a>`).join('')}`).join('')}</nav>`;
+    let n = 0; groups.forEach(([lb, xs]) => { if (lb) h += `<p class="rd-grp">${lb}</p>`; xs.forEach(([k, , d]) => { n++; h += scenePart(m, k, d, `${ci + 1}-${n}`); }); });
+    const nx = CH[ci + 1]; if (nx) h += `<button type="button" class="rd-next" data-ch="${nx[0]}">다음 단원: ${MOVES[nx[0]].name} ›</button>`;
+    $('rdPage').innerHTML = h; $('rdPage').scrollTop = 0; $('rdCh').value = m;
+    $('rdPage').querySelectorAll('.rd-figbtn').forEach(b => b.onclick = () => open3D(b));
+    $('rdPage').querySelectorAll('.rd-next').forEach(b => b.onclick = () => render(b.dataset.ch));
+    $('rdPage').querySelectorAll('.rd-toc a').forEach(a => a.onclick = e => { e.preventDefault(); const t = $(a.getAttribute('href').slice(1)); $('rdPage').scrollTo({ top: t.offsetTop - 8, behavior: reduce ? 'auto' : 'smooth' }); });
+    const first = $('rdPage').querySelector('.rd-figbtn'); if (first) show3D(first.dataset.m, first.dataset.sc, first.dataset.v, first, false); }
+  function show3D(m, sc, v, btn, openIt) { if (state.m !== m) setMove(m); if (state.sc !== sc) setScene(sc); setVariant(v);
+    const d = state.def; $('rdFigT').textContent = `${btn.querySelector('.rd-fignum').textContent} · ${d.sceneLabel || d.name}`;
+    $('rdTabs').innerHTML = Object.entries(d.variants).map(([k, x]) => `<button type="button" data-v="${k}" class="${(d.neutral ? x.warn : k !== 'good' && !x.ok) ? 'bad' : ''}" aria-pressed="${k === v}">${esc(x.short || x.name.split(' → ')[0])}</button>`).join('');
+    $('rdTabs').querySelectorAll('button').forEach(b => b.onclick = () => { setVariant(b.dataset.v); $('rdTabs').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); });
+    $('rdPage').querySelectorAll('.rd-figbtn').forEach(x => x.classList.toggle('on', x === btn));
+    if (openIt) root.dataset.open = '1'; setTimeout(resize, 30); setTimeout(resize, 300); }
+  function open3D(b) { show3D(b.dataset.m, b.dataset.sc, b.dataset.v, b, true); }
+  $('rdX').onclick = () => { root.dataset.open = ''; };
+  $('rdCh').onchange = e => render(e.target.value);
+  render('squat');
+}
+
 
 loop();
 </script>
