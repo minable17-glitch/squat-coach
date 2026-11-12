@@ -618,6 +618,27 @@ body.paper:not(.bodymap) .pg-flow>section:has(#mlist),body.paper.bodymap .pg-flo
 .toc-link b{font-size:16px;color:var(--navy);line-height:1.3}.toc-link span{font-size:12.5px;color:var(--pmuted);line-height:1.35}
 .toc-extra{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media (orientation:portrait){.toc-extra .toc-link{min-height:54px;grid-auto-flow:column;justify-content:space-between;align-items:center}}
+
+/* 던지기: 공의 길 비교 상자 */
+.thbox{position:absolute;left:12px;top:50px;width:236px;background:var(--overlay);border-radius:12px;padding:8px 10px;display:grid;gap:5px;color:var(--overlay-ink);z-index:2;pointer-events:none;font-size:12.5px;line-height:1.35}
+.thbox[hidden]{display:none}
+.thbox>b{font-size:12px;color:var(--overlay-muted)}
+.thr{display:flex;gap:7px;align-items:flex-start;opacity:.62}
+.thr.on{opacity:1}
+.thr i{flex:none;width:12px;height:12px;border-radius:50%;margin-top:3px}
+.thr em{display:block;font-style:normal;font-weight:700;font-size:13.5px}
+.thr u{display:block;text-decoration:none;font-weight:700}
+.thr u.ok{color:#51cf66}.thr u.no{color:#ff8787}
+body.paper .thbox{left:8px;top:8px;border:1.5px solid var(--pline)}
+body.paper .thr u.ok{color:#2f8a4e}body.paper .thr u.no{color:#c2410c}
+@media (max-width:900px),(orientation:landscape) and (max-height:440px){.thbox{width:200px;font-size:11.5px;padding:6px 8px;gap:3px}.thr em{font-size:12.5px}}
+
+body.throwing .mini{display:none}
+.thbox{width:auto;max-width:min(300px,calc(100% - 24px))}
+.thl{display:flex;flex-wrap:wrap;gap:3px 10px;font-size:11.5px;opacity:.85}
+.thl span{display:flex;align-items:center;gap:4px;opacity:.6}
+.thl span.on{opacity:1;font-weight:700}
+.thl i{width:9px;height:9px;border-radius:50%}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -648,6 +669,7 @@ body.paper:not(.bodymap) .pg-flow>section:has(#mlist),body.paper.bodymap .pg-flo
       <div class="load" id="load">3D 화면을 불러오는 중…</div>
       <div class="labels" id="labels"></div>
       <div class="chips" id="chips"></div>
+      <div class="thbox" id="throwBox" hidden></div>
       <div class="aimbox" id="aimbox" hidden><b>과녁에 맞은 자리</b><svg viewBox="-1.08 -1.08 2.16 2.16" aria-hidden="true"><circle r="1" fill="#f1f3f5"/><circle r=".8" fill="#212529"/><circle r=".6" fill="#228be6"/><circle r=".4" fill="#e03131"/><circle r=".2" fill="#fcc419"/><path d="M-1 0H1M0-1V1" stroke="rgba(255,255,255,.35)" stroke-width=".015"/><g id="aimDots"></g></svg><span id="aimTxt"></span></div>
       <div class="mini" id="mini"><button class="mh" id="miniT" type="button" aria-expanded="true">일하는 근육 ▾</button><div class="ml" id="miniL"></div></div>
       <div class="hint">끌어서 돌리기 · 휠로 확대 · 근육과 ⚠를 눌러 보세요</div>
@@ -962,7 +984,7 @@ const MOVES = {
         ['테니스·탁구 준비 자세', '고관절과 무릎을 살짝 굽혀 어느 쪽으로든 바로 움직일 수 있게 해요.'],
         ['야구 내야 수비', '낮은 땅볼을 잡을 때 고관절을 접어 몸을 낮춰요.']] } },
 };
-const MOVE_ORDER = ['squat', 'lunge', 'pushup', 'pull', 'hinge', 'plank', 'fitness', 'train', 'body'];
+const MOVE_ORDER = ['squat', 'lunge', 'pushup', 'pull', 'throw', 'hinge', 'plank', 'fitness', 'train', 'body'];
 
 // ---------- 스쿼트 장면: 일상 · 응용 · 스포츠 ----------
 const CHAIR = { name: '의자에서 일어나기', sceneLabel: '의자에서 일어나기', env: 'class', com: true, range: ['앉기', '일어서기'], cam: { y: .65, z: -.12, dist: 3.3 }, defaultView: 'side',
@@ -2012,6 +2034,51 @@ MOVES.lunge.scenes.push(['getup', '응용', GETUP]);
 MOVES.pushup.scenes.push(['burpee', '응용', BURPEE]);
 MOVES.hinge.scenes = [['base', '기본', MOVES.hinge], ['swing', '응용', SWING]];
 MOVES.plank.scenes.push(['carry', '응용', CARRY], ['climber', '응용', CLIMBER]);
+// ---------- 던지기: 놓는 타점과 공의 길 (투사체 운동) ----------
+const TH = { DIST: 12, MITT: [.5, 1.4], uR: .3, fit: {}, calc: {} };
+function throwSpec(q) { const u = q.t, uR = TH.uR, full = q.mode === 'full', arm = q.mode === 'arm';
+  const st = full ? ss(.08, .28, u) * (1 - ss(.78, .98, u)) : 0;
+  const feet = { 1: footStand(.13, -.12, 28 * ss(.24, .36, u) * (1 - ss(.7, .9, u)), 1), [-1]: footStand(-.13, .28 + .38 * st, 0, -1) };
+  const lean = full ? -12 * ss(.05, .2, u) + 36 * ss(.2, .36, u) - 24 * ss(.7, .95, u) : -4 * ss(.05, .2, u) + 12 * ss(.2, .36, u) - 8 * ss(.7, .95, u);
+  const hip = V(0, .955 - .09 * st, .08 + .3 * st), pr = -(180 + q.a); let fR, eR;
+  if (arm) { fR = 35 * ss(0, .15, u) * (1 - ss(.75, .95, u)); eR = 150 * ss(0, .18, u) - 130 * clamp((u - uR + .02) / .12) - 20 * ss(.75, .95, u); } // 팔꿈치가 처진 채 팔뚝만 펴기
+  else { fR = u < .18 ? -110 * ss(0, .18, u) : u < uR ? -110 + (pr + 110) * ((u - .18) / (uR - .18)) : u < .44 ? pr + (-330 - pr) * ((u - uR) / (.44 - uR)) : -330 - 30 * ss(.6, .92, u);
+    eR = 85 * ss(.06, .18, u) * (1 - ss(.2, uR, u)); }
+  const fL = 75 * ss(.04, .2, u) * (1 - ss(.24, .4, u)), eL = 20 + 70 * ss(.24, .4, u) * (1 - ss(.75, .95, u));
+  return { feet, hip, low: lean * .6, up: lean, head: lean * .3, kneePole: sym(s => V(s * .15, 0, 1)), arms: { mode: 'angle', flex: [fR, fL], elbow: [eR, eL], abd: [arm ? 22 : 12, 10] }, q }; }
+function throwSim(q) { // 놓는 순간 손의 위치와 방향 → 중력만 받는 공의 길
+  const P1 = build(throwSpec({ ...q, t: TH.uR })), P0 = build(throwSpec({ ...q, t: TH.uR - .012 })), pos = P1.side[1].wr.clone(), dir = pos.clone().sub(P0.side[1].wr); dir.x = 0; dir.normalize();
+  const vel = dir.clone().multiplyScalar(q.v), pts = []; let end = null;
+  for (let t = 0; t < 4; t += .02) { const y = pos.y + vel.y * t - 4.9 * t * t, z = pos.z + vel.z * t; if (y <= .06) { pts.push(V(0, .06, z)); end = { ground: z, T: t }; break; } if (z >= TH.DIST) { pts.push(V(0, y, TH.DIST)); end = { h: y, T: t }; break; } pts.push(V(0, y, z)); }
+  return { pos, dir, vel, pts, end: end || { h: 99, T: 4 }, up: Math.atan2(dir.y, dir.z) / D }; }
+function thFit(v, mode) { const k = v + mode; if (TH.fit[k] != null) return TH.fit[k]; let best = -6, bd = 1e9;
+  for (let a = -40; a <= 25; a += .5) { const e = throwSim({ a, v, mode }).end; if (e.h == null) continue; const d = Math.abs(e.h - .95); if (d < bd) { bd = d; best = a; } } return TH.fit[k] = best; }
+const thVerdict = e => e.h == null ? ['no', `미트 앞 ${(TH.DIST - e.ground).toFixed(1)} m에서 땅에 닿음`] : e.h > TH.MITT[1] ? ['no', `미트보다 ${(e.h - TH.MITT[1]).toFixed(1)} m 높게 지나감`] : e.h < TH.MITT[0] ? ['no', '미트보다 낮게 들어옴'] : ['ok', '미트에 쏙!'];
+const thAct = (v, P) => { const m = P.q.mode, k = ss(.1, .3, P.q.t) * (1 - ss(.36, .6, P.q.t));
+  return m === 'arm' ? { tri: .2 + .65 * k, delt: .25 + .2 * k, abs: .2, lat: .1, glute: .1, quad: .15 } : m === 'shoulder' ? { delt: .3 + .6 * k, lat: .2 + .5 * k, tri: .2 + .6 * k, abs: .3 + .2 * k, glute: .15, quad: .2 } : { delt: .3 + .6 * k, lat: .2 + .55 * k, tri: .2 + .6 * k, abs: .35 + .5 * k, glute: .3 + .55 * k, quad: .3 + .5 * k }; };
+const TH_BASE = { env: 'field', props: ['throwing'], cycle: 'loop', period: 4.2, range: ['준비', '던진 뒤'], spec: throwSpec, act: thAct, throwing: true, noLabel: true, noGhost: true, badLabel: '어긋난 자세',
+  cam: { x: 0, y: 1.7, z: 5.8, dist: 13.5, fitW: 15.5, dirs: { side: V(-1, .16, .06), diag: V(-.62, .34, -.7), back: V(-.12, .26, -1), front: V(.18, .22, 1) } }, defaultView: 'side',
+  muscles: ['delt', 'lat', 'tri', 'abs', 'glute', 'quad'], readouts: [['공 빠르기', P => Math.round(P.q.v * 3.6), ' km/h']],
+  notes: { abs: { good: '허리가 돌며 만든 힘을 어깨와 팔로 넘겨 줘요.' }, glute: { good: '발을 내딛고 버티는 다리와 엉덩이가 힘의 시작이에요.' } } };
+const TH_REL = { ...TH_BASE, name: '타점과 공의 길', sceneLabel: '타점과 공의 길',
+  variants: {
+    good: { name: '알맞은 타점', desc: '공은 손을 떠나는 순간 손이 가던 방향으로 날아가요. 팔이 머리 위를 지나 앞으로 나오는 순간에 놓으면 공이 거의 앞으로 떠나요. 날아가는 동안 중력이 조금씩 끌어내려서, 완만한 곡선을 그리며 포수 미트로 들어가요.',
+      checks: ['팔이 머리 위를 지나 앞으로 나올 때 놓기', '손끝이 미트를 향하게 끝까지 뻗기', '초록 선: 공이 날아간 길', '파란 화살표: 공이 손을 떠나는 방향'], p: t => ({ t, a: thFit(20, 'full'), mode: 'full', v: 20 }) },
+    early: { name: '일찍 놓음 → 높이 뜸', desc: '팔이 아직 머리 뒤에 있을 때 공을 놓았어요.',
+      why: '이때 손은 아직 위로 올라가는 중이에요. 그래서 공도 위로 떠나서 높은 포물선을 그려요. 미트 위로 한참 지나가고, 같은 거리를 가는 데 시간도 더 걸려요.', fix: ['공을 조금 더 오래 쥐고 있기', '팔이 귀 옆을 지난 뒤에 놓기', '시선은 끝까지 미트에'], p: t => ({ t, a: -30, mode: 'full', v: 20 }) },
+    late: { name: '늦게 놓음 → 땅에 꽂힘', desc: '팔이 몸 앞으로 한참 내려온 뒤에 공을 놓았어요.',
+      why: '이때 손은 이미 아래로 내려가는 중이에요. 그래서 공도 아래로 떠나서 미트에 가기 전에 땅에 꽂혀요.', fix: ['공을 조금 더 일찍 놓기', '팔이 머리 앞 높은 곳에 있을 때 놓기', '손목을 미리 꺾지 않기'], p: t => ({ t, a: 20, mode: 'full', v: 20 }) },
+  } };
+const TH_CHAIN = { ...TH_BASE, name: '온몸으로 던지기', sceneLabel: '야구: 온몸으로 던지기',
+  variants: {
+    good: { name: '온몸으로 (다리·허리·어깨)', desc: '발을 내딛고 허리를 돌린 힘이 어깨, 팔꿈치, 손목으로 차례로 전해져요. 채찍처럼 끝으로 갈수록 빨라져서 공이 가장 빨라요. 빠른 공은 떨어질 시간이 짧아 직선에 가깝게 미트로 들어가요.',
+      checks: ['앞발을 크게 내딛기', '허리가 먼저 돌고 어깨가 따라오기', '팔꿈치를 어깨 높이로', '던진 뒤 몸이 앞으로 따라가기'], p: t => ({ t, a: thFit(23, 'full'), mode: 'full', v: 23 }) },
+    shoulder: { ok: true, name: '어깨까지만 (제자리에서)', desc: '다리와 허리는 쓰지 않고 제자리에 서서 어깨와 팔로만 던져요. 팔꿈치는 어깨 높이로 올라가지만 힘을 보태는 부위가 줄어서 공이 느려져요. 같은 타점에서 놓으면 미트 앞에서 땅에 닿아요. 미트까지 보내려면 더 높이 띄워야 해서 포물선이 돼요.',
+      checks: ['어깨와 팔은 잘 쓰고 있어요', '발을 내딛고 허리를 돌리면 더 빨라져요'], p: t => ({ t, a: thFit(23, 'full'), mode: 'shoulder', v: 17 }) },
+    arm: { name: '팔로만 밀어 던지기', danger: [['shoulder', [1]]], desc: '팔꿈치가 어깨보다 낮게 처진 채 팔뚝만 펴서 공을 밀어 던져요.',
+      why: '작은 팔 근육만 쓰니 공이 가장 느려요. 느린 공은 금방 떨어져서 미트까지 못 가요. 또 팔꿈치가 처진 채 세게 던지려고 하면 어깨와 팔꿈치 안쪽에 무리가 가요.', fix: ['팔꿈치를 어깨 높이까지 들기', '어깨를 돌려 팔꿈치가 먼저 나오게', '앞발을 내딛고 허리 돌리기'], p: t => ({ t, a: 0, mode: 'arm', v: 11 }) },
+  } };
+MOVES.throw = { name: '던지기', pattern: '공을 놓는 타점과 온몸의 힘', uses: null, scenes: [['base', '기본', TH_REL], ['chain', '스포츠', TH_CHAIN]] };
 let USES_CACHE = null;
 function muscleUses(id) {
   if (!USES_CACHE) { USES_CACHE = [];
@@ -2238,7 +2305,7 @@ const ENV_BG = { gym: 0x1b2125, class: 0x26221f, court: 0x1d2024, field: 0x1d231
     const ln2 = new THREE.Mesh(new THREE.PlaneGeometry(.04, 1.8), lineM); ln2.rotation.x = -Math.PI / 2; ln2.position.set(sx * 1.55, .005, .7); g.add(ln2); }
 }
 const PAD = new THREE.Group();
-const PROPS = { archery: new THREE.Group(), jbox: new THREE.Group(), ballwall: new THREE.Group(), pad: new THREE.Group(), frontwall: new THREE.Group(), door: new THREE.Group(), wall: new THREE.Group(), net: new THREE.Group(), stairs: new THREE.Group(), bench: new THREE.Group() };
+const PROPS = { throwing: new THREE.Group(), archery: new THREE.Group(), jbox: new THREE.Group(), ballwall: new THREE.Group(), pad: new THREE.Group(), frontwall: new THREE.Group(), door: new THREE.Group(), wall: new THREE.Group(), net: new THREE.Group(), stairs: new THREE.Group(), bench: new THREE.Group() };
 { const m = std(0xb9bfc4, { roughness: .85 }), edge = std(0xf0c419);
   [[.18, .375], [.36, .725], [.54, 1.075]].forEach(([h, z]) => { boxAt(PROPS.stairs, 1.1, h, .35, 0, h / 2, z, m); boxAt(PROPS.stairs, 1.1, .012, .04, 0, h + .006, z - .155, edge); }); }
 { const w = boxAt(PROPS.frontwall, 2.4, 2.2, .06, 0, 1.1, .76, std(0xdfe3e6, { roughness: .95 })); w.receiveShadow = true; }
@@ -2256,6 +2323,37 @@ const DOOR_PIVOT = new THREE.Group(); DOOR_PIVOT.position.set(.5, 0, .62); PROPS
   boxAt(PROPS.bench, .5, .05, .42, 0, .45, -.68, wood);
   for (const [x, z] of [[.21, -.5], [-.21, -.5], [.21, -.86], [-.21, -.86]]) cylAt(PROPS.bench, .015, .43, x, .215, z, leg); }
 for (const k in PROPS) scene.add(PROPS[k]);
+// 던지기 장면: 잔디, 포수 미트, 공, 공이 날아간 길
+const TH3 = (() => { const g = PROPS.throwing, DZ = TH.DIST;
+  const pl = (w, d, color, y, z) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), std(color, { roughness: 1 })); m.rotation.x = -Math.PI / 2; m.position.set(0, y, z); m.receiveShadow = true; g.add(m); return m; };
+  pl(7, DZ + 7, 0x8cc07a, .004, DZ / 2 - .5); for (let z = 3; z < DZ; z += 3) pl(7, .05, 0xf1f3f5, .007, z);
+  const mound = new THREE.Mesh(new THREE.CircleGeometry(1.25, 40), std(0xc9a06c, { roughness: 1 })); mound.rotation.x = -Math.PI / 2; mound.position.y = .008; mound.receiveShadow = true; g.add(mound);
+  boxAt(g, .43, .012, .43, 0, .012, DZ, std(0xffffff));
+  const zm = std(0x2f8a4e), [lo, hi] = TH.MITT, zw = .55;
+  boxAt(g, .04, hi - lo, .04, -zw / 2, (lo + hi) / 2, DZ, zm); boxAt(g, .04, hi - lo, .04, zw / 2, (lo + hi) / 2, DZ, zm); boxAt(g, zw + .04, .04, .04, 0, lo, DZ, zm); boxAt(g, zw + .04, .04, .04, 0, hi, DZ, zm);
+  const pane = new THREE.Mesh(new THREE.PlaneGeometry(zw, hi - lo), new THREE.MeshBasicMaterial({ color: 0x51cf66, transparent: true, opacity: .22, side: THREE.DoubleSide })); pane.position.set(0, (lo + hi) / 2, DZ); g.add(pane);
+  boxAt(g, .05, lo, .05, 0, lo / 2, DZ + .02, std(0x868e96));
+  const ball = new THREE.Mesh(new THREE.SphereGeometry(.075, 20, 14), std(0xffffff, { roughness: .5 })); ball.castShadow = true; g.add(ball);
+  const seam = new THREE.Mesh(new THREE.TorusGeometry(.075, .008, 6, 24), std(0xe03131)); ball.add(seam);
+  const arrow = new THREE.ArrowHelper(V(0, 0, 1), V(), 1.1, 0x1c7ed6, .3, .16); arrow.line.material.depthTest = arrow.cone.material.depthTest = false; arrow.renderOrder = 11; g.add(arrow);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(.12, .014, 8, 28), new THREE.MeshBasicMaterial({ color: 0x1c7ed6, depthTest: false })); ring.rotation.y = Math.PI / 2; ring.renderOrder = 11; g.add(ring);
+  const tubes = new THREE.Group(); g.add(tubes); const mark = new THREE.Mesh(new THREE.SphereGeometry(.11, 16, 12), new THREE.MeshBasicMaterial({ color: 0xffffff })); g.add(mark);
+  return { ball, arrow, ring, tubes, mark, key: '', sims: {} }; })();
+const TH_COL = [0x2f8a4e, 0x1c7ed6, 0xe8590c], TH_CSS = ['#2f8a4e', '#1c7ed6', '#e8590c'];
+function throwFrame(M, vk, t, P) { const box = $('throwBox'); if (!M.throwing) { if (!box.hidden) { box.hidden = true; document.body.classList.remove('throwing'); } return; } document.body.classList.add('throwing');
+  const keys = Object.keys(M.variants), key = state.m + state.sc;
+  if (TH3.key !== key) { TH3.key = key; TH3.sims = {}; while (TH3.tubes.children.length) { const c = TH3.tubes.children.pop(); c.geometry.dispose(); c.material.dispose(); }
+    keys.forEach((k, i) => { const sim = throwSim(M.variants[k].p(TH.uR)); TH3.sims[k] = sim;
+      const m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(sim.pts.length > 1 ? sim.pts : [sim.pos, sim.pos.clone().add(V(0, 0, .1))]), 80, .05, 8), new THREE.MeshBasicMaterial({ color: TH_COL[i % 3], transparent: true })); m.userData.k = k; TH3.tubes.add(m); }); TH3.hud = ''; }
+  const sim = TH3.sims[vk], u = t, uR = TH.uR, fl = Math.min(.55, sim.end.T * 1.5 / M.period), i = keys.indexOf(vk);
+  TH3.tubes.children.forEach(m => { const on = m.userData.k === vk; m.material.opacity = on ? .95 : .28; m.scale.x = on ? 1 : .6; });
+  if (u < uR) TH3.ball.position.copy(P.side[1].wr); else { const tt = Math.min(1, (u - uR) / fl) * sim.end.T; TH3.ball.position.set(0, Math.max(.075, sim.pos.y + sim.vel.y * tt - 4.9 * tt * tt), Math.min(TH.DIST, sim.pos.z + sim.vel.z * tt)); TH3.ball.rotation.x = tt * 14; }
+  TH3.arrow.position.copy(sim.pos); TH3.arrow.setDirection(sim.dir); TH3.ring.position.copy(sim.pos); TH3.arrow.visible = TH3.ring.visible = true; TH3.arrow.setColor(TH_COL[i % 3]); TH3.ring.material.color.setHex(TH_COL[i % 3]);
+  const e = sim.pts[sim.pts.length - 1]; TH3.mark.position.copy(e); TH3.mark.material.color.setHex(sim.end.h != null && thVerdict(sim.end)[0] === 'ok' ? 0x2f8a4e : 0xe03131);
+  const hk = key + vk; if (TH3.hud === hk && !box.hidden) return; TH3.hud = hk; box.hidden = false;
+  const [c, tx] = thVerdict(sim.end), q = M.variants[vk].p(TH.uR);
+  box.innerHTML = `<div class="thr on"><i style="background:${TH_CSS[i % 3]}"></i><span><em>${Math.round(q.v * 3.6)} km/h · ${sim.up >= 0 ? '위로' : '아래로'} ${Math.abs(Math.round(sim.up))}° · ${sim.end.T.toFixed(2)}초</em><u class="${c}">${tx}</u></span></div><div class="thl">${keys.map((k, j) => `<span${k === vk ? ' class="on"' : ''}><i style="background:${TH_CSS[j % 3]}"></i>${M.variants[k].name.split(' → ')[0].split(' (')[0]}</span>`).join('')}</div>`;
+}
 const AR = (() => { const g = PROPS.archery, ringC = [0xf1f3f5, 0x212529, 0x228be6, 0xe03131, 0xfcc419];
   const face = new THREE.Group(); face.position.copy(T_C); face.rotation.y = Math.PI / 2; g.add(face);
   ringC.forEach((c, i) => { const m = new THREE.Mesh(new THREE.CircleGeometry(T_R * (1 - i * .2), 40), new THREE.MeshStandardMaterial({ color: c, roughness: .8 })); m.position.z = .004 * i + .002; face.add(m); });
@@ -2474,7 +2572,7 @@ const $ = id => document.getElementById(id);
   document.querySelectorAll('#panes button').forEach(b => b.onclick = () => showPane(b.dataset.p)); if (BOOK3D) document.querySelector('aside').dataset.p = 'all'; }
 const miniL = $('miniL'); $('miniT').onclick = () => { const c = $('mini').classList.toggle('closed'); $('miniT').setAttribute('aria-expanded', !c); $('miniT').textContent = c ? '일하는 근육 ▸' : '일하는 근육 ▾'; resize(); };
 const movesEl = $('moves'), tabs = $('tabs'), mlist = $('mlist'), usesEl = $('uses');
-const NAV = [['움직임', ['squat', 'lunge', 'pushup', 'pull', 'hinge', 'plank']], ['이론', ['fitness', 'train']], ['근육으로 찾기', ['body']]];
+const NAV = [['움직임', ['squat', 'lunge', 'pushup', 'pull', 'throw', 'hinge', 'plank']], ['이론', ['fitness', 'train']], ['근육으로 찾기', ['body']]];
 movesEl.innerHTML = NAV.map(([t, ks]) => `<div class="navg"><span class="navt">${t}</span><div class="navb">${ks.map(k => `<button type="button" class="move" data-m="${k}" title="${MOVES[k].pattern}">${MOVES[k].name}</button>`).join('')}</div></div>`).join('');
 movesEl.insertAdjacentHTML('beforeend', `<label class="mselw"><select class="msel" id="moveSel" aria-label="움직임 고르기">${NAV.map(([t, ks]) => `<optgroup label="${t}">${ks.map(k => `<option value="${k}">${MOVES[k].name}</option>`).join('')}</optgroup>`).join('')}</select></label><button type="button" class="landx" id="landX" hidden aria-label="전체 화면 끝내기">✕</button>`);
 $('moveSel').onchange = e => setMove(e.target.value);
@@ -2489,7 +2587,10 @@ function syncGhost() { ghostBtn.setAttribute('aria-pressed', state.ghost); ghost
 let camGoal = null;
 const VIEWDIR = { diag: V(.62, .42, .66), side: V(1, .28, .02), front: V(0, .3, 1), back: V(.01, .36, -1) };
 function camFor(k) { const c = state.def.variants[state.v]?.cam || state.def.cam, tg = V(c.x || 0, c.y, c.z), narrow = stage.clientWidth < 560;
-  return [tg.clone().addScaledVector(VIEWDIR[k].clone().normalize(), c.dist * (PAPER ? (matchMedia('(orientation:portrait)').matches ? 1.08 : .9) : narrow ? 1.02 : 1)), tg]; }
+  const fit = c.fitW ? clamp((c.fitW / 2) / (Math.tan(camera.fov * D / 2) * camera.aspect), 8, 30) : 0; // 가로로 fitW(m)가 다 보이는 거리
+  controls.maxDistance = Math.max(7, (fit || c.dist) * 1.5); scene.fog.far = Math.max(PAPER ? 22 : 16, (fit || c.dist) * 2.6); scene.fog.near = Math.max(PAPER ? 9 : 7, (fit || c.dist) * 1.1);
+  if (fit) return [tg.clone().addScaledVector((c.dirs?.[k] || VIEWDIR[k]).clone().normalize(), k === 'side' ? fit : fit * .8), tg];
+  return [tg.clone().addScaledVector((c.dirs?.[k] || VIEWDIR[k]).clone().normalize(), c.dist * (PAPER ? (matchMedia('(orientation:portrait)').matches ? 1.08 : .9) : narrow ? 1.02 : 1)), tg]; }
 function setView(k) { state.view = k; camGoal = camFor(k); document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === k)); }
 const scenesEl = $('scenes'), mqNarrow = matchMedia('(max-width:900px)');
 function focusStage() { // 폰에서는 무엇을 누르든 3D 화면이 보이게
@@ -2633,14 +2734,14 @@ function updatePanel() {
 // ---------- 그리기 ----------
 function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < 560 ? 46 : 36; const mn = document.getElementById('mini'), ox = mn && mn.offsetWidth && !mn.classList.contains('closed') ? (mn.offsetWidth + 10) / 2 : 0; // 근육 패널만큼 인형을 왼쪽으로
   const oy = PAPER ? Math.min(28, h * .11) : 0; if (ox || oy) camera.setViewOffset(w, h, ox, oy, w, h); else camera.clearViewOffset(); camera.updateProjectionMatrix(); }
-new ResizeObserver(resize).observe(canvas); resize();
+new ResizeObserver(() => { resize(); if (state.def?.cam?.fitW) camGoal = camFor(state.view); }).observe(canvas); resize();
 const clock = new THREE.Clock(); let time = 0;
 function loop() {
   const dt = Math.min(clock.getDelta(), .05); time += dt;
   if (state.playing) { const loopM = state.def.cycle === 'loop'; state.phase += dt / (state.def.period || 4.4);
     state.t = loopM ? state.phase % 1 : .5 - .5 * Math.cos(state.phase * 2 * Math.PI); slider.value = Math.round(state.t * 1000); }
   if (camGoal) { camera.position.lerp(camGoal[0], .09); controls.target.lerp(camGoal[1], .09); if (camera.position.distanceTo(camGoal[0]) < .02) camGoal = null; }
-  fig.update(state.def, state.v, state.t, time); state.def.frame?.(state.t, state.v, fig.P); archFrame(state.def, state.v, state.t, fig.P); state.com = updateCom(state.def, fig.P);
+  fig.update(state.def, state.v, state.t, time); state.def.frame?.(state.t, state.v, fig.P); archFrame(state.def, state.v, state.t, fig.P); throwFrame(state.def, state.v, state.t, fig.P); state.com = updateCom(state.def, fig.P);
   if (state.ghost) ghost.update(state.def, 'good', state.t, time);
   { const multi = state.def.variants[state.v]?.multi || []; extras.forEach((f, i) => { const m = multi[i]; f.g.visible = !!m; if (m) { f.g.position.x = m.x; f.update(m.def, m.v, state.t, time); } });
     fig.g.position.x = 0; if (state.def.livePanel && time - (state.panelAt || 0) > .3) { state.panelAt = time; $('prCard').innerHTML = state.def.panel(state.v, state.t); } }
@@ -2734,7 +2835,7 @@ syncPlay(); slider.value = Math.round(state.t * 1000);
 $('load').remove(); window.__state = state; window.__setMove = setMove; window.__setScene = setScene; window.__setVariant = setVariant; window.__ready = true;
 // ---------- 책 모드 ----------
 const BOOK = [
-  { t: '기본 움직임', d: '움직임마다 기본 · 응용 · 일상에서 · 스포츠에서', ch: ['squat', 'lunge', 'pushup', 'pull', 'hinge', 'plank'] },
+  { t: '기본 움직임', d: '움직임마다 기본 · 응용 · 일상에서 · 스포츠에서', ch: ['squat', 'lunge', 'pushup', 'pull', 'throw', 'hinge', 'plank'] },
   { t: '체력과 트레이닝', d: '체력 요소와 트레이닝 원리', ch: ['fitness', 'train'] }];
 const PAGES = []; BOOK.forEach((u, ui) => u.ch.forEach((m, ci) => { const M = MOVES[m]; (M.scenes || [['base', '기본', M]]).forEach(([sc, , d]) => PAGES.push({ ui, ci, m, sc, label: d.sceneLabel || M.name, neutral: !!d.neutral })); }));
 const GOALS = {
@@ -2815,7 +2916,7 @@ if (PAPER) {
   { const fl = new THREE.Mesh(new THREE.CircleGeometry(7, 48), new THREE.MeshStandardMaterial({ color: 0xece4d0, roughness: 1 })); fl.rotation.x = -Math.PI / 2; fl.receiveShadow = true; scene.add(fl);
     const gh = new THREE.GridHelper(14, 28, 0xd6cbb2, 0xe0d7c2); gh.position.y = .002; scene.add(gh); }
   for (const fg of [fig, ...extras]) fg.skin.color.set(0xc3cedb);
-  const MV = ['squat', 'lunge', 'pushup', 'pull', 'hinge', 'plank'], SEQ = [];
+  const MV = ['squat', 'lunge', 'pushup', 'pull', 'throw', 'hinge', 'plank'], SEQ = [];
   for (const m of MV) for (const [g, lb] of FRAME) for (const x of MOVES[m].scenes.filter(x => x[1] === g)) SEQ.push({ m, sc: x[0], g, d: x[2], ch: MOVES[m].name, grp: lb });
   for (const m of ['fitness', 'train']) for (const x of MOVES[m].scenes) SEQ.push({ m, sc: x[0], g: null, d: x[2], ch: MOVES[m].name, grp: '' });
   SEQ.push({ m: 'body', sc: 'base', g: null, d: BODYMAP, ch: '몸 지도', grp: '' });
@@ -2865,7 +2966,7 @@ if (PAPER) {
     const cnt = k => FRAME.map(([g, lb]) => `${lb.replace('에서', '')} ${MOVES[k].scenes.filter(x => x[1] === g).length}`).join(' · ');
     $('pbToc').innerHTML = `<section class="pg pg-l toc-l"><span class="ribbon">차례</span><h1><span>3D 체육 교과서</span></h1><p class="toc-desc">움직임을 고르면 기본 · 응용 · 일상에서 · 스포츠에서 장면이 나와요.</p>
         <div class="toc-moves">${MV.map((k, n) => `<button type="button" class="toc-mv" data-m="${k}" aria-pressed="${k === tocMove}"><small>운동 ${n + 1}</small><b>${MOVES[k].name}</b><span>${cnt(k)}</span></button>`).join('')}</div>
-        <div class="toc-extra"><button type="button" class="toc-mv x1" data-m="fitness"><b>💓 체력 요소</b><span>체력의 5가지 영역</span></button><button type="button" class="toc-mv x2" data-m="train"><b>🏋️ 트레이닝 원리</b><span>효과적인 운동 방법</span></button><button type="button" class="toc-mv x3" data-m="body"><b>🧍 몸 지도</b><span>근육으로 운동 찾기</span></button><a class="toc-link x4" href="throw.html"><b>⚾ 던지기 원리</b><span>타점과 공의 길</span></a></div>
+        <div class="toc-extra"><button type="button" class="toc-mv x1" data-m="fitness"><b>💓 체력 요소</b><span>체력의 5가지 영역</span></button><button type="button" class="toc-mv x2" data-m="train"><b>🏋️ 트레이닝 원리</b><span>효과적인 운동 방법</span></button><button type="button" class="toc-mv x3" data-m="body"><b>🧍 몸 지도</b><span>근육으로 운동 찾기</span></button></div>
         ${started ? '<button type="button" class="toc-resume" id="tocResume">보던 장면으로 돌아가기 ›</button>' : ''}</section>
       <section class="pg pg-r toc-r">${chapter(tocMove)}</section>`;
     $('pbToc').dataset.view = view; $('pbToc').hidden = false; $('pbBook').hidden = true; root.dataset.toc = '1';
