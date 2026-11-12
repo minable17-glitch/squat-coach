@@ -639,6 +639,35 @@ body.throwing .mini{display:none}
 .thl span{display:flex;align-items:center;gap:4px;opacity:.6}
 .thl span.on{opacity:1;font-weight:700}
 .thl i{width:9px;height:9px;border-radius:50%}
+
+/* 던지기: 3D 화면 위에서 자세와 타점을 바로 바꾸는 버튼 */
+.thbox{pointer-events:auto;max-width:calc(100% - 16px)}
+.thl{gap:5px;opacity:1}
+.thl button{display:flex;align-items:center;gap:5px;font:inherit;font-size:12.5px;font-weight:600;min-height:38px;padding:0 10px;border-radius:10px;border:1.5px solid rgba(128,128,128,.35);background:rgba(128,128,128,.12);color:inherit;cursor:pointer;opacity:.75}
+.thl button.on{opacity:1;font-weight:700;border-color:currentColor}
+.thl button i{width:10px;height:10px;border-radius:50%}
+.thadj{position:absolute;left:10px;bottom:62px;z-index:2;display:flex;align-items:center;gap:6px;background:var(--overlay);color:var(--overlay-ink);border-radius:12px;padding:5px}
+.thadj[hidden]{display:none}
+.thadj button{font:inherit;font-size:14px;font-weight:700;min-height:42px;padding:0 12px;border-radius:10px;border:1.5px solid rgba(128,128,128,.4);background:rgba(128,128,128,.14);color:inherit;cursor:pointer;white-space:nowrap}
+.thadj span{font-size:11.5px;line-height:1.2;text-align:center;min-width:62px;color:var(--overlay-muted)}
+.thadj span b{display:block;font-size:14px;color:var(--overlay-ink)}
+body.paper .thadj{left:8px;bottom:62px;border:1.5px solid var(--pline)}
+body.paper .thadj button,body.paper .thl button{background:#fff;border-color:var(--pline)}
+body.paper .thl button.on{border-color:var(--navy);background:var(--lime)}
+@media (max-width:900px){.stage:not(body.paper .stage) .thadj{bottom:auto;top:auto}}
+
+.thbox .thr{max-width:calc(100% - 158px)}
+.thl{flex-wrap:nowrap}
+.thl button{padding:0 9px;white-space:nowrap}
+.thadj,body.paper .thadj{left:auto;right:8px;top:8px;bottom:auto;gap:4px;padding:4px}
+.thadj button{min-width:42px;padding:0}
+.thadj span{min-width:56px}
+
+.thbox,body.paper .thbox{left:8px;right:8px;top:8px;width:auto;max-width:none;background:none;border:0;padding:0;pointer-events:none;gap:5px}
+.thbox .thr{justify-self:start;max-width:calc(100% - 166px);background:var(--overlay);border-radius:10px;padding:5px 9px;pointer-events:auto}
+body.paper .thbox .thr{border:1.5px solid var(--pline)}
+.thl{pointer-events:none}
+.thl button{pointer-events:auto;background:var(--overlay)}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -670,6 +699,7 @@ body.throwing .mini{display:none}
       <div class="labels" id="labels"></div>
       <div class="chips" id="chips"></div>
       <div class="thbox" id="throwBox" hidden></div>
+      <div class="thadj" id="throwAdj" hidden><button type="button" data-d="-3" aria-label="더 일찍 놓기">◀</button><span id="thAdjV"></span><button type="button" data-d="3" aria-label="더 늦게 놓기">▶</button></div>
       <div class="aimbox" id="aimbox" hidden><b>과녁에 맞은 자리</b><svg viewBox="-1.08 -1.08 2.16 2.16" aria-hidden="true"><circle r="1" fill="#f1f3f5"/><circle r=".8" fill="#212529"/><circle r=".6" fill="#228be6"/><circle r=".4" fill="#e03131"/><circle r=".2" fill="#fcc419"/><path d="M-1 0H1M0-1V1" stroke="rgba(255,255,255,.35)" stroke-width=".015"/><g id="aimDots"></g></svg><span id="aimTxt"></span></div>
       <div class="mini" id="mini"><button class="mh" id="miniT" type="button" aria-expanded="true">일하는 근육 ▾</button><div class="ml" id="miniL"></div></div>
       <div class="hint">끌어서 돌리기 · 휠로 확대 · 근육과 ⚠를 눌러 보세요</div>
@@ -2035,13 +2065,13 @@ MOVES.pushup.scenes.push(['burpee', '응용', BURPEE]);
 MOVES.hinge.scenes = [['base', '기본', MOVES.hinge], ['swing', '응용', SWING]];
 MOVES.plank.scenes.push(['carry', '응용', CARRY], ['climber', '응용', CLIMBER]);
 // ---------- 던지기: 놓는 타점과 공의 길 (투사체 운동) ----------
-const TH = { DIST: 12, MITT: [.5, 1.4], uR: .3, fit: {}, calc: {} };
+const TH = { DIST: 12, MITT: [.5, 1.4], uR: .3, fit: {}, calc: {}, adj: 0 }; // adj: 3D 화면 버튼으로 옮긴 타점(도). -는 일찍, +는 늦게
 function throwSpec(q) { const u = q.t, uR = TH.uR, full = q.mode === 'full', arm = q.mode === 'arm';
   const st = full ? ss(.08, .28, u) * (1 - ss(.78, .98, u)) : 0;
   const feet = { 1: footStand(.13, -.12, 28 * ss(.24, .36, u) * (1 - ss(.7, .9, u)), 1), [-1]: footStand(-.13, .28 + .38 * st, 0, -1) };
   const lean = full ? -12 * ss(.05, .2, u) + 36 * ss(.2, .36, u) - 24 * ss(.7, .95, u) : -4 * ss(.05, .2, u) + 12 * ss(.2, .36, u) - 8 * ss(.7, .95, u);
-  const hip = V(0, .955 - .09 * st, .08 + .3 * st), pr = -(180 + q.a); let fR, eR;
-  if (arm) { fR = 35 * ss(0, .15, u) * (1 - ss(.75, .95, u)); eR = 150 * ss(0, .18, u) - 130 * clamp((u - uR + .02) / .12) - 20 * ss(.75, .95, u); } // 팔꿈치가 처진 채 팔뚝만 펴기
+  const a = q.a + TH.adj, hip = V(0, .955 - .09 * st, .08 + .3 * st), pr = -(180 + a); let fR, eR;
+  if (arm) { fR = 35 * ss(0, .15, u) * (1 - ss(.75, .95, u)); eR = 150 * ss(0, .18, u) - 130 * clamp((u - uR + .02 + a * .0016) / .12) - 20 * ss(.75, .95, u); } // 팔꿈치가 처진 채 팔뚝만 펴기
   else { fR = u < .18 ? -110 * ss(0, .18, u) : u < uR ? -110 + (pr + 110) * ((u - .18) / (uR - .18)) : u < .44 ? pr + (-330 - pr) * ((u - uR) / (.44 - uR)) : -330 - 30 * ss(.6, .92, u);
     eR = 85 * ss(.06, .18, u) * (1 - ss(.2, uR, u)); }
   const fL = 75 * ss(.04, .2, u) * (1 - ss(.24, .4, u)), eL = 20 + 70 * ss(.24, .4, u) * (1 - ss(.75, .95, u));
@@ -2051,8 +2081,8 @@ function throwSim(q) { // 놓는 순간 손의 위치와 방향 → 중력만 �
   const vel = dir.clone().multiplyScalar(q.v), pts = []; let end = null;
   for (let t = 0; t < 4; t += .02) { const y = pos.y + vel.y * t - 4.9 * t * t, z = pos.z + vel.z * t; if (y <= .06) { pts.push(V(0, .06, z)); end = { ground: z, T: t }; break; } if (z >= TH.DIST) { pts.push(V(0, y, TH.DIST)); end = { h: y, T: t }; break; } pts.push(V(0, y, z)); }
   return { pos, dir, vel, pts, end: end || { h: 99, T: 4 }, up: Math.atan2(dir.y, dir.z) / D }; }
-function thFit(v, mode) { const k = v + mode; if (TH.fit[k] != null) return TH.fit[k]; let best = -6, bd = 1e9;
-  for (let a = -40; a <= 25; a += .5) { const e = throwSim({ a, v, mode }).end; if (e.h == null) continue; const d = Math.abs(e.h - .95); if (d < bd) { bd = d; best = a; } } return TH.fit[k] = best; }
+function thFit(v, mode) { const k = v + mode; if (TH.fit[k] != null) return TH.fit[k]; let best = -6, bd = 1e9; const keep = TH.adj; TH.adj = 0;
+  for (let a = -40; a <= 25; a += .5) { const e = throwSim({ a, v, mode }).end; if (e.h == null) continue; const d = Math.abs(e.h - .95); if (d < bd) { bd = d; best = a; } } TH.adj = keep; return TH.fit[k] = best; }
 const thVerdict = e => e.h == null ? ['no', `미트 앞 ${(TH.DIST - e.ground).toFixed(1)} m에서 땅에 닿음`] : e.h > TH.MITT[1] ? ['no', `미트보다 ${(e.h - TH.MITT[1]).toFixed(1)} m 높게 지나감`] : e.h < TH.MITT[0] ? ['no', '미트보다 낮게 들어옴'] : ['ok', '미트에 쏙!'];
 const thAct = (v, P) => { const m = P.q.mode, k = ss(.1, .3, P.q.t) * (1 - ss(.36, .6, P.q.t));
   return m === 'arm' ? { tri: .2 + .65 * k, delt: .25 + .2 * k, abs: .2, lat: .1, glute: .1, quad: .15 } : m === 'shoulder' ? { delt: .3 + .6 * k, lat: .2 + .5 * k, tri: .2 + .6 * k, abs: .3 + .2 * k, glute: .15, quad: .2 } : { delt: .3 + .6 * k, lat: .2 + .55 * k, tri: .2 + .6 * k, abs: .35 + .5 * k, glute: .3 + .55 * k, quad: .3 + .5 * k }; };
@@ -2062,20 +2092,20 @@ const TH_BASE = { env: 'field', props: ['throwing'], cycle: 'loop', period: 4.2,
   notes: { abs: { good: '허리가 돌며 만든 힘을 어깨와 팔로 넘겨 줘요.' }, glute: { good: '발을 내딛고 버티는 다리와 엉덩이가 힘의 시작이에요.' } } };
 const TH_REL = { ...TH_BASE, name: '타점과 공의 길', sceneLabel: '타점과 공의 길',
   variants: {
-    good: { name: '알맞은 타점', desc: '공은 손을 떠나는 순간 손이 가던 방향으로 날아가요. 팔이 머리 위를 지나 앞으로 나오는 순간에 놓으면 공이 거의 앞으로 떠나요. 날아가는 동안 중력이 조금씩 끌어내려서, 완만한 곡선을 그리며 포수 미트로 들어가요.',
+    good: { short: '알맞게', name: '알맞은 타점', desc: '공은 손을 떠나는 순간 손이 가던 방향으로 날아가요. 팔이 머리 위를 지나 앞으로 나오는 순간에 놓으면 공이 거의 앞으로 떠나요. 날아가는 동안 중력이 조금씩 끌어내려서, 완만한 곡선을 그리며 포수 미트로 들어가요.',
       checks: ['팔이 머리 위를 지나 앞으로 나올 때 놓기', '손끝이 미트를 향하게 끝까지 뻗기', '초록 선: 공이 날아간 길', '파란 화살표: 공이 손을 떠나는 방향'], p: t => ({ t, a: thFit(20, 'full'), mode: 'full', v: 20 }) },
-    early: { name: '일찍 놓음 → 높이 뜸', desc: '팔이 아직 머리 뒤에 있을 때 공을 놓았어요.',
+    early: { short: '일찍', name: '일찍 놓음 → 높이 뜸', desc: '팔이 아직 머리 뒤에 있을 때 공을 놓았어요.',
       why: '이때 손은 아직 위로 올라가는 중이에요. 그래서 공도 위로 떠나서 높은 포물선을 그려요. 미트 위로 한참 지나가고, 같은 거리를 가는 데 시간도 더 걸려요.', fix: ['공을 조금 더 오래 쥐고 있기', '팔이 귀 옆을 지난 뒤에 놓기', '시선은 끝까지 미트에'], p: t => ({ t, a: -30, mode: 'full', v: 20 }) },
-    late: { name: '늦게 놓음 → 땅에 꽂힘', desc: '팔이 몸 앞으로 한참 내려온 뒤에 공을 놓았어요.',
+    late: { short: '늦게', name: '늦게 놓음 → 땅에 꽂힘', desc: '팔이 몸 앞으로 한참 내려온 뒤에 공을 놓았어요.',
       why: '이때 손은 이미 아래로 내려가는 중이에요. 그래서 공도 아래로 떠나서 미트에 가기 전에 땅에 꽂혀요.', fix: ['공을 조금 더 일찍 놓기', '팔이 머리 앞 높은 곳에 있을 때 놓기', '손목을 미리 꺾지 않기'], p: t => ({ t, a: 20, mode: 'full', v: 20 }) },
   } };
 const TH_CHAIN = { ...TH_BASE, name: '온몸으로 던지기', sceneLabel: '야구: 온몸으로 던지기',
   variants: {
-    good: { name: '온몸으로 (다리·허리·어깨)', desc: '발을 내딛고 허리를 돌린 힘이 어깨, 팔꿈치, 손목으로 차례로 전해져요. 채찍처럼 끝으로 갈수록 빨라져서 공이 가장 빨라요. 빠른 공은 떨어질 시간이 짧아 직선에 가깝게 미트로 들어가요.',
+    good: { short: '온몸으로', name: '온몸으로 (다리·허리·어깨)', desc: '발을 내딛고 허리를 돌린 힘이 어깨, 팔꿈치, 손목으로 차례로 전해져요. 채찍처럼 끝으로 갈수록 빨라져서 공이 가장 빨라요. 빠른 공은 떨어질 시간이 짧아 직선에 가깝게 미트로 들어가요.',
       checks: ['앞발을 크게 내딛기', '허리가 먼저 돌고 어깨가 따라오기', '팔꿈치를 어깨 높이로', '던진 뒤 몸이 앞으로 따라가기'], p: t => ({ t, a: thFit(23, 'full'), mode: 'full', v: 23 }) },
-    shoulder: { ok: true, name: '어깨까지만 (제자리에서)', desc: '다리와 허리는 쓰지 않고 제자리에 서서 어깨와 팔로만 던져요. 팔꿈치는 어깨 높이로 올라가지만 힘을 보태는 부위가 줄어서 공이 느려져요. 같은 타점에서 놓으면 미트 앞에서 땅에 닿아요. 미트까지 보내려면 더 높이 띄워야 해서 포물선이 돼요.',
+    shoulder: { ok: true, short: '어깨까지', name: '어깨까지만 (제자리에서)', desc: '다리와 허리는 쓰지 않고 제자리에 서서 어깨와 팔로만 던져요. 팔꿈치는 어깨 높이로 올라가지만 힘을 보태는 부위가 줄어서 공이 느려져요. 같은 타점에서 놓으면 미트 앞에서 땅에 닿아요. 미트까지 보내려면 더 높이 띄워야 해서 포물선이 돼요.',
       checks: ['어깨와 팔은 잘 쓰고 있어요', '발을 내딛고 허리를 돌리면 더 빨라져요'], p: t => ({ t, a: thFit(23, 'full'), mode: 'shoulder', v: 17 }) },
-    arm: { name: '팔로만 밀어 던지기', danger: [['shoulder', [1]]], desc: '팔꿈치가 어깨보다 낮게 처진 채 팔뚝만 펴서 공을 밀어 던져요.',
+    arm: { short: '팔로만', name: '팔로만 밀어 던지기', danger: [['shoulder', [1]]], desc: '팔꿈치가 어깨보다 낮게 처진 채 팔뚝만 펴서 공을 밀어 던져요.',
       why: '작은 팔 근육만 쓰니 공이 가장 느려요. 느린 공은 금방 떨어져서 미트까지 못 가요. 또 팔꿈치가 처진 채 세게 던지려고 하면 어깨와 팔꿈치 안쪽에 무리가 가요.', fix: ['팔꿈치를 어깨 높이까지 들기', '어깨를 돌려 팔꿈치가 먼저 나오게', '앞발을 내딛고 허리 돌리기'], p: t => ({ t, a: 0, mode: 'arm', v: 11 }) },
   } };
 MOVES.throw = { name: '던지기', pattern: '공을 놓는 타점과 온몸의 힘', uses: null, scenes: [['base', '기본', TH_REL], ['chain', '스포츠', TH_CHAIN]] };
@@ -2340,8 +2370,10 @@ const TH3 = (() => { const g = PROPS.throwing, DZ = TH.DIST;
   const tubes = new THREE.Group(); g.add(tubes); const mark = new THREE.Mesh(new THREE.SphereGeometry(.11, 16, 12), new THREE.MeshBasicMaterial({ color: 0xffffff })); g.add(mark);
   return { ball, arrow, ring, tubes, mark, key: '', sims: {} }; })();
 const TH_COL = [0x2f8a4e, 0x1c7ed6, 0xe8590c], TH_CSS = ['#2f8a4e', '#1c7ed6', '#e8590c'];
-function throwFrame(M, vk, t, P) { const box = $('throwBox'); if (!M.throwing) { if (!box.hidden) { box.hidden = true; document.body.classList.remove('throwing'); } return; } document.body.classList.add('throwing');
-  const keys = Object.keys(M.variants), key = state.m + state.sc;
+function throwFrame(M, vk, t, P) { const box = $('throwBox'), adj = $('throwAdj'); if (!M.throwing) { if (!box.hidden) { box.hidden = adj.hidden = true; document.body.classList.remove('throwing'); } return; } document.body.classList.add('throwing');
+  if (TH3.scene !== state.m + state.sc) { TH3.scene = state.m + state.sc; TH.adj = 0; }
+  if (!adj.dataset.on) { adj.dataset.on = 1; adj.querySelectorAll('button').forEach(b => b.onclick = () => { TH.adj = clamp(TH.adj + +b.dataset.d, -30, 30); }); }
+  const keys = Object.keys(M.variants), key = state.m + state.sc + TH.adj;
   if (TH3.key !== key) { TH3.key = key; TH3.sims = {}; while (TH3.tubes.children.length) { const c = TH3.tubes.children.pop(); c.geometry.dispose(); c.material.dispose(); }
     keys.forEach((k, i) => { const sim = throwSim(M.variants[k].p(TH.uR)); TH3.sims[k] = sim;
       const m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(sim.pts.length > 1 ? sim.pts : [sim.pos, sim.pos.clone().add(V(0, 0, .1))]), 80, .05, 8), new THREE.MeshBasicMaterial({ color: TH_COL[i % 3], transparent: true })); m.userData.k = k; TH3.tubes.add(m); }); TH3.hud = ''; }
@@ -2350,9 +2382,11 @@ function throwFrame(M, vk, t, P) { const box = $('throwBox'); if (!M.throwing) {
   if (u < uR) TH3.ball.position.copy(P.side[1].wr); else { const tt = Math.min(1, (u - uR) / fl) * sim.end.T; TH3.ball.position.set(0, Math.max(.075, sim.pos.y + sim.vel.y * tt - 4.9 * tt * tt), Math.min(TH.DIST, sim.pos.z + sim.vel.z * tt)); TH3.ball.rotation.x = tt * 14; }
   TH3.arrow.position.copy(sim.pos); TH3.arrow.setDirection(sim.dir); TH3.ring.position.copy(sim.pos); TH3.arrow.visible = TH3.ring.visible = true; TH3.arrow.setColor(TH_COL[i % 3]); TH3.ring.material.color.setHex(TH_COL[i % 3]);
   const e = sim.pts[sim.pts.length - 1]; TH3.mark.position.copy(e); TH3.mark.material.color.setHex(sim.end.h != null && thVerdict(sim.end)[0] === 'ok' ? 0x2f8a4e : 0xe03131);
-  const hk = key + vk; if (TH3.hud === hk && !box.hidden) return; TH3.hud = hk; box.hidden = false;
+  const hk = key + vk; if (TH3.hud === hk && !box.hidden) return; TH3.hud = hk; box.hidden = adj.hidden = false;
+  $('thAdjV').innerHTML = TH.adj === 0 ? '타점<b>기준</b>' : `타점<b>${Math.abs(TH.adj)}° ${TH.adj < 0 ? '일찍' : '늦게'}</b>`;
   const [c, tx] = thVerdict(sim.end), q = M.variants[vk].p(TH.uR);
-  box.innerHTML = `<div class="thr on"><i style="background:${TH_CSS[i % 3]}"></i><span><em>${Math.round(q.v * 3.6)} km/h · ${sim.up >= 0 ? '위로' : '아래로'} ${Math.abs(Math.round(sim.up))}° · ${sim.end.T.toFixed(2)}초</em><u class="${c}">${tx}</u></span></div><div class="thl">${keys.map((k, j) => `<span${k === vk ? ' class="on"' : ''}><i style="background:${TH_CSS[j % 3]}"></i>${M.variants[k].name.split(' → ')[0].split(' (')[0]}</span>`).join('')}</div>`;
+  box.innerHTML = `<div class="thr on"><i style="background:${TH_CSS[i % 3]}"></i><span><em>${Math.round(q.v * 3.6)} km/h · ${sim.up >= 0 ? '위로' : '아래로'} ${Math.abs(Math.round(sim.up))}° · ${sim.end.T.toFixed(2)}초</em><u class="${c}">${tx}</u></span></div><div class="thl">${keys.map((k, j) => `<button type="button" data-k="${k}"${k === vk ? ' class="on"' : ''}><i style="background:${TH_CSS[j % 3]}"></i>${M.variants[k].short || M.variants[k].name}</button>`).join('')}</div>`;
+  box.querySelectorAll('[data-k]').forEach(b => b.onclick = () => setVariant(b.dataset.k));
 }
 const AR = (() => { const g = PROPS.archery, ringC = [0xf1f3f5, 0x212529, 0x228be6, 0xe03131, 0xfcc419];
   const face = new THREE.Group(); face.position.copy(T_C); face.rotation.y = Math.PI / 2; g.add(face);
