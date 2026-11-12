@@ -668,6 +668,35 @@ body.paper .thl button.on{border-color:var(--navy);background:var(--lime)}
 body.paper .thbox .thr{border:1.5px solid var(--pline)}
 .thl{pointer-events:none}
 .thl button{pointer-events:auto;background:var(--overlay)}
+
+/* 종이 버전: 자세 고르기 버튼을 3D 화면 위로 (글 칸은 글만) */
+body.paper .stage .tabs{position:absolute;left:8px;right:8px;top:8px;z-index:4;margin:0;padding:0;gap:5px;overflow-x:auto}
+body.paper .stage .tabs button{min-height:44px;padding:0 12px;border-radius:12px;border:2px solid var(--pline);background:#fff;color:var(--pmuted);font-size:15px;box-shadow:0 2px 4px rgba(60,40,10,.12)}
+body.paper .stage .tabs button[aria-pressed="true"]{background:#eaf7ec;border-color:var(--good);color:var(--pink)}
+body.paper .stage .tabs button.bad[aria-pressed="true"]{background:#fff0e6;border-color:var(--bad)}
+body.paper .mini,body.paper .aimbox{top:60px}
+.thbox,body.paper .thbox{top:60px}
+.thadj,body.paper .thadj{top:60px}
+body.paper .thl{display:none}
+.thadj button{min-width:0;padding:0 9px;font-size:13.5px}
+.st-cam{left:auto;right:8px;top:auto;bottom:8px}
+.pb .vcard h3{display:flex}
+.pb .vcard h2{display:block;font-size:21px;margin:2px 0 6px}
+.pg-text{border-radius:14px}
+@media (orientation:landscape){
+  .pb-book .pg-l{grid-template-rows:minmax(0,1fr)}
+  .pb-book .pg-l .pg-text{margin-top:0}
+}
+@media (orientation:portrait){
+  .pb-book{grid-template-rows:minmax(0,1fr) minmax(0,1.25fr)}
+  .plate{grid-row:1}.pg-text{grid-row:2;margin-top:0}
+  body.paper .stage .tabs button{min-height:42px;font-size:14.5px;padding:0 10px}
+  body.paper .mini,body.paper .aimbox,body.paper .thbox,body.paper .thadj{top:56px}
+}
+@media (orientation:landscape) and (max-height:440px){.pb .vcard h2{font-size:19px}body.paper .stage .tabs button{min-height:42px;font-size:14.5px}}
+
+.st-cam{padding:0 11px}
+@media (orientation:landscape){body.paper .stage .ctrl{gap:5px;right:92px}body.paper .ctrl button{min-width:40px;padding:0 8px}}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -699,7 +728,7 @@ body.paper .thbox .thr{border:1.5px solid var(--pline)}
       <div class="labels" id="labels"></div>
       <div class="chips" id="chips"></div>
       <div class="thbox" id="throwBox" hidden></div>
-      <div class="thadj" id="throwAdj" hidden><button type="button" data-d="-3" aria-label="더 일찍 놓기">◀</button><span id="thAdjV"></span><button type="button" data-d="3" aria-label="더 늦게 놓기">▶</button></div>
+      <div class="thadj" id="throwAdj" hidden><button type="button" data-d="-3" aria-label="더 뒤에서(일찍) 놓기">◀ 뒤</button><span id="thAdjV"></span><button type="button" data-d="3" aria-label="더 앞에서(늦게) 놓기">앞 ▶</button></div>
       <div class="aimbox" id="aimbox" hidden><b>과녁에 맞은 자리</b><svg viewBox="-1.08 -1.08 2.16 2.16" aria-hidden="true"><circle r="1" fill="#f1f3f5"/><circle r=".8" fill="#212529"/><circle r=".6" fill="#228be6"/><circle r=".4" fill="#e03131"/><circle r=".2" fill="#fcc419"/><path d="M-1 0H1M0-1V1" stroke="rgba(255,255,255,.35)" stroke-width=".015"/><g id="aimDots"></g></svg><span id="aimTxt"></span></div>
       <div class="mini" id="mini"><button class="mh" id="miniT" type="button" aria-expanded="true">일하는 근육 ▾</button><div class="ml" id="miniL"></div></div>
       <div class="hint">끌어서 돌리기 · 휠로 확대 · 근육과 ⚠를 눌러 보세요</div>
@@ -2080,7 +2109,9 @@ function throwSim(q) { // 놓는 순간 손의 위치와 방향 → 중력만 �
   const P1 = build(throwSpec({ ...q, t: TH.uR })), P0 = build(throwSpec({ ...q, t: TH.uR - .012 })), pos = P1.side[1].wr.clone(), dir = pos.clone().sub(P0.side[1].wr); dir.x = 0; dir.normalize();
   const vel = dir.clone().multiplyScalar(q.v), pts = []; let end = null;
   for (let t = 0; t < 4; t += .02) { const y = pos.y + vel.y * t - 4.9 * t * t, z = pos.z + vel.z * t; if (y <= .06) { pts.push(V(0, .06, z)); end = { ground: z, T: t }; break; } if (z >= TH.DIST) { pts.push(V(0, y, TH.DIST)); end = { h: y, T: t }; break; } pts.push(V(0, y, z)); }
-  return { pos, dir, vel, pts, end: end || { h: 99, T: 4 }, up: Math.atan2(dir.y, dir.z) / D }; }
+  return { pos, dir, vel, pts, end: end || { h: 99, T: 4 }, up: Math.atan2(dir.y, dir.z) / D, dy: pos.y - P1.head.y, dz: pos.z - P1.head.z }; }
+const thSpot = s => s.dy < .1 ? (s.dy > -.2 ? '턱 앞' : '가슴 앞') : s.dz < -.22 ? '머리 뒤' : s.dz < -.07 ? '머리 위 뒤쪽' : s.dz <= .07 ? '머리 위' : s.dz <= .18 ? '눈썹 위' : '눈앞';
+window.__thSim = (a, v, mode) => { const k = TH.adj; TH.adj = 0; const r = throwSim({ a, v, mode }); TH.adj = k; return [r.dy.toFixed(2), r.dz.toFixed(2), r.up.toFixed(0)]; };
 function thFit(v, mode) { const k = v + mode; if (TH.fit[k] != null) return TH.fit[k]; let best = -6, bd = 1e9; const keep = TH.adj; TH.adj = 0;
   for (let a = -40; a <= 25; a += .5) { const e = throwSim({ a, v, mode }).end; if (e.h == null) continue; const d = Math.abs(e.h - .95); if (d < bd) { bd = d; best = a; } } TH.adj = keep; return TH.fit[k] = best; }
 const thVerdict = e => e.h == null ? ['no', `미트 앞 ${(TH.DIST - e.ground).toFixed(1)} m에서 땅에 닿음`] : e.h > TH.MITT[1] ? ['no', `미트보다 ${(e.h - TH.MITT[1]).toFixed(1)} m 높게 지나감`] : e.h < TH.MITT[0] ? ['no', '미트보다 낮게 들어옴'] : ['ok', '미트에 쏙!'];
@@ -2092,12 +2123,12 @@ const TH_BASE = { env: 'field', props: ['throwing'], cycle: 'loop', period: 4.2,
   notes: { abs: { good: '허리가 돌며 만든 힘을 어깨와 팔로 넘겨 줘요.' }, glute: { good: '발을 내딛고 버티는 다리와 엉덩이가 힘의 시작이에요.' } } };
 const TH_REL = { ...TH_BASE, name: '타점과 공의 길', sceneLabel: '타점과 공의 길',
   variants: {
-    good: { short: '알맞게', name: '알맞은 타점', desc: '공은 손을 떠나는 순간 손이 가던 방향으로 날아가요. 팔이 머리 위를 지나 앞으로 나오는 순간에 놓으면 공이 거의 앞으로 떠나요. 날아가는 동안 중력이 조금씩 끌어내려서, 완만한 곡선을 그리며 포수 미트로 들어가요.',
-      checks: ['팔이 머리 위를 지나 앞으로 나올 때 놓기', '손끝이 미트를 향하게 끝까지 뻗기', '초록 선: 공이 날아간 길', '파란 화살표: 공이 손을 떠나는 방향'], p: t => ({ t, a: thFit(20, 'full'), mode: 'full', v: 20 }) },
-    early: { short: '일찍', name: '일찍 놓음 → 높이 뜸', desc: '팔이 아직 머리 뒤에 있을 때 공을 놓았어요.',
-      why: '이때 손은 아직 위로 올라가는 중이에요. 그래서 공도 위로 떠나서 높은 포물선을 그려요. 미트 위로 한참 지나가고, 같은 거리를 가는 데 시간도 더 걸려요.', fix: ['공을 조금 더 오래 쥐고 있기', '팔이 귀 옆을 지난 뒤에 놓기', '시선은 끝까지 미트에'], p: t => ({ t, a: -30, mode: 'full', v: 20 }) },
-    late: { short: '늦게', name: '늦게 놓음 → 땅에 꽂힘', desc: '팔이 몸 앞으로 한참 내려온 뒤에 공을 놓았어요.',
-      why: '이때 손은 이미 아래로 내려가는 중이에요. 그래서 공도 아래로 떠나서 미트에 가기 전에 땅에 꽂혀요.', fix: ['공을 조금 더 일찍 놓기', '팔이 머리 앞 높은 곳에 있을 때 놓기', '손목을 미리 꺾지 않기'], p: t => ({ t, a: 20, mode: 'full', v: 20 }) },
+    good: { short: '머리 위', name: '머리 위에서 놓기 (알맞은 타점)', desc: '공은 손을 떠나는 순간 손이 가던 방향으로 날아가요. 손이 머리 위를 지나는 순간에 놓으면 공이 거의 앞으로 떠나요. 날아가는 동안 중력이 조금씩 끌어내려서, 완만한 곡선을 그리며 포수 미트로 들어가요.',
+      checks: ['손이 머리 위에 왔을 때 놓기', '손끝이 미트를 향하게 끝까지 뻗기', '초록 선은 공이 날아간 길', '화살표는 공이 손을 떠나는 방향'], p: t => ({ t, a: thFit(20, 'full'), mode: 'full', v: 20 }) },
+    early: { short: '머리 뒤', name: '머리 뒤에서 놓음 → 높이 뜸', desc: '손이 아직 머리 뒤에 있을 때 공을 놓았어요.',
+      why: '이때 손은 아직 위로 올라가는 중이에요. 그래서 공도 위로 떠나서 높은 포물선을 그려요. 미트 위로 한참 지나가고, 같은 거리를 가는 데 시간도 더 걸려요.', fix: ['공을 조금 더 오래 쥐고 있기', '손이 머리 위까지 온 뒤에 놓기', '시선은 끝까지 미트에'], p: t => ({ t, a: -30, mode: 'full', v: 20 }) },
+    late: { short: '눈앞', name: '눈앞에서 놓음 → 땅에 꽂힘', desc: '손이 눈앞까지 내려온 뒤에 공을 놓았어요.',
+      why: '이때 손은 이미 아래로 내려가는 중이에요. 그래서 공도 아래로 떠나서 미트에 가기 전에 땅에 꽂혀요.', fix: ['공을 조금 더 일찍 놓기', '손이 머리 위에 있을 때 놓기', '손목을 미리 꺾지 않기'], p: t => ({ t, a: 28, mode: 'full', v: 20 }) },
   } };
 const TH_CHAIN = { ...TH_BASE, name: '온몸으로 던지기', sceneLabel: '야구: 온몸으로 던지기',
   variants: {
@@ -2372,7 +2403,7 @@ const TH3 = (() => { const g = PROPS.throwing, DZ = TH.DIST;
 const TH_COL = [0x2f8a4e, 0x1c7ed6, 0xe8590c], TH_CSS = ['#2f8a4e', '#1c7ed6', '#e8590c'];
 function throwFrame(M, vk, t, P) { const box = $('throwBox'), adj = $('throwAdj'); if (!M.throwing) { if (!box.hidden) { box.hidden = adj.hidden = true; document.body.classList.remove('throwing'); } return; } document.body.classList.add('throwing');
   if (TH3.scene !== state.m + state.sc) { TH3.scene = state.m + state.sc; TH.adj = 0; }
-  if (!adj.dataset.on) { adj.dataset.on = 1; adj.querySelectorAll('button').forEach(b => b.onclick = () => { TH.adj = clamp(TH.adj + +b.dataset.d, -30, 30); }); }
+  if (!adj.dataset.on) { adj.dataset.on = 1; adj.querySelectorAll('button').forEach(b => b.onclick = () => { TH.adj = clamp(TH.adj + 2 * +b.dataset.d, -36, 36); }); }
   const keys = Object.keys(M.variants), key = state.m + state.sc + TH.adj;
   if (TH3.key !== key) { TH3.key = key; TH3.sims = {}; while (TH3.tubes.children.length) { const c = TH3.tubes.children.pop(); c.geometry.dispose(); c.material.dispose(); }
     keys.forEach((k, i) => { const sim = throwSim(M.variants[k].p(TH.uR)); TH3.sims[k] = sim;
@@ -2383,9 +2414,9 @@ function throwFrame(M, vk, t, P) { const box = $('throwBox'), adj = $('throwAdj'
   TH3.arrow.position.copy(sim.pos); TH3.arrow.setDirection(sim.dir); TH3.ring.position.copy(sim.pos); TH3.arrow.visible = TH3.ring.visible = true; TH3.arrow.setColor(TH_COL[i % 3]); TH3.ring.material.color.setHex(TH_COL[i % 3]);
   const e = sim.pts[sim.pts.length - 1]; TH3.mark.position.copy(e); TH3.mark.material.color.setHex(sim.end.h != null && thVerdict(sim.end)[0] === 'ok' ? 0x2f8a4e : 0xe03131);
   const hk = key + vk; if (TH3.hud === hk && !box.hidden) return; TH3.hud = hk; box.hidden = adj.hidden = false;
-  $('thAdjV').innerHTML = TH.adj === 0 ? '타점<b>기준</b>' : `타점<b>${Math.abs(TH.adj)}° ${TH.adj < 0 ? '일찍' : '늦게'}</b>`;
+  $('thAdjV').innerHTML = `놓는 곳<b>${thSpot(sim)}</b>`;
   const [c, tx] = thVerdict(sim.end), q = M.variants[vk].p(TH.uR);
-  box.innerHTML = `<div class="thr on"><i style="background:${TH_CSS[i % 3]}"></i><span><em>${Math.round(q.v * 3.6)} km/h · ${sim.up >= 0 ? '위로' : '아래로'} ${Math.abs(Math.round(sim.up))}° · ${sim.end.T.toFixed(2)}초</em><u class="${c}">${tx}</u></span></div><div class="thl">${keys.map((k, j) => `<button type="button" data-k="${k}"${k === vk ? ' class="on"' : ''}><i style="background:${TH_CSS[j % 3]}"></i>${M.variants[k].short || M.variants[k].name}</button>`).join('')}</div>`;
+  box.innerHTML = `<div class="thr on"><i style="background:${TH_CSS[i % 3]}"></i><span><em>${thSpot(sim)}에서 놓음 · ${Math.round(q.v * 3.6)} km/h · ${sim.up >= 0 ? '위로' : '아래로'} ${Math.abs(Math.round(sim.up))}°</em><u class="${c}">${tx}</u></span></div><div class="thl">${keys.map((k, j) => `<button type="button" data-k="${k}"${k === vk ? ' class="on"' : ''}><i style="background:${TH_CSS[j % 3]}"></i>${M.variants[k].short || M.variants[k].name}</button>`).join('')}</div>`;
   box.querySelectorAll('[data-k]').forEach(b => b.onclick = () => setVariant(b.dataset.k));
 }
 const AR = (() => { const g = PROPS.archery, ringC = [0xf1f3f5, 0x212529, 0x228be6, 0xe03131, 0xfcc419];
@@ -2964,10 +2995,10 @@ if (PAPER) {
         <section class="pg pg-r" id="pgR"><div class="plate" id="pbPlate"></div></section></div></main>
     <footer class="pb-pager"><button type="button" class="turn" id="pbPrev">‹ 이전</button><span class="pgdots" id="pbPg"></span><button type="button" class="turn nx" id="pbNext">다음 ›</button></footer>`;
   document.body.prepend(root);
-  $('pbPlate').append($('stage')); $('pgL').insertBefore($('tabs'), $('pgText'));
+  $('pbPlate').append($('stage')); $('stage').append($('tabs'));
   $('pgFlow').append($('vcard'), $('prCard'), $('bodyCard'), $('labCard'), $('tryCard'), $('dname').closest('section'), $('mlist').closest('section'));
   $('miniT').textContent = '주로 쓰는 근육'; $('miniT').onclick = null;
-  $('stage').insertAdjacentHTML('beforeend', '<a class="st-cam" id="stCam" target="_blank" rel="noopener" hidden>📷 내 자세 평가</a>');
+  $('stage').insertAdjacentHTML('beforeend', '<a class="st-cam" id="stCam" target="_blank" rel="noopener" hidden>📷 평가</a>');
   const mqPort = matchMedia('(orientation:portrait)'), GAP = 32; let cur = 0, started = false, tocMove = 'squat', tp = 0, tpN = 1, lastKey = '';
   const idxOf = (m, sc) => SEQ.findIndex(p => p.m === m && p.sc === sc), firstOf = m => SEQ.findIndex(p => p.m === m);
   function flow() { const fl = $('pgFlow'); $('nvYt').hidden = $('vyt').hidden || !$('pbToc').hidden; $('nvYt').href = $('vyt').href; { const c = $('stCam'), on = !$('tryCard').hidden; c.hidden = !on; if (on) { const u = new URL(document.querySelector('#tryCard .trylinks a').href); u.searchParams.delete('mode'); c.href = u.href; } } if ($('pbBook').hidden) return; const key = state.m + state.sc + state.v; if (key !== lastKey) { lastKey = key; tp = 0; }
