@@ -1004,6 +1004,23 @@ body.hybrid .pb[data-vw="3d"] .pg-l,body.hybrid .pb[data-vw="text"] .pg-r{displa
 body.hybrid .pb[data-toc="1"] .nv-view,body.hybrid .pb[data-toc="1"] .nv-yt{display:none!important}
 body.hybrid .st-cam{right:8px}
 body.hybrid.paper .stage .ctrl{right:64px}
+
+/* 합친 버전 장면 화면: 3D 안에는 인형만. 자세 버튼은 위, 근육·조작은 아래로 뺌 */
+body.hybrid #sbS{display:none!important}
+body.hybrid .pb .stage{display:flex!important;flex-direction:column;background:#f4eedf}
+body.hybrid .pb .stage canvas{order:1;flex:1 1 0;min-height:0;height:auto!important}
+body.hybrid .pb .sbar{order:0;position:static;flex:none;padding:6px 6px 4px;background:#fbf5e6;border-bottom:1px solid var(--pline)}
+body.hybrid .pb .sb{min-height:40px;font-size:14.5px;box-shadow:none}
+body.hybrid .pb .labels{top:var(--sbh,50px);bottom:auto;height:calc(100% - var(--sbh,50px))}
+body.hybrid .pb .mini{order:2;position:static!important;display:block!important;width:auto!important;margin:0;padding:5px 6px 0;border:0;border-top:1px solid var(--pline);border-radius:0;box-shadow:none;background:#fbf5e6}
+body.hybrid .pb .mini .mh{display:none}
+body.hybrid .pb .mini .ml{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+body.hybrid .pb .mini .mi:nth-child(n+4){display:none}
+body.hybrid .pb .mi{min-height:30px;font-size:12.5px}
+body.hybrid .pb .stage .ctrl{order:3;position:static!important;flex:none;margin:0;padding:5px 62px 6px 6px;background:#fbf5e6;gap:5px;flex-wrap:nowrap}
+body.hybrid .pb .ctrl button{min-height:40px;min-width:40px;padding:0 9px;box-shadow:none}
+body.hybrid .pb .st-cam{bottom:6px;right:6px;min-height:40px;height:40px}
+body.hybrid .pb .thbox,body.hybrid .pb .thadj,body.hybrid .pb .aimbox{top:calc(var(--sbh,50px) + 8px)!important}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -3069,7 +3086,7 @@ function camFor(k) { const c = state.def.variants[state.v]?.cam || state.def.cam
   const fit = c.fitW ? clamp((c.fitW / 2) / (Math.tan(camera.fov * D / 2) * camera.aspect), 8, 30) : 0; // 가로로 fitW(m)가 다 보이는 거리
   controls.maxDistance = Math.max(7, (fit || c.dist) * 1.5); scene.fog.far = Math.max(PAPER ? 22 : 16, (fit || c.dist) * 2.6); scene.fog.near = Math.max(PAPER ? 9 : 7, (fit || c.dist) * 1.1);
   if (fit) return [tg.clone().addScaledVector((c.dirs?.[k] || VIEWDIR[k]).clone().normalize(), k === 'side' ? fit : fit * .8), tg];
-  return [tg.clone().addScaledVector((c.dirs?.[k] || VIEWDIR[k]).clone().normalize(), c.dist * (PAPER ? (matchMedia('(orientation:portrait)').matches ? 1.08 : .9) : narrow ? 1.02 : 1)), tg]; }
+  return [tg.clone().addScaledVector((c.dirs?.[k] || VIEWDIR[k]).clone().normalize(), c.dist * (PAPER ? (matchMedia('(orientation:portrait)').matches ? (HYBRID ? .78 : 1.08) : (HYBRID ? .82 : .9)) : narrow ? 1.02 : 1)), tg]; }
 function setView(k) { state.view = k; camGoal = camFor(k); document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === k)); }
 const scenesEl = $('scenes'), mqNarrow = matchMedia('(max-width:900px)');
 function focusStage() { // 폰에서는 무엇을 누르든 3D 화면이 보이게
@@ -3211,8 +3228,8 @@ function updatePanel() {
 }
 
 // ---------- 그리기 ----------
-function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < 560 ? 46 : 36; const mn = document.getElementById('mini'), ox = mn && mn.offsetWidth && !mn.classList.contains('closed') ? (mn.offsetWidth + 10) / 2 : 0; // 근육 패널만큼 인형을 왼쪽으로
-  const oy = PAPER ? Math.min(28, h * .11) : 0, pbr = PAPER && document.getElementById('pb'), fullOn = pbr && pbr.dataset.full === '1', ox2 = !fullOn ? ox : w > h ? (pbr.dataset.fold !== '1' ? ox - w * .2 : ox) : (pbr.dataset.fold !== '1' ? w * .24 : .001); // 전체 화면(가로): 글 카드만큼 인형을 오른쪽으로
+function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < 560 ? 46 : 36; const mn = document.getElementById('mini'), ox = !HYBRID && mn && mn.offsetWidth && !mn.classList.contains('closed') ? (mn.offsetWidth + 10) / 2 : 0; // 근육 패널만큼 인형을 왼쪽으로
+  const oy = PAPER && !HYBRID ? Math.min(28, h * .11) : 0, pbr = PAPER && document.getElementById('pb'), fullOn = pbr && pbr.dataset.full === '1', ox2 = !fullOn ? ox : w > h ? (pbr.dataset.fold !== '1' ? ox - w * .2 : ox) : (pbr.dataset.fold !== '1' ? w * .24 : .001); // 전체 화면(가로): 글 카드만큼 인형을 오른쪽으로
   if (ox2 !== ox) { camera.setViewOffset(w, h, ox2, oy, w, h); camera.updateProjectionMatrix(); return; }
   if (ox || oy) camera.setViewOffset(w, h, ox, oy, w, h); else camera.clearViewOffset(); camera.updateProjectionMatrix(); }
 new ResizeObserver(() => { resize(); if (state.def?.cam?.fitW) camGoal = camFor(state.view); }).observe(canvas); resize();
