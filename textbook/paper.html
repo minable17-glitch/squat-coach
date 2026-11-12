@@ -923,6 +923,7 @@ function ik(A, C, l1, l2, pole) {
   return A.clone().addScaledVector(dir, a).addScaledVector(p, h);
 }
 function armDir(s, abd, flex) { const ab = abd * D, f = flex * D, vy = -Math.cos(ab); return V(s * Math.sin(ab), vy * Math.cos(f), -vy * Math.sin(f)); }
+const KNEE_MIN = .1; // 무릎이 몸 가운데에서 이만큼(m)보다 안쪽으로는 못 들어감: 두 무릎 사이에 주먹 하나쯤 남음
 function build(S) {
   const P = { ...S, side: {} };
   const hipC = S.hip, mid = hipC.clone().addScaledVector(dirA(S.low), L.low), neck = mid.clone().addScaledVector(dirA(S.up), L.up);
@@ -930,8 +931,8 @@ function build(S) {
   for (const s of [1, -1]) {
     const f = S.feet[s], hip = hipC.clone().add(V(s * .1, 0, 0));
     let knee = ik(hip, f.ankle, L.thigh, L.shank, S.kneePole[s]);
-    if (S.kneePole[s].z > 0 && s * knee.x < .06) { const p0 = S.kneePole[s], p1 = V(s * .3, 0, 1); let lo = 0, hi = 1;
-      for (let i = 0; i < 10; i++) { const m = (lo + hi) / 2, kk = ik(hip, f.ankle, L.thigh, L.shank, p0.clone().lerp(p1, m)); if (s * kk.x < .06) lo = m; else { hi = m; knee = kk; } } }
+    if (S.kneePole[s].z > 0 && s * knee.x < KNEE_MIN) { const p0 = S.kneePole[s], p1 = V(s * .3, 0, 1); let lo = 0, hi = 1;
+      for (let i = 0; i < 10; i++) { const m = (lo + hi) / 2, kk = ik(hip, f.ankle, L.thigh, L.shank, p0.clone().lerp(p1, m)); if (s * kk.x < KNEE_MIN) lo = m; else { hi = m; knee = kk; } } }
     const sh = neck.clone().addScaledVector(dirA(S.up), -.05).add(V(s * .19, 0, 0));
     let el, wr; const A = S.arms;
     if (A.mode === 'angle') { const pk = v => Array.isArray(v) ? v[s === 1 ? 0 : 1] : (v || 0), ab = pk(A.abd), fl = pk(A.flex);
