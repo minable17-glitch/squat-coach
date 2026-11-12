@@ -949,6 +949,30 @@ body.reader .rd-stage .ctrl{justify-content:flex-start;background:none;padding:0
   body.reader .rd-stage .ctrl button{min-height:36px;padding:0 8px;font-size:13px}
   .rd-page{font-size:16.5px}.rd-page h1{font-size:26px}.rd-sec h2{font-size:21px}
 }
+
+/* 팝업: 종이에서 일어서는 3D 카드 */
+.rd-fig.pop{display:flex!important;position:fixed!important;inset:auto 8px auto 8px;z-index:50;border-radius:18px;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 78%,rgba(255,253,247,.92),rgba(255,253,247,.55) 72%);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+  box-shadow:0 -2px 0 rgba(20,40,75,.08),0 18px 40px rgba(20,40,75,.28);transform-origin:50% 100%;animation:rdPop .5s cubic-bezier(.2,.9,.25,1.15)}
+.rd-fig.pop.closing{animation:rdFold .3s ease-in forwards}
+@keyframes rdPop{from{transform:perspective(900px) rotateX(82deg);opacity:.2}to{transform:none;opacity:1}}
+@keyframes rdFold{to{transform:perspective(900px) rotateX(85deg);opacity:0}}
+@media (prefers-reduced-motion:reduce){.rd-fig.pop,.rd-fig.pop.closing{animation:none}}
+.rd-fig.pop .rd-fighead{color:var(--navy);padding:6px 8px}
+.rd-fig.pop .rd-fighead b{font-size:13.5px}
+.rd-fig.pop .rd-x{background:var(--navy);color:#fff!important;width:40px;height:40px}
+.rd-fig.pop .rd-tabs button{background:#fff;border-color:#d8cfba;color:var(--navy)!important}
+.rd-fig.pop .rd-tabs button[aria-pressed="true"]{background:#d7f25a;border-color:#b9d53f}
+.rd-fig.pop .rd-tabs button.bad[aria-pressed="true"]{background:#ffd8b8;border-color:#ff922b}
+body.reader .rd-fig.pop .stage{background:transparent}
+body.reader .rd-fig.pop .stage .ctrl button{background:#fff;color:var(--navy);border:1.5px solid #d8cfba}
+body.reader .rd-fig.pop .stage .ctrl button[aria-pressed="true"]{background:#d7f25a}
+body.reader .rd-fig.pop .mini{--overlay:rgba(255,255,255,.92);--overlay-ink:#14284b;--overlay-muted:#5c6475}
+body.reader .rd-fig.pop .mini .mi{background:#f3ecdb;color:#14284b}
+.rd-figbtn.on{position:relative;z-index:51}
+
+.rd-fig.pop .rd-fighead b{display:none}
+.rd-fig.pop .rd-fighead{flex-wrap:nowrap}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -2643,7 +2667,7 @@ const MUSCLES = {
 
 // ---------- 장면 ----------
 const stage = document.getElementById('stage'), canvas = document.getElementById('c');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -3170,7 +3194,7 @@ function loop() {
   if (state.ghost) ghost.update(state.def, 'good', state.t, time);
   { const multi = state.def.variants[state.v]?.multi || []; extras.forEach((f, i) => { const m = multi[i]; f.g.visible = !!m; if (m) { f.g.position.x = m.x; f.update(m.def, m.v, state.t, time); } });
     fig.g.position.x = 0; if (state.def.livePanel && time - (state.panelAt || 0) > .3) { state.panelAt = time; $('prCard').innerHTML = state.def.panel(state.v, state.t); } }
-  if (BOOK3D) book3dTick(dt); controls.update(); renderer.render(scene, camera);
+  if (BOOK3D) book3dTick(dt); if (READER) window.__rdTick?.(dt); controls.update(); renderer.render(scene, camera);
   updateLabels(); updateChips(); updatePanel();
   requestAnimationFrame(loop);
 }
@@ -3452,19 +3476,19 @@ if (READER) {
   const ytUrl = (m, d) => 'https://www.youtube.com/results?search_query=' + encodeURIComponent(ytQ(m, d));
   const camUrl = m => { const u = new URL(document.querySelector('#tryCard .trylinks a').href); u.searchParams.set('ex', m); u.searchParams.delete('mode'); return u.href; };
   const labUrl = () => document.querySelector('#labCard a').href;
-  const fig = (m, sc, v, label, kind) => { figNo++; return `<button type="button" class="rd-figbtn ${kind || ''}" data-m="${m}" data-sc="${sc}" data-v="${v}"><span class="rd-fignum">그림 ${figNo}</span><span class="rd-figname">${label}</span><span class="rd-figgo">3D로 보기 ›</span></button>`; };
+  const figB = (m, sc, v, label, kind) => { figNo++; return `<button type="button" class="rd-figbtn ${kind || ''}" data-m="${m}" data-sc="${sc}" data-v="${v}"><span class="rd-fignum">그림 ${figNo}</span><span class="rd-figname">${label}</span><span class="rd-figgo">3D로 보기 ›</span></button>`; };
   function scenePart(m, sc, d, n) { const vs = Object.entries(d.variants), good = d.variants.good ? 'good' : vs[0][0], gv = d.variants[good], steps = STEPS[m + ':' + sc];
     let h = `<section class="rd-sec" id="sec-${m}-${sc}"><h2><span class="rd-no">${n}</span><span class="rd-h2t">${esc(d.sceneLabel || d.name)}</span><a class="rd-ytl" href="${ytUrl(m, d)}" target="_blank" rel="noopener">▶ 영상</a></h2>`;
     if (d.neutral) {
       if (d.panel) { const tmp = document.createElement('div'); tmp.innerHTML = d.panel(good, 0); const key = tmp.querySelector('.key'); if (key) h += `<p class="rd-def"><b>뜻</b> ${key.textContent}</p>`; }
-      vs.forEach(([k, v]) => { h += `<h3>${esc(v.name)}</h3><p>${esc(v.desc)}</p>`; if (v.why) h += `<p class="rd-why"><b>왜?</b> ${esc(v.why)}</p>`; h += fig(m, sc, k, v.name, v.warn ? 'bad' : ''); });
+      vs.forEach(([k, v]) => { h += `<h3>${esc(v.name)}</h3><p>${esc(v.desc)}</p>`; if (v.why) h += `<p class="rd-why"><b>왜?</b> ${esc(v.why)}</p>`; h += figB(m, sc, k, v.name, v.warn ? 'bad' : ''); });
       return h + '</section>'; }
-    h += `<p>${esc(gv.desc)}</p>` + fig(m, sc, good, `${d.sceneLabel || d.name} · 바른 자세`, 'good');
+    h += `<p>${esc(gv.desc)}</p>` + figB(m, sc, good, `${d.sceneLabel || d.name} · 바른 자세`, 'good');
     if (steps) h += `<h3>따라 해 보기 <small>누르면 3D가 그 단계에서 멈춰요</small></h3><ol class="rd-steps">${steps.map(([t, ti, tx], j) => `<li><button type="button" class="rd-step" data-m="${m}" data-sc="${sc}" data-v="${good}" data-t="${t}"><span class="sn">${j + 1}</span><span><b>${ti}</b> ${tx}</span></button></li>`).join('')}</ol>`;
     if (gv.checks?.length) h += `<div class="rd-box ok"><b>✓ 자세 확인하기</b><ul>${gv.checks.map(c => `<li>${c}</li>`).join('')}</ul></div>`;
     const bad = vs.filter(([k, v]) => k !== good);
     if (bad.length) { h += `<h3>${bad.every(([, v]) => !v.ok) ? '이런 자세는 조심해요' : '비교해 보기'}</h3>`;
-      bad.forEach(([k, v]) => { h += `<div class="rd-box ${v.ok ? 'cmp' : 'bad'}"><b>${v.ok ? '' : '⚠ '}${esc(v.name)}</b><p>${esc(v.desc)}</p>${v.why ? `<p><b>왜 문제일까?</b> ${esc(v.why)}</p>` : ''}${v.fix ? `<p><b>이렇게 고쳐요</b> ${v.fix.join(' · ')}</p>` : ''}${fig(m, sc, k, v.name, v.ok ? '' : 'bad')}</div>`; }); }
+      bad.forEach(([k, v]) => { h += `<div class="rd-box ${v.ok ? 'cmp' : 'bad'}"><b>${v.ok ? '' : '⚠ '}${esc(v.name)}</b><p>${esc(v.desc)}</p>${v.why ? `<p><b>왜 문제일까?</b> ${esc(v.why)}</p>` : ''}${v.fix ? `<p><b>이렇게 고쳐요</b> ${v.fix.join(' · ')}</p>` : ''}${figB(m, sc, k, v.name, v.ok ? '' : 'bad')}</div>`; }); }
     return h + '</section>'; }
   function renderEx() { const star = n => '★'.repeat(n) + '<i>' + '★'.repeat(5 - n) + '</i>';
     let h = `<p class="rd-kick">운동 모음</p><h1>💪 운동 모음</h1><p class="rd-lead">학교에서 맨몸이나 뜀틀로 할 수 있는 운동을 몸 부위와 난이도(★)로 모았어요. 쉬운 것부터 해 보세요.</p>`;
@@ -3482,21 +3506,43 @@ if (READER) {
     let n = 0; groups.forEach(([lb, xs]) => { if (lb) h += `<p class="rd-grp">${lb}</p>`; xs.forEach(([k, , d]) => { n++; h += scenePart(m, k, d, `${ci + 1}-${n}`); }); });
     const nx = CH[ci + 1]; if (nx) h += `<button type="button" class="rd-next" data-ch="${nx[0]}">다음 단원: ${MOVES[nx[0]].name} ›</button>`;
     $('rdPage').innerHTML = h; $('rdPage').scrollTop = 0; $('rdCh').value = m;
-    $('rdPage').querySelectorAll('.rd-figbtn').forEach(b => b.onclick = () => open3D(b));
-    $('rdPage').querySelectorAll('.rd-step').forEach(b => b.onclick = () => { const fb = b.closest('.rd-sec').querySelector('.rd-figbtn'); show3D(b.dataset.m, b.dataset.sc, b.dataset.v, fb, true);
+    $('rdPage').querySelectorAll('.rd-figbtn').forEach(b => b.onclick = () => { lastY = $('rdPage').scrollTop; open3D(b); });
+    $('rdPage').querySelectorAll('.rd-step').forEach(b => b.onclick = () => { const fb = b.closest('.rd-sec').querySelector('.rd-figbtn'); lastY = $('rdPage').scrollTop; show3D(b.dataset.m, b.dataset.sc, b.dataset.v, mqPop.matches ? b : fb, true);
       state.playing = false; state.t = +b.dataset.t; syncPlay(); slider.value = Math.round(state.t * 1000); $('rdPage').querySelectorAll('.rd-step').forEach(x => x.setAttribute('aria-pressed', x === b)); });
     $('rdPage').querySelectorAll('.rd-next').forEach(b => b.onclick = () => render(b.dataset.ch));
     $('rdPage').querySelectorAll('.rd-toc a').forEach(a => a.onclick = e => { e.preventDefault(); const t = $(a.getAttribute('href').slice(1)); $('rdPage').scrollTo({ top: t.offsetTop - 8, behavior: reduce ? 'auto' : 'smooth' }); });
     const first = $('rdPage').querySelector('.rd-figbtn'); if (first) show3D(first.dataset.m, first.dataset.sc, first.dataset.v, first, false); }
   function show3D(m, sc, v, btn, openIt) { if (state.m !== m) setMove(m); if (state.sc !== sc) setScene(sc); setVariant(v);
-    const d = state.def; $('rdFigT').textContent = `${btn.querySelector('.rd-fignum').textContent} · ${d.sceneLabel || d.name}`;
+    const d = state.def; $('rdFigT').textContent = `${btn.querySelector('.rd-fignum')?.textContent || '따라 해 보기'} · ${d.sceneLabel || d.name}`;
     $('rdTabs').innerHTML = Object.entries(d.variants).map(([k, x]) => `<button type="button" data-v="${k}" class="${(d.neutral ? x.warn : k !== 'good' && !x.ok) ? 'bad' : ''}" aria-pressed="${k === v}">${esc(x.short || x.name.split(' → ')[0])}</button>`).join('');
     $('rdTabs').querySelectorAll('button').forEach(b => b.onclick = () => { setVariant(b.dataset.v); $('rdTabs').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); });
     $('rdPage').querySelectorAll('.rd-figbtn').forEach(x => x.classList.toggle('on', x === btn));
     $('rdYt').href = ytUrl(m, d); const cam = m === 'squat' || m === 'pushup'; $('rdCam').hidden = !cam; if (cam) $('rdCam').href = camUrl(m); $('rdLab').hidden = m !== 'train'; if (m === 'train') $('rdLab').href = labUrl();
     if (openIt) root.dataset.open = '1'; setTimeout(resize, 30); setTimeout(resize, 300); }
   function open3D(b) { show3D(b.dataset.m, b.dataset.sc, b.dataset.v, b, true); }
-  $('rdX').onclick = () => { root.dataset.open = ''; };
+  // ---- 팝업: 폰 세로에서는 그림을 누르면 3D가 글 위로 일어서며 튀어나옴
+  const mqPop = matchMedia('(max-width:899px) and (orientation:portrait)'); let popOn = false, popK = 0, popTo = 0, popBtn = null;
+  const base = new THREE.Mesh(new THREE.CircleGeometry(.8, 48), new THREE.MeshStandardMaterial({ color: 0xf4ecd8, roughness: .95 })); base.rotation.x = -Math.PI / 2; base.position.y = .002; base.receiveShadow = true; base.visible = false; scene.add(base);
+  const look = on => { base.visible = on; if (on) { for (const e in ENVS) ENVS[e].visible = false; scene.background = null; scene.fog.near = 60; scene.fog.far = 90; } };
+  const _setEnv = setEnv; setEnv = k => { if (!scene.background) scene.background = new THREE.Color(); _setEnv(k); look(popOn); };
+  const figs = () => [fig, ghost, ...extras];
+  window.__rdTick = dt => { if (popK === popTo) return; popK = popTo > popK ? Math.min(popTo, popK + dt / .55) : Math.max(popTo, popK - dt / .3);
+    const x = popK, e = popTo ? 1 + 2.2 * Math.pow(x - 1, 3) + 1.2 * Math.pow(x - 1, 2) : x * x; for (const g of figs()) g.g.scale.set(1, Math.max(.001, e), 1);
+    if (popK === 0 && !popTo) finishClose(); };
+  function placePop(btn) { const fg = $('rdFig'), pg = $('rdPage'), top = pg.getBoundingClientRect().top;
+    let r = btn.getBoundingClientRect(); const want = innerHeight * .86; if (r.top < top + 420 || r.top > want) { pg.scrollTop += r.top - want; r = btn.getBoundingClientRect(); } lastY = pg.scrollTop;
+    let H = Math.min(580, r.top - top - 8); if (H < 400) { H = Math.min(580, innerHeight * .72); fg.style.top = (top + 6) + 'px'; } else fg.style.top = (r.top + 14 - H) + 'px'; fg.style.height = H + 'px'; }
+  function openPop(btn) { popBtn = btn; popOn = true; look(true); const fg = $('rdFig'); fg.classList.add('pop'); fg.classList.remove('closing'); placePop(btn);
+    popK = 0; popTo = 1; for (const g of figs()) g.g.scale.set(1, .001, 1); fg.style.animation = 'none'; void fg.offsetWidth; fg.style.animation = ''; }
+  function closePop() { if (!popOn) { root.dataset.open = ''; return; } $('rdFig').classList.add('closing'); popTo = 0; if (reduce) { popK = 0; finishClose(); } }
+  function finishClose() { if (!popOn) return; popOn = false; root.dataset.open = ''; const fg = $('rdFig'); fg.classList.remove('pop', 'closing'); fg.style.top = fg.style.height = '';
+    for (const g of figs()) g.g.scale.set(1, 1, 1); look(false); setEnv(state.def.env || 'gym'); setView(state.view); setTimeout(resize, 30); }
+  const _show3D = show3D; show3D = (m, sc, v, btn, openIt) => { _show3D(m, sc, v, btn, openIt); if (openIt && mqPop.matches) { openPop(btn); setTimeout(resize, 30); } };
+  $('rdPage').addEventListener('pointerdown', e => { if (popOn && !e.target.closest('.rd-figbtn,.rd-step')) closePop(); });
+  let lastY = 0; $('rdPage').addEventListener('scroll', () => { if (popOn && Math.abs($('rdPage').scrollTop - lastY) > 60) closePop(); }); $('rdPage').addEventListener('scroll', () => { if (!popOn) lastY = $('rdPage').scrollTop; });
+  const _open = open3D; open3D = b => { lastY = $('rdPage').scrollTop; _open(b); setTimeout(() => { lastY = $('rdPage').scrollTop; }, 50); };
+  mqPop.addEventListener('change', () => { if (popOn) { popTo = 0; popK = 0; finishClose(); } });
+  $('rdX').onclick = () => closePop();
   $('rdCh').onchange = e => render(e.target.value);
   render('squat');
 }
