@@ -821,6 +821,16 @@ body.paper .stage .ctrl{right:152px}
 .st-lab{background:#5f3dc4;cursor:pointer}
 .pb[data-full="1"] .pg-text{display:flex}
 @media (orientation:portrait){.st-lab span{display:inline}.st-lab{width:auto;padding:0 10px;font-size:15px}}
+
+/* 운동 모음 */
+.toc-ex{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:52px;padding:0 14px;border-radius:14px;border:2px solid var(--navy);background:#fff;text-align:left}
+.toc-ex b{font-size:17px;color:var(--navy)}.toc-ex span{font-size:13px;color:var(--pmuted)}
+.toc-ex[aria-pressed="true"]{background:var(--navy)}.toc-ex[aria-pressed="true"] b,.toc-ex[aria-pressed="true"] span{color:#fff}
+.toc-row.ex{align-items:center}
+.toc-row.ex span{flex:1;min-width:0}
+.toc-row.ex small{margin-left:8px;font-size:12.5px;font-weight:500;color:var(--pmuted)}
+.toc-row.ex em{font-style:normal;color:#f28c38;font-size:14px;letter-spacing:-1px;white-space:nowrap}
+.toc-row.ex em i{font-style:normal;color:#e2d6bb;border:0;transform:none;flex:none}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -2267,6 +2277,108 @@ const TH_CHAIN = { ...TH_BASE, name: '온몸으로 던지기', sceneLabel: '야�
       why: '작은 팔 근육만 쓰니 공이 가장 느려요. 느린 공은 금방 떨어져서 미트까지 못 가요. 또 팔꿈치가 처진 채 세게 던지려고 하면 어깨와 팔꿈치 안쪽에 무리가 가요.', fix: ['팔꿈치를 어깨 높이까지 들기', '어깨를 돌려 팔꿈치가 먼저 나오게', '앞발을 내딛고 허리 돌리기'], p: t => ({ t, a: 0, mode: 'arm', v: 11 }) },
   } };
 MOVES.throw = { name: '던지기', pattern: '공을 놓는 타점과 온몸의 힘', uses: null, scenes: [['base', '기본', TH_REL], ['chain', '스포츠', TH_CHAIN]] };
+
+// ---------- 학교에서 맨몸으로: 카프 레이즈 · 경사 푸시업 · 파이크 푸시업 · 숄더 탭 · 베어 크롤 · 윗몸 말아올리기 ----------
+const CALF = { name: '카프 레이즈', sceneLabel: '카프 레이즈', env: 'gym', range: ['서기', '발뒤꿈치 들기'], cam: { y: .7, z: 0, dist: 3.4 }, defaultView: 'side',
+  muscles: ['calf', 'quad', 'glute', 'abs'],
+  variants: {
+    good: { name: '엄지발가락 쪽으로 곧게', desc: '발을 골반 너비로 벌리고 서서, 발뒤꿈치를 천천히 최대한 높이 들었다가 천천히 내려요. 몸무게는 엄지발가락과 둘째 발가락 쪽에 실어요. 종아리 근육이 일하고, 달리기와 점프에서 바닥을 박차는 힘이 돼요.',
+      checks: ['몸무게는 엄지발가락 쪽에', '발목이 바깥으로 꺾이지 않게', '위에서 1초 멈추기', '내릴 때도 천천히'], p: t => ({ t, roll: 0 }) },
+    roll: { name: '발목이 바깥으로 꺾임', danger: [['ankle', [1, -1]]], view: 'front', desc: '발뒤꿈치를 들 때 몸무게가 새끼발가락 쪽으로 쏠리면서 발목이 바깥으로 꺾여요.',
+      why: '발목이 바깥으로 꺾인 채 몸무게를 실으면 발목 바깥쪽 인대가 늘어나요. 운동하다 가장 흔히 다치는 발목 염좌가 이렇게 생겨요.', fix: ['엄지발가락으로 바닥을 누르기', '처음에는 벽을 짚고 하기', '높이보다 곧게 드는 것이 먼저'], p: t => ({ t, roll: 1 }) },
+  },
+  spec(q) { const t = q.t, heel = 38 * t, feet = sym(s => { const f = footStand(s * .12, 0, heel, s); const r = .045 * q.roll * t; f.ankle.x += s * r; f.heel.x += s * r * 1.4; f.toe.x -= s * r * .3; return f; });
+    return { feet, hip: chainUp(feet[1].ankle, 0, 0), low: 0, up: 0, head: 0, kneePole: sym(s => V(s * .15, 0, 1)), arms: { mode: 'angle', flex: 6, abd: 8, elbow: 6 }, q }; },
+  act(v, P, t) { return { calf: .2 + .75 * t, quad: .2, glute: .15, abs: .25 }; },
+  readouts: [['발뒤꿈치 높이', P => Math.max(0, (P.side[1].heel.y - .03) * 100), ' cm']],
+  notes: { calf: { good: '발뒤꿈치를 들 때 종아리 근육(비복근·가자미근)이 짧아지며 일해요.', roll: '종아리는 일하지만 발목이 꺾여서 다치기 쉬워요.' } } };
+
+function incline(ySh, sag, handY, handZ, ankZ) { const ank = V(0, .13, ankZ), Lb = 1.38, b = Math.asin(clamp((ySh - ank.y) / Lb, -1, 1)), dB = V(0, Math.sin(b), Math.cos(b));
+  const neckT = ank.clone().addScaledVector(dB, Lb + .05), hip = ank.clone().addScaledVector(dB, L.shank + L.thigh).add(V(0, -.11 * sag, 0)), tv = neckT.clone().sub(hip), ang = Math.atan2(tv.z, tv.y) / D;
+  return { feet: sym(s => ({ toe: V(s * .11, .02, ankZ + .09), ankle: V(s * .1, .13, ankZ), heel: V(s * .1, .18, ankZ - .03) })), hip, low: ang - 9 * sag, up: ang + 6 * sag, head: ang - 20, kneePole: sym(() => V(0, -1, 0)),
+    arms: { mode: 'ik', wr: sym(s => V(s * .2, handY, handZ)), pole: sym(s => V(s * .45, .5, -1)) } }; }
+const INCLINE = { name: '경사 푸시업', sceneLabel: '경사 푸시업', env: 'gym', props: ['jbox'], range: ['위', '아래'], cam: { y: .55, z: 0, dist: 3.3 }, defaultView: 'side',
+  muscles: ['chest', 'tri', 'delt', 'abs', 'glute'],
+  variants: {
+    good: { name: '손은 뜀틀에, 몸은 일직선', desc: '뜀틀이나 튼튼한 의자에 손을 어깨너비로 짚고 발을 뒤로 빼요. 몸이 비스듬히 서 있어서 바닥 푸시업보다 쉬워요. 바닥 푸시업이 아직 어려운 학생이 바른 자세를 먼저 익히는 단계예요.',
+      checks: ['손은 어깨너비로 뜀틀 가장자리에', '머리부터 발뒤꿈치까지 일직선', '가슴이 뜀틀 가장자리에 닿을 만큼 내려가기', '뜀틀이 밀리지 않게 벽에 붙여 두기'], p: t => ({ t, sag: 0 }) },
+    sag: { name: '허리가 처짐', danger: [['back', [0]]], desc: '배에 힘이 빠져 엉덩이가 아래로 처져요.', why: '쉬운 단계라도 허리가 처지면 허리 뒤쪽이 눌려요. 여기서 몸을 일직선으로 버티는 힘을 길러야 바닥 푸시업으로 넘어갈 수 있어요.', fix: ['배와 엉덩이에 힘 주기', '발을 조금 앞으로 당겨 더 쉽게'], p: t => ({ t, sag: 1 }) },
+  },
+  spec(q) { return { ...incline(.97 - .3 * q.t, q.sag, .43, .56, -.52), q }; },
+  act(v, P, t) { const A = { chest: .25 + .5 * t, tri: .25 + .5 * t, delt: .25 + .35 * t, abs: .4, glute: .25 }; if (v === 'sag') { A.abs = .15; A.glute = .1; A.erector = .35; } return A; },
+  readouts: [['팔꿈치', elbowOf(1)], ['몸 일직선', lineOf]],
+  notes: { chest: { good: '몸이 비스듬해서 바닥 푸시업보다 들어 올리는 몸무게가 적어요. 벽 → 뜀틀 → 무릎 → 바닥 순서로 단계를 올려요.' } } };
+
+const PIKEPU = { name: '파이크 푸시업', sceneLabel: '파이크 푸시업', env: 'gym', range: ['위', '아래'], cam: { y: .45, z: 0, dist: 3.2 }, defaultView: 'side',
+  muscles: ['delt', 'tri', 'chest', 'abs', 'ham'],
+  variants: {
+    good: { name: '엉덩이를 높이, 머리는 손 앞으로', desc: '엉덩이를 높이 들어 몸을 ㅅ자로 만들고, 팔꿈치를 굽혀 머리를 두 손 앞 바닥 쪽으로 내려요. 몸무게가 어깨 위로 실려서 어깨(삼각근)를 키우는 푸시업이에요.',
+      checks: ['엉덩이는 높이, 다리는 쭉', '머리는 두 손 앞쪽으로', '팔꿈치는 뒤쪽으로 굽히기', '정수리가 바닥에 닿기 전에 멈추기'], p: t => ({ t, flare: 0 }) },
+    flare: { name: '팔꿈치가 옆으로 벌어짐', danger: [['shoulder', [1, -1]]], view: 'front', desc: '팔꿈치가 옆으로 활짝 벌어진 채 내려가요.', why: '몸무게가 어깨 위에 바로 실리는 동작이라, 팔꿈치가 벌어지면 어깨 관절이 끼이는 힘을 크게 받아요.', fix: ['팔꿈치를 뒤쪽으로', '손을 어깨너비로', '어려우면 무릎을 굽혀 엉덩이 낮추기'], p: t => ({ t, flare: 1 }) },
+  },
+  spec(q) { const t = q.t, hip = V(0, .95 - .1 * t, -.2 + .15 * t), ang = 150 + 5 * t;
+    const feet = sym(s => ({ toe: V(s * .11, .02, -.39), ankle: V(s * .1, .13, -.48), heel: V(s * .1, .17, -.51) }));
+    return { feet, hip, low: ang, up: ang, head: ang + 8, kneePole: sym(() => V(0, 0, -1)),
+      arms: { mode: 'ik', wr: sym(s => V(s * (.2 + .06 * q.flare), .035, .25)), pole: sym(s => q.flare ? V(s * 1.5, .5, 0) : V(s * .35, .3, -1)) }, q }; },
+  act(v, P, t) { const A = { delt: .35 + .6 * t, tri: .3 + .55 * t, chest: .2 + .25 * t, abs: .4, ham: .25 }; if (v === 'flare') A.delt = .4 + .6 * t; return A; },
+  readouts: [['팔꿈치', elbowOf(1)], ['머리 높이', P => P.head.y * 100, ' cm']],
+  notes: { delt: { good: '몸무게가 어깨 바로 위에 실려서 삼각근이 가장 많이 일해요. 기본 푸시업과 숫자를 비교해 보세요.', flare: '팔꿈치가 벌어지면 어깨 관절 앞쪽에 부담이 몰려요.' } } };
+
+const TAP = { name: '숄더 탭', sceneLabel: '숄더 탭', env: 'gym', cycle: 'loop', period: 2.6, range: ['오른손', '왼손'], cam: { y: .35, z: -.1, dist: 3.1 }, defaultView: 'diag',
+  muscles: ['abs', 'delt', 'chest', 'tri', 'glute'],
+  variants: {
+    good: { name: '엉덩이는 그대로, 손만', desc: '팔을 편 플랭크(푸시업 위 자세)에서 한 손씩 번갈아 반대쪽 어깨를 톡 쳐요. 손이 떨어지는 순간 몸이 돌아가려고 하는데, 배에 힘을 줘서 엉덩이가 흔들리지 않게 버텨요.',
+      checks: ['발은 어깨보다 조금 넓게', '엉덩이는 좌우로 흔들리지 않게', '천천히 번갈아 치기', '몸은 머리부터 발까지 일직선'], p: t => ({ t, sway: 0 }) },
+    sway: { name: '엉덩이가 좌우로 흔들림', desc: '손을 들 때마다 엉덩이가 손을 든 쪽으로 크게 흔들려요.', why: '다치는 자세는 아니지만, 엉덩이가 흔들리면 복부가 버티는 일을 놓쳐서 운동 효과가 줄어요. 숄더 탭의 목표는 "흔들리지 않기"예요.', fix: ['발을 더 넓게 벌리기', '더 천천히 치기', '배와 엉덩이에 힘 주기'], p: t => ({ t, sway: 1 }) },
+  },
+  spec(q) { const B = plank(.58, 0, 0), ph = q.t < .5 ? 1 : -1, k = Math.sin(Math.PI * ((q.t * 2) % 1)), hip = B.hip.clone(); hip.x = ph * .09 * q.sway * k;
+    const sh = B.sh, wr = sym(s => s === ph ? V(s * .19, .035, .34).lerp(V(-s * .14, sh.y - .02, sh.z - .02), k) : V(s * .19, .035, .34));
+    return { feet: sym(s => ({ toe: V(s * (.2 - .08 * q.sway), .02, -.9), ankle: V(s * (.19 - .08 * q.sway), .13, -.99), heel: V(s * (.19 - .08 * q.sway), .18, -1.02) })), hip, low: B.ang, up: B.ang, head: B.ang - 25, kneePole: sym(() => V(0, -1, 0)),
+      arms: { mode: 'ik', wr, pole: sym(s => V(s * .6, .4, -1)) }, q, k }; },
+  act(v, P) { const k = P.q.k ?? 0; return v === 'sway' ? { abs: .35, delt: .5 + .2 * k, chest: .3, tri: .35, glute: .2 } : { abs: .55 + .3 * k, delt: .5 + .25 * k, chest: .3, tri: .35, glute: .4 }; },
+  readouts: [['엉덩이 흔들림', P => Math.abs(P.hipC.x) * 100, ' cm']],
+  notes: { abs: { good: '한 손이 떨어지면 몸이 그쪽으로 돌아가려고 해요. 복부가 그걸 막느라 손을 들 때마다 더 세게 일해요.', sway: '엉덩이가 흔들리면 복부가 버티지 않고 몸이 돌아간 거예요.' } } };
+
+const BEAR = { name: '베어 크롤', sceneLabel: '베어 크롤', env: 'gym', cycle: 'loop', period: 1.8, range: ['한 걸음', '한 걸음'], cam: { y: .35, z: 0, dist: 3.1 }, defaultView: 'diag',
+  muscles: ['abs', 'delt', 'quad', 'glute', 'tri'],
+  variants: {
+    good: { name: '무릎은 바닥 바로 위, 등은 평평하게', desc: '네 발 자세에서 무릎을 바닥에서 한 뼘쯤 띄우고, 오른손과 왼발, 왼손과 오른발을 같이 움직이며 곰처럼 기어가요. 등 위에 물컵이 있다고 생각하고 등을 평평하게 지켜요.',
+      checks: ['무릎은 바닥에서 한 뼘', '등은 책상처럼 평평하게', '반대쪽 손과 발을 같이', '작은 걸음으로 천천히'], p: t => ({ t, high: 0 }) },
+    high: { name: '엉덩이가 높이 들림', desc: '다리를 쭉 펴서 엉덩이가 높이 솟은 채 기어가요.', why: '다치는 자세는 아니지만, 엉덩이가 들리면 몸무게가 팔로 쏠리고 복부가 버티는 일을 덜 해요. 무릎이 바닥 가까이 있어야 몸통 운동이 돼요.', fix: ['무릎을 굽혀 바닥 가까이', '엉덩이를 어깨 높이로', '걸음을 작게'], p: t => ({ t, high: 1 }) },
+  },
+  spec(q) { const ph = 2 * Math.PI * q.t, hi = q.high, hip = V(0, .55 + .3 * hi, -.27 + .1 * hi), N = V(0, .58, .3), tv = N.clone().sub(hip), ang = Math.atan2(tv.z, tv.y) / D;
+    const st = s => .09 * Math.sin(ph + (s > 0 ? 0 : Math.PI)), lf = s => .05 * Math.max(0, Math.cos(ph + (s > 0 ? 0 : Math.PI)));
+    const feet = sym(s => { const z = -.62 + .1 * hi + st(-s), y = lf(-s); return { toe: V(s * .12, .02 + y, z + .1), ankle: V(s * .11, .13 + y, z), heel: V(s * .11, .18 + y, z - .03) }; });
+    return { feet, hip, low: ang, up: ang, head: ang - 15, kneePole: sym(s => V(s * .15, -1, .4)),
+      arms: { mode: 'ik', wr: sym(s => V(s * .19, .035 + lf(s), .32 + st(s))), pole: sym(s => V(s * .3, -.4, -1)) }, q }; },
+  act(v) { return v === 'high' ? { abs: .3, delt: .65, quad: .35, glute: .25, tri: .45 } : { abs: .65, delt: .55, quad: .55, glute: .35, tri: .4 }; },
+  readouts: [['무릎 높이', P => P.side[1].knee.y * 100, ' cm']],
+  notes: { abs: { good: '무릎을 띄운 채 움직이는 동안 복부가 몸통을 평평하게 잡아 줘요. 움직이는 플랭크예요.', high: '엉덩이를 들면 복부가 쉬고 어깨만 일해요.' }, quad: { good: '무릎을 굽혀 띄우고 있느라 허벅지 앞도 계속 버텨요.' } } };
+
+const CRUNCH = { name: '윗몸 말아올리기', sceneLabel: '윗몸 말아올리기', env: 'gym', range: ['누운 자세', '말아 올리기'], cam: { y: .3, z: .1, dist: 2.9 }, defaultView: 'side',
+  muscles: ['abs', 'erector', 'quad', 'delt'],
+  variants: {
+    good: { name: '배꼽을 보며 등을 둥글게', desc: '누워서 무릎을 세우고 발바닥을 바닥에 붙여요. 배에 힘을 주며 머리와 어깨, 등 윗부분을 둥글게 말아 올려 손끝이 무릎 쪽으로 미끄러지게 해요. 학교 체력 평가(PAPS)의 윗몸 말아올리기와 같은 동작이에요.',
+      checks: ['무릎은 세우고 발바닥은 바닥에', '턱과 가슴 사이에 주먹 하나', '배꼽을 보며 등을 둥글게 말기', '허리는 바닥에 붙인 채'], p: t => ({ t, neck: 0 }) },
+    neck: { name: '손으로 목을 당김', danger: [['neck', [0]]], desc: '깍지 낀 손을 머리 뒤에 대고, 손으로 머리를 끌어당기며 올라와요.', why: '배가 아니라 팔 힘으로 머리를 당기면 목이 앞으로 확 꺾여요. 목이 아프고, 정작 배 근육은 덜 일해요.', fix: ['손은 가슴에 모으거나 허벅지 위로', '턱 아래 주먹 하나 공간 지키기', '배에 힘을 주는 만큼만 올라오기'], p: t => ({ t, neck: 1 }) },
+  },
+  spec(q) { const t = q.t, hip = V(0, .12, 0), feet = sym(s => footStand(s * .12, .5)), up = -90 + 38 * t, low = -86 + 6 * t;
+    const arms = q.neck ? { mode: 'ik', wr: sym(s => V(s * .04, .02, 0)), pole: sym(s => V(s, .3, 0)) } : { mode: 'angle', flex: [8 + 40 * t, 8 + 40 * t], abd: 6, elbow: 0 };
+    const S = { feet, hip, low, up, head: q.neck ? up + 30 + 40 * t : up + 20 * t, kneePole: sym(s => V(s * .1, 1, .3)), arms, q };
+    if (q.neck) { const B = build({ ...S, arms: { mode: 'angle', flex: 0, abd: 0, elbow: 0 } }); S.arms = { mode: 'ik', wr: sym(s => B.head.clone().add(V(s * .07, -.05, -.06))), pole: sym(s => V(s, .5, .3)) }; }
+    return S; },
+  act(v, P, t) { return v === 'neck' ? { abs: .2 + .35 * t, erector: .1, quad: .15, delt: .35 } : { abs: .25 + .7 * t, erector: .1, quad: .15, delt: .15 }; },
+  readouts: [['어깨 들린 높이', P => Math.max(0, (P.neck.y - .14) * 100), ' cm']],
+  notes: { abs: { good: '등을 둥글게 말아 올릴 때 복직근이 짧아지며 일해요. 플랭크(버티기)와 다른, 몸통을 "말아 올리는" 힘이에요.', neck: '팔로 머리를 당기면 배 근육 숫자가 절반쯤으로 떨어져요.' } } };
+
+MOVES.squat.scenes.push(['calf', '응용', CALF]);
+MOVES.pushup.scenes.push(['incline', '응용', INCLINE], ['pike', '응용', PIKEPU]);
+MOVES.plank.scenes.push(['crunch', '응용', CRUNCH], ['tap', '응용', TAP], ['bear', '응용', BEAR]);
+// 운동 모음: 몸 부위와 난이도(★)로 고르기
+const EXMAP = { 하체: [['squat:calf', 1], ['squat:base', 2], ['squat:goblet', 2], ['squat:wide', 2], ['squat:wall', 2], ['lunge:base', 2], ['lunge:reverse', 2], ['lunge:side', 2], ['hinge:base', 2], ['squat:jump', 3], ['squat:boxjump', 3], ['lunge:bulgarian', 3], ['hinge:swing', 3]],
+  상체: [['pushup:wallpu', 1], ['pushup:incline', 1], ['pushup:kneepu', 2], ['pull:base', 2], ['pushup:base', 3], ['pushup:diamond', 4], ['pushup:pike', 4], ['pushup:clap', 5]],
+  몸통: [['plank:crunch', 1], ['plank:kneeplank', 1], ['plank:base', 2], ['plank:birddog', 2], ['plank:tap', 2], ['plank:bear', 2], ['plank:carry', 2], ['plank:legraise', 3], ['plank:climber', 3]],
+  전신: [['squat:thruster', 3], ['squat:wallball', 3], ['pushup:burpee', 3], ['lunge:getup', 4]] };
 let USES_CACHE = null;
 function muscleUses(id) {
   if (!USES_CACHE) { USES_CACHE = [];
@@ -3171,13 +3283,17 @@ if (PAPER) {
   function openToc(cat) { if (cat) tocCat = cat; const CATD = { 기본: '움직임마다 가장 기본이 되는 동작', 응용: '기본 동작을 바꾸거나 도구를 더한 동작', 일상: '생활 속에서 같은 움직임이 쓰이는 장면', 스포츠: '경기에서 같은 움직임이 쓰이는 장면' };
     const n = g => SEQ.filter(p => p.g === g).length, lbOf = g => FRAME.find(fr => fr[0] === g)[1];
     const row = (p) => { const i = SEQ.indexOf(p); return `<button type="button" class="toc-row" data-i="${i}"><span>${p.d.sceneLabel || p.d.name}</span><i></i><b>›</b></button>`; };
-    const list = tocCat === '기본' ? `<div class="toc-base">${MV.map((k, j) => { const p = SEQ.find(x => x.m === k && x.g === '기본'); return `<button type="button" class="toc-mv" data-i="${SEQ.indexOf(p)}"><small>움직임 ${j + 1}</small><b>${MOVES[k].name}</b><span>${p.d.sceneLabel || p.d.name}</span></button>`; }).join('')}</div>`
+    const star = n => '★'.repeat(n) + '<i>' + '★'.repeat(5 - n) + '</i>';
+    const exList = () => `<div class="toc-ch">${Object.entries(EXMAP).map(([part, xs]) => `<div class="toc-grp"><h3 style="--gc:#14284b">${part}</h3>${xs.map(([key, n]) => { const [m, sc] = key.split(':'), i = SEQ.findIndex(p => p.m === m && p.sc === sc); if (i < 0) return ''; const p = SEQ[i];
+      return `<button type="button" class="toc-row ex" data-i="${i}"><span>${p.d.sceneLabel || p.d.name}<small>${MOVES[m].name}</small></span><em>${star(n)}</em></button>`; }).join('')}</div>`).join('')}</div>`;
+    const list = tocCat === '모음' ? exList() : tocCat === '기본' ? `<div class="toc-base">${MV.map((k, j) => { const p = SEQ.find(x => x.m === k && x.g === '기본'); return `<button type="button" class="toc-mv" data-i="${SEQ.indexOf(p)}"><small>움직임 ${j + 1}</small><b>${MOVES[k].name}</b><span>${p.d.sceneLabel || p.d.name}</span></button>`; }).join('')}</div>`
       : `<div class="toc-ch">${MV.map(k => { const xs = SEQ.filter(p => p.m === k && p.g === tocCat); return `<div class="toc-grp"><h3 style="--gc:${GROUP_COLOR[tocCat]}">${MOVES[k].name}</h3>${xs.length ? xs.map(row).join('') : '<p class="toc-none">준비 중</p>'}</div>`; }).join('')}</div>`;
     $('pbToc').innerHTML = `<section class="pg pg-l toc-l"><span class="ribbon">차례</span><h1><span>3D 체육 교과서</span></h1>
         <div class="toc-cats" role="tablist" aria-label="기본, 응용, 일상에서, 스포츠에서">${FRAME.map(([g, lb]) => `<button type="button" role="tab" data-cat="${g}" aria-selected="${g === tocCat}" style="--gc:${GROUP_COLOR[g]}"><b>${lb}</b><small>${n(g)}개</small></button>`).join('')}</div>
+        <button type="button" class="toc-ex" data-cat="모음" aria-pressed="${tocCat === '모음'}"><b>💪 운동 모음</b><span>몸 부위 · 난이도(★)로 고르기</span></button>
         <div class="toc-extra"><button type="button" class="toc-mv x1" data-m="fitness"><b>💓 체력 요소</b><span>체력의 5가지 영역</span></button><button type="button" class="toc-mv x2" data-m="train"><b>🏋️ 트레이닝 원리</b><span>효과적인 운동 방법</span></button><button type="button" class="toc-mv x3" data-m="body"><b>🧍 몸 지도</b><span>근육으로 운동 찾기</span></button></div>
         ${started ? '<button type="button" class="toc-resume" id="tocResume">보던 장면으로 돌아가기 ›</button>' : ''}</section>
-      <section class="pg pg-r toc-r"><span class="ribbon" style="background:${GROUP_COLOR[tocCat]}">${lbOf(tocCat)}</span><p class="toc-desc">${CATD[tocCat]}</p>${list}</section>`;
+      <section class="pg pg-r toc-r"><span class="ribbon" style="background:${tocCat === '모음' ? '#14284b' : GROUP_COLOR[tocCat]}">${tocCat === '모음' ? '운동 모음' : lbOf(tocCat)}</span><p class="toc-desc">${tocCat === '모음' ? '학교에서 맨몸이나 뜀틀로 할 수 있는 운동을 몸 부위와 난이도(★)로 모았어요. 쉬운 것부터 해 보세요.' : CATD[tocCat]}</p>${list}</section>`;
     $('pbToc').dataset.view = 'home'; $('pbToc').hidden = false; $('pbBook').hidden = true; root.dataset.toc = '1';
     $('pbToc').querySelectorAll('[data-cat]').forEach(b => b.onclick = () => openToc(b.dataset.cat));
     $('pbToc').querySelectorAll('[data-m]').forEach(b => b.onclick = () => show(firstOf(b.dataset.m)));
