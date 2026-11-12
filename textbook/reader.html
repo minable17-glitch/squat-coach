@@ -973,6 +973,37 @@ body.reader .rd-fig.pop .mini .mi{background:#f3ecdb;color:#14284b}
 
 .rd-fig.pop .rd-fighead b{display:none}
 .rd-fig.pop .rd-fighead{flex-wrap:nowrap}
+
+/* ===== 합친 버전 (HYBRID): 글로 읽기 → 그림 → 장면 화면 ===== */
+body.hybrid .rd{position:fixed;inset:0;z-index:60;background:#e9e2d2}
+body.hybrid .rd[hidden]{display:none}
+body.hybrid .rd-fig{display:none!important}
+body.hybrid .rd-body{grid-template-columns:minmax(0,1fr)!important}
+.rd-toc-btn{flex:none;height:42px;padding:0 12px;border-radius:10px;border:0;background:#fff;color:var(--navy)!important;font-weight:700;font-size:15px}
+body.hybrid .rd-logo{display:none}
+@media (min-width:600px){body.hybrid .rd-logo{display:inline}}
+.nv-read{flex:none;height:46px;padding:0 12px;border-radius:12px;border:0;background:var(--lime);color:var(--navy)!important;font-weight:700;font-size:15px;white-space:nowrap}
+.nv-view{display:none}
+body.hybrid .nv-view{display:flex;gap:3px;background:rgba(255,255,255,.14);border-radius:12px;padding:3px;flex:none}
+.nv-view button{min-height:40px;padding:0 11px;border:0;border-radius:9px;background:transparent;color:#fff!important;font-weight:700;font-size:14px;white-space:nowrap}
+.nv-view button[aria-pressed="true"]{background:#fff;color:var(--navy)!important}
+body.hybrid .nv-sel.m{display:none}
+body.hybrid .fcover,body.hybrid .st-full{display:none!important}
+body.hybrid .pb[data-vw="3d"] .pg-l,body.hybrid .pb[data-vw="text"] .pg-r{display:none!important}
+@media (orientation:portrait){
+  body.hybrid .nv-view{order:9;flex:1 1 100%}
+  body.hybrid .nv-view button{flex:1}
+  body.hybrid .pb[data-vw="both"] .pb-book{grid-template-rows:minmax(0,1.25fr) minmax(0,1fr)!important}
+  body.hybrid .pb[data-vw="text"] .pb-book,body.hybrid .pb[data-vw="3d"] .pb-book{grid-template-rows:minmax(0,1fr)!important}
+  body.hybrid .pb[data-vw="text"] .pg-text,body.hybrid .pb[data-vw="3d"] .plate{grid-row:1/-1!important}
+}
+@media (orientation:landscape){
+  body.hybrid .pb[data-vw="text"] .pb-book,body.hybrid .pb[data-vw="3d"] .pb-book{grid-template-columns:minmax(0,1fr)!important}
+}
+
+body.hybrid .pb[data-toc="1"] .nv-view,body.hybrid .pb[data-toc="1"] .nv-yt{display:none!important}
+body.hybrid .st-cam{right:8px}
+body.hybrid.paper .stage .ctrl{right:64px}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -1082,7 +1113,8 @@ body.reader .rd-fig.pop .mini .mi{background:#f3ecdb;color:#14284b}
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 const BOOK3D = /[?&]book3d\b/.test(location.search); // 책상 위 3D 책 버전
-const PAPER = /[?&]paper\b/.test(location.search);
+const HYBRID = false; // 글로 읽다가 그림을 누르면 장면 화면(3D+글)
+const PAPER = false;
 const READER = true; // 글로 읽는 교과서: 그림을 누르면 3D // 종이 교과서 버전(세로 한 쪽 · 가로 두 쪽)
 
 const D = Math.PI / 180;
@@ -3439,9 +3471,10 @@ if (PAPER) {
       <section class="pg pg-r toc-r"><span class="ribbon" style="background:${tocCat === '모음' ? '#14284b' : GROUP_COLOR[tocCat]}">${tocCat === '모음' ? '운동 모음' : lbOf(tocCat)}</span><p class="toc-desc">${tocCat === '모음' ? '학교에서 맨몸이나 뜀틀로 할 수 있는 운동을 몸 부위와 난이도(★)로 모았어요. 쉬운 것부터 해 보세요.' : CATD[tocCat]}</p>${list}</section>`;
     $('pbToc').dataset.view = 'home'; $('pbToc').hidden = false; $('pbBook').hidden = true; root.dataset.toc = '1';
     $('pbToc').querySelectorAll('[data-cat]').forEach(b => b.onclick = () => openToc(b.dataset.cat));
-    $('pbToc').querySelectorAll('[data-m]').forEach(b => b.onclick = () => show(firstOf(b.dataset.m)));
-    $('pbToc').querySelectorAll('[data-i]').forEach(b => b.onclick = () => show(+b.dataset.i));
-    if ($('tocResume')) $('tocResume').onclick = () => show(cur); }
+    const go2 = i => window.__hyGo && SEQ[i].m !== 'body' ? window.__hyGo(SEQ[i].m, SEQ[i].sc) : show(i);
+    $('pbToc').querySelectorAll('[data-m]').forEach(b => b.onclick = () => go2(firstOf(b.dataset.m)));
+    $('pbToc').querySelectorAll('[data-i]').forEach(b => b.onclick = () => go2(+b.dataset.i));
+    if ($('tocResume')) $('tocResume').onclick = () => window.__hyBack ? window.__hyBack() : show(cur); }
   $('pbHome').onclick = () => openToc(null);
   // 세로 화면: 작은 쪽을 누르면 그쪽이 크게 (3D 크게 ↔ 글 크게)
   $('stage').insertAdjacentHTML('beforeend', '<button type="button" class="fcover st-cover" id="stCover" aria-label="3D 화면 크게 보기"><span>눌러서 3D 크게</span></button>');
@@ -3458,7 +3491,7 @@ if (PAPER) {
     const hide = () => { $('rotTip')?.remove(); try { sessionStorage.setItem('rot-tip', '1'); } catch (e) { } }; $('rotTip').onclick = hide; setTimeout(hide, 7000); mqPort.addEventListener('change', hide); } }
   mqPort.addEventListener('change', () => { resize(); setView(state.view); flow(); });
   document.addEventListener('keydown', e => { if (!$('pbToc').hidden || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return; if (e.key === 'ArrowRight' || e.key === 'PageDown') $('pbNext').click(); else if (e.key === 'ArrowLeft' || e.key === 'PageUp') $('pbPrev').click(); });
-  window.__pbShow = show; sync(); openToc(null);
+  window.__pbShow = show; window.__pbToc = openToc; sync(); openToc(null);
 }
 // ---------- 글로 읽는 교과서 (READER): 본문을 읽다가 그림을 누르면 3D가 열림 ----------
 if (READER) {
@@ -3466,11 +3499,11 @@ if (READER) {
   const CH = [['squat', '움직임'], ['lunge', '움직임'], ['pushup', '움직임'], ['pull', '움직임'], ['throw', '움직임'], ['hinge', '움직임'], ['plank', '움직임'], ['fitness', '이론'], ['train', '이론']];
   const esc = x => String(x ?? '');
   const root = document.createElement('div'); root.className = 'rd'; root.id = 'rd';
-  root.innerHTML = `<header class="rd-top"><span class="rd-logo">3D 체육 교과서</span><label class="rd-sel"><select id="rdCh" aria-label="단원 고르기">${CH.map(([k, g], i) => `<option value="${k}">${i + 1}. ${MOVES[k].name}</option>`).join('')}<option value="ex">💪 운동 모음</option></select></label></header>
+  root.innerHTML = `<header class="rd-top">${HYBRID ? '<button type="button" class="rd-toc-btn" id="rdToc" aria-label="차례">☰ 차례</button>' : ''}<span class="rd-logo">3D 체육 교과서</span><label class="rd-sel"><select id="rdCh" aria-label="단원 고르기">${CH.map(([k, g], i) => `<option value="${k}">${i + 1}. ${MOVES[k].name}</option>`).join('')}<option value="ex">💪 운동 모음</option></select></label></header>
     <div class="rd-body"><article class="rd-page" id="rdPage"></article>
       <aside class="rd-fig" id="rdFig" aria-label="3D 그림"><div class="rd-fighead"><b id="rdFigT">그림을 누르면 여기에 3D가 나와요</b><a class="rd-act yt" id="rdYt" target="_blank" rel="noopener">▶ 영상</a><a class="rd-act cam" id="rdCam" target="_blank" rel="noopener" hidden>📷 평가</a><a class="rd-act lab" id="rdLab" target="_blank" rel="noopener" hidden>🧪 실험실</a><button type="button" class="rd-x" id="rdX" aria-label="3D 닫기">✕</button></div><div class="rd-tabs" id="rdTabs"></div><div class="rd-stage" id="rdStage"></div></aside></div>`;
   document.body.prepend(root);
-  $('rdStage').append($('stage'));
+  if (!HYBRID) $('rdStage').append($('stage'));
   let figNo = 0;
   const ytQ = (m, d) => d.neutral ? `${d.name} ${MOVES[m].name}` : `${(d.sceneLabel || d.name).replace(/[①②③④]/g, '')} 바른 자세`;
   const ytUrl = (m, d) => 'https://www.youtube.com/results?search_query=' + encodeURIComponent(ytQ(m, d));
@@ -3544,7 +3577,29 @@ if (READER) {
   mqPop.addEventListener('change', () => { if (popOn) { popTo = 0; popK = 0; finishClose(); } });
   $('rdX').onclick = () => closePop();
   $('rdCh').onchange = e => render(e.target.value);
-  render('squat');
+  if (HYBRID) {
+    document.body.classList.add('hybrid'); root.hidden = true; let curCh = null;
+    const _render = render; render = m => { curCh = m; _render(m); };
+    const pb = $('pb');
+    // 장면 화면 맨 위: 글로 돌아가기 + 보기 방식(3D+글 · 글 · 3D)
+    $('pbHome').insertAdjacentHTML('afterend', '<button type="button" class="nv-read" id="pbRead">📖 글로</button>');
+    $('nvYt').insertAdjacentHTML('afterend', '<div class="nv-view" id="nvView" role="group" aria-label="보기 방식"><button type="button" data-vw="both" aria-pressed="true">3D+글</button><button type="button" data-vw="text" aria-pressed="false">글만</button><button type="button" data-vw="3d" aria-pressed="false">3D만</button></div>');
+    const setVw = w => { pb.dataset.vw = w; $('nvView').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.vw === w)); setTimeout(() => { resize(); setView(state.view); }, 60); };
+    $('nvView').querySelectorAll('button').forEach(b => b.onclick = () => setVw(b.dataset.vw)); pb.dataset.vw = 'both';
+    const scrollToSec = (m, sc) => { const t = $(`sec-${m}-${sc}`); if (t) $('rdPage').scrollTop = t.offsetTop - 8; };
+    const hyOpen = (m, sc, v, t) => { root.hidden = true; window.__pbGoScene(m, sc); setVariant(v); setVw(pb.dataset.vw === 'text' ? 'both' : pb.dataset.vw);
+      if (t != null) { state.playing = false; state.t = t; syncPlay(); slider.value = Math.round(t * 1000); } };
+    window.__hyGo = (m, sc) => { root.hidden = false; if (curCh !== m) render(m); scrollToSec(m, sc); };
+    window.__hyBack = () => { root.hidden = false; if (curCh !== state.m && MOVES[state.m]?.scenes && CH.some(c => c[0] === state.m)) { render(state.m); scrollToSec(state.m, state.sc); }
+      else if (curCh == null) render('squat'); };
+    $('pbRead').onclick = () => { const m = state.m, sc = state.sc; root.hidden = false; if (CH.some(c => c[0] === m)) { if (curCh !== m) render(m); scrollToSec(m, sc); } else if (curCh == null) render('squat'); };
+    $('rdToc').onclick = () => { root.hidden = true; window.__pbToc(null); };
+    show3D = (m, sc, v, btn, openIt) => { if (openIt) hyOpen(m, sc, v); };
+    open3D = b => hyOpen(b.dataset.m, b.dataset.sc, b.dataset.v);
+    // 따라 해 보기 단계: 장면을 열고 그 단계에서 멈춤
+    $('rdPage').addEventListener('click', e => { const b = e.target.closest('.rd-step'); if (!b) return; e.stopImmediatePropagation(); hyOpen(b.dataset.m, b.dataset.sc, b.dataset.v, +b.dataset.t); }, true);
+  }
+  if (!HYBRID) render('squat');
 }
 
 
