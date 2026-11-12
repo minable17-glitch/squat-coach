@@ -911,6 +911,44 @@ body.reader .rd-stage #ghost,body.reader .rd-stage .ctrl [data-view="diag"]{font
 body.reader .rd-stage #ghost::after{content:"겹쳐 보기";font-size:14px}
 body.reader .rd-stage .ctrl [data-view="diag"]::after{content:"↗";font-size:17px}
 body.reader .rd-stage .ctrl{justify-content:flex-start;background:none;padding:0}
+
+/* 글로 읽기: 옮겨 온 기능 */
+.rd-sec h2{flex-wrap:wrap}
+.rd-h2t{flex:1;min-width:0}
+.rd-ytl{flex:none;font-family:var(--f-body);font-size:13.5px;font-weight:700;color:#fff;background:#e03131;border-radius:999px;padding:4px 12px;text-decoration:none;align-self:center}
+.rd-sec h3 small{font-size:13px;font-weight:500;color:var(--muted);margin-left:6px}
+.rd-steps{list-style:none;padding:0}
+.rd-step{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;border:1.5px solid transparent;border-radius:12px;background:#f6f1e4;padding:9px 12px;line-height:1.6;font-size:17px}
+.rd-step .sn{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-weight:700;font-size:14px;margin-top:2px}
+.rd-step[aria-pressed="true"]{border-color:var(--good);background:#eaf7ec}
+.rd-cta{display:grid;gap:2px;margin:14px 0 4px;padding:14px 16px;border-radius:14px;text-decoration:none;color:#fff}
+.rd-cta b{font-size:18px}.rd-cta span{font-size:14.5px;opacity:.9}
+.rd-cta.cam{background:var(--navy)}.rd-cta.lab{background:#5f3dc4}
+.rd-act{flex:none;display:flex;align-items:center;height:40px;padding:0 11px;border-radius:10px;color:#fff;font-weight:700;font-size:14px;text-decoration:none;white-space:nowrap}
+.rd-act[hidden]{display:none}
+.rd-act.yt{background:#e03131}.rd-act.cam{background:#3b5bdb}.rd-act.lab{background:#7048e8}
+.rd-exl{display:grid;gap:6px;margin:10px 0 6px}
+.rd-ex{display:flex;align-items:center;gap:10px;width:100%;min-height:54px;padding:8px 14px;border-radius:12px;border:1.5px solid #e2d6bb;background:#fff;text-align:left}
+.rd-ex span{flex:1;min-width:0;display:grid}.rd-ex b{font-size:17px}.rd-ex small{font-size:13px;color:var(--muted)}
+.rd-ex em{font-style:normal;color:#f28c38;letter-spacing:-1px;white-space:nowrap}.rd-ex em i{font-style:normal;color:#e2d6bb}
+@media (max-width:899px){.rd-fighead{flex-wrap:wrap}.rd-fighead b{flex-basis:100%;order:-1}.rd-x{margin-left:auto}}
+/* 폰을 가로로 눕혀도 글과 3D를 나란히 */
+@media (orientation:landscape) and (min-width:600px) and (max-width:899px){
+  .rd-body{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .rd-fig,.rd[data-open="1"] .rd-fig{display:flex;position:static}
+  .rd-x{display:none}
+  .rd-fighead b{flex-basis:auto;order:0}
+  .rd-fighead{flex-wrap:nowrap}
+  .rd-page{padding-top:14px}
+}
+
+@media (orientation:landscape) and (max-height:500px){
+  .rd-fighead{padding:5px 8px;gap:6px}.rd-fighead b{font-size:13px}.rd-act{height:36px;padding:0 9px;font-size:13px}
+  .rd-tabs{padding:0 8px 5px}.rd-tabs button{min-height:36px;font-size:13px}
+  body.reader .rd-stage .mini{top:6px;width:120px}body.reader .rd-stage .mini .mi:nth-child(n+4){display:none}
+  body.reader .rd-stage .ctrl button{min-height:36px;padding:0 8px;font-size:13px}
+  .rd-page{font-size:16.5px}.rd-page h1{font-size:26px}.rd-sec h2{font-size:21px}
+}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -3404,35 +3442,49 @@ if (READER) {
   const CH = [['squat', '움직임'], ['lunge', '움직임'], ['pushup', '움직임'], ['pull', '움직임'], ['throw', '움직임'], ['hinge', '움직임'], ['plank', '움직임'], ['fitness', '이론'], ['train', '이론']];
   const esc = x => String(x ?? '');
   const root = document.createElement('div'); root.className = 'rd'; root.id = 'rd';
-  root.innerHTML = `<header class="rd-top"><span class="rd-logo">3D 체육 교과서</span><label class="rd-sel"><select id="rdCh" aria-label="단원 고르기">${CH.map(([k, g], i) => `<option value="${k}">${i + 1}. ${MOVES[k].name}</option>`).join('')}</select></label></header>
+  root.innerHTML = `<header class="rd-top"><span class="rd-logo">3D 체육 교과서</span><label class="rd-sel"><select id="rdCh" aria-label="단원 고르기">${CH.map(([k, g], i) => `<option value="${k}">${i + 1}. ${MOVES[k].name}</option>`).join('')}<option value="ex">💪 운동 모음</option></select></label></header>
     <div class="rd-body"><article class="rd-page" id="rdPage"></article>
-      <aside class="rd-fig" id="rdFig" aria-label="3D 그림"><div class="rd-fighead"><b id="rdFigT">그림을 누르면 여기에 3D가 나와요</b><button type="button" class="rd-x" id="rdX" aria-label="3D 닫기">✕</button></div><div class="rd-tabs" id="rdTabs"></div><div class="rd-stage" id="rdStage"></div></aside></div>`;
+      <aside class="rd-fig" id="rdFig" aria-label="3D 그림"><div class="rd-fighead"><b id="rdFigT">그림을 누르면 여기에 3D가 나와요</b><a class="rd-act yt" id="rdYt" target="_blank" rel="noopener">▶ 영상</a><a class="rd-act cam" id="rdCam" target="_blank" rel="noopener" hidden>📷 평가</a><a class="rd-act lab" id="rdLab" target="_blank" rel="noopener" hidden>🧪 실험실</a><button type="button" class="rd-x" id="rdX" aria-label="3D 닫기">✕</button></div><div class="rd-tabs" id="rdTabs"></div><div class="rd-stage" id="rdStage"></div></aside></div>`;
   document.body.prepend(root);
   $('rdStage').append($('stage'));
   let figNo = 0;
+  const ytQ = (m, d) => d.neutral ? `${d.name} ${MOVES[m].name}` : `${(d.sceneLabel || d.name).replace(/[①②③④]/g, '')} 바른 자세`;
+  const ytUrl = (m, d) => 'https://www.youtube.com/results?search_query=' + encodeURIComponent(ytQ(m, d));
+  const camUrl = m => { const u = new URL(document.querySelector('#tryCard .trylinks a').href); u.searchParams.set('ex', m); u.searchParams.delete('mode'); return u.href; };
+  const labUrl = () => document.querySelector('#labCard a').href;
   const fig = (m, sc, v, label, kind) => { figNo++; return `<button type="button" class="rd-figbtn ${kind || ''}" data-m="${m}" data-sc="${sc}" data-v="${v}"><span class="rd-fignum">그림 ${figNo}</span><span class="rd-figname">${label}</span><span class="rd-figgo">3D로 보기 ›</span></button>`; };
   function scenePart(m, sc, d, n) { const vs = Object.entries(d.variants), good = d.variants.good ? 'good' : vs[0][0], gv = d.variants[good], steps = STEPS[m + ':' + sc];
-    let h = `<section class="rd-sec" id="sec-${m}-${sc}"><h2><span class="rd-no">${n}</span>${esc(d.sceneLabel || d.name)}</h2>`;
+    let h = `<section class="rd-sec" id="sec-${m}-${sc}"><h2><span class="rd-no">${n}</span><span class="rd-h2t">${esc(d.sceneLabel || d.name)}</span><a class="rd-ytl" href="${ytUrl(m, d)}" target="_blank" rel="noopener">▶ 영상</a></h2>`;
     if (d.neutral) {
       if (d.panel) { const tmp = document.createElement('div'); tmp.innerHTML = d.panel(good, 0); const key = tmp.querySelector('.key'); if (key) h += `<p class="rd-def"><b>뜻</b> ${key.textContent}</p>`; }
       vs.forEach(([k, v]) => { h += `<h3>${esc(v.name)}</h3><p>${esc(v.desc)}</p>`; if (v.why) h += `<p class="rd-why"><b>왜?</b> ${esc(v.why)}</p>`; h += fig(m, sc, k, v.name, v.warn ? 'bad' : ''); });
       return h + '</section>'; }
     h += `<p>${esc(gv.desc)}</p>` + fig(m, sc, good, `${d.sceneLabel || d.name} · 바른 자세`, 'good');
-    if (steps) h += `<h3>따라 해 보기</h3><ol class="rd-steps">${steps.map(([t, ti, tx]) => `<li><b>${ti}</b> ${tx}</li>`).join('')}</ol>`;
+    if (steps) h += `<h3>따라 해 보기 <small>누르면 3D가 그 단계에서 멈춰요</small></h3><ol class="rd-steps">${steps.map(([t, ti, tx], j) => `<li><button type="button" class="rd-step" data-m="${m}" data-sc="${sc}" data-v="${good}" data-t="${t}"><span class="sn">${j + 1}</span><span><b>${ti}</b> ${tx}</span></button></li>`).join('')}</ol>`;
     if (gv.checks?.length) h += `<div class="rd-box ok"><b>✓ 자세 확인하기</b><ul>${gv.checks.map(c => `<li>${c}</li>`).join('')}</ul></div>`;
     const bad = vs.filter(([k, v]) => k !== good);
     if (bad.length) { h += `<h3>${bad.every(([, v]) => !v.ok) ? '이런 자세는 조심해요' : '비교해 보기'}</h3>`;
       bad.forEach(([k, v]) => { h += `<div class="rd-box ${v.ok ? 'cmp' : 'bad'}"><b>${v.ok ? '' : '⚠ '}${esc(v.name)}</b><p>${esc(v.desc)}</p>${v.why ? `<p><b>왜 문제일까?</b> ${esc(v.why)}</p>` : ''}${v.fix ? `<p><b>이렇게 고쳐요</b> ${v.fix.join(' · ')}</p>` : ''}${fig(m, sc, k, v.name, v.ok ? '' : 'bad')}</div>`; }); }
     return h + '</section>'; }
-  function render(m) { const M = MOVES[m], sc = M.scenes || [['base', '기본', M]], ci = CH.findIndex(c => c[0] === m); figNo = 0;
+  function renderEx() { const star = n => '★'.repeat(n) + '<i>' + '★'.repeat(5 - n) + '</i>';
+    let h = `<p class="rd-kick">운동 모음</p><h1>💪 운동 모음</h1><p class="rd-lead">학교에서 맨몸이나 뜀틀로 할 수 있는 운동을 몸 부위와 난이도(★)로 모았어요. 쉬운 것부터 해 보세요.</p>`;
+    for (const [part, xs] of Object.entries(EXMAP)) { h += `<p class="rd-grp">${part}</p><div class="rd-exl">` + xs.map(([key, n]) => { const [m, sc] = key.split(':'), e = (MOVES[m].scenes || []).find(x => x[0] === sc); if (!e) return '';
+        return `<button type="button" class="rd-ex" data-m="${m}" data-sc="${sc}"><span><b>${esc(e[2].sceneLabel || e[2].name)}</b><small>${MOVES[m].name}</small></span><em>${star(n)}</em></button>`; }).join('') + '</div>'; }
+    $('rdPage').innerHTML = h; $('rdPage').scrollTop = 0; $('rdCh').value = 'ex';
+    $('rdPage').querySelectorAll('.rd-ex').forEach(b => b.onclick = () => { render(b.dataset.m); const t = $(`sec-${b.dataset.m}-${b.dataset.sc}`); if (t) { $('rdPage').scrollTop = t.offsetTop - 8; const fb = t.querySelector('.rd-figbtn'); if (fb) open3D(fb); } }); }
+  function render(m) { if (m === 'ex') return renderEx(); const M = MOVES[m], sc = M.scenes || [['base', '기본', M]], ci = CH.findIndex(c => c[0] === m); figNo = 0;
     const framed = sc.some(x => FRAME.some(fr => fr[0] === x[1]));
     let h = `<p class="rd-kick">${ci + 1}단원 · ${CH[ci][1]}</p><h1>${esc(M.name)}</h1><p class="rd-lead">${esc(M.pattern || '')}</p>`;
+    if (m === 'squat' || m === 'pushup') h += `<a class="rd-cta cam" href="${camUrl(m)}" target="_blank" rel="noopener"><b>📷 카메라로 내 ${M.name} 자세 평가</b><span>폰 카메라가 자세를 보고 바로 알려 줘요 ›</span></a>`;
+    if (m === 'train') h += `<a class="rd-cta lab" href="${labUrl()}" target="_blank" rel="noopener"><b>🧪 실험실: 내가 고른 무게로 근육 키우기</b><span>다섯 가지 원리를 직접 해 보고 퀴즈로 정리해요 ›</span></a>`;
     const groups = framed ? FRAME.map(([g, lb]) => [lb, sc.filter(x => x[1] === g)]).filter(([, xs]) => xs.length) : [['', sc]];
     h += `<nav class="rd-toc">${groups.map(([lb, xs]) => `${lb ? `<b>${lb}</b>` : ''}${xs.map(([k, , d]) => `<a href="#sec-${m}-${k}">${esc(d.sceneLabel || d.name)}</a>`).join('')}`).join('')}</nav>`;
     let n = 0; groups.forEach(([lb, xs]) => { if (lb) h += `<p class="rd-grp">${lb}</p>`; xs.forEach(([k, , d]) => { n++; h += scenePart(m, k, d, `${ci + 1}-${n}`); }); });
     const nx = CH[ci + 1]; if (nx) h += `<button type="button" class="rd-next" data-ch="${nx[0]}">다음 단원: ${MOVES[nx[0]].name} ›</button>`;
     $('rdPage').innerHTML = h; $('rdPage').scrollTop = 0; $('rdCh').value = m;
     $('rdPage').querySelectorAll('.rd-figbtn').forEach(b => b.onclick = () => open3D(b));
+    $('rdPage').querySelectorAll('.rd-step').forEach(b => b.onclick = () => { const fb = b.closest('.rd-sec').querySelector('.rd-figbtn'); show3D(b.dataset.m, b.dataset.sc, b.dataset.v, fb, true);
+      state.playing = false; state.t = +b.dataset.t; syncPlay(); slider.value = Math.round(state.t * 1000); $('rdPage').querySelectorAll('.rd-step').forEach(x => x.setAttribute('aria-pressed', x === b)); });
     $('rdPage').querySelectorAll('.rd-next').forEach(b => b.onclick = () => render(b.dataset.ch));
     $('rdPage').querySelectorAll('.rd-toc a').forEach(a => a.onclick = e => { e.preventDefault(); const t = $(a.getAttribute('href').slice(1)); $('rdPage').scrollTo({ top: t.offsetTop - 8, behavior: reduce ? 'auto' : 'smooth' }); });
     const first = $('rdPage').querySelector('.rd-figbtn'); if (first) show3D(first.dataset.m, first.dataset.sc, first.dataset.v, first, false); }
@@ -3441,6 +3493,7 @@ if (READER) {
     $('rdTabs').innerHTML = Object.entries(d.variants).map(([k, x]) => `<button type="button" data-v="${k}" class="${(d.neutral ? x.warn : k !== 'good' && !x.ok) ? 'bad' : ''}" aria-pressed="${k === v}">${esc(x.short || x.name.split(' → ')[0])}</button>`).join('');
     $('rdTabs').querySelectorAll('button').forEach(b => b.onclick = () => { setVariant(b.dataset.v); $('rdTabs').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); });
     $('rdPage').querySelectorAll('.rd-figbtn').forEach(x => x.classList.toggle('on', x === btn));
+    $('rdYt').href = ytUrl(m, d); const cam = m === 'squat' || m === 'pushup'; $('rdCam').hidden = !cam; if (cam) $('rdCam').href = camUrl(m); $('rdLab').hidden = m !== 'train'; if (m === 'train') $('rdLab').href = labUrl();
     if (openIt) root.dataset.open = '1'; setTimeout(resize, 30); setTimeout(resize, 300); }
   function open3D(b) { show3D(b.dataset.m, b.dataset.sc, b.dataset.v, b, true); }
   $('rdX').onclick = () => { root.dataset.open = ''; };
