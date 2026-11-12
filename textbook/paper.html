@@ -727,6 +727,20 @@ body.paper .mini,body.paper .aimbox,.thbox,body.paper .thbox,.thadj,body.paper .
 
 .pb .vcard p,.pb .detail p,.pb .card p,.pb .why{break-inside:auto;orphans:2;widows:2}
 .pb .why{-webkit-box-decoration-break:clone;box-decoration-break:clone}
+
+/* 세로: 누른 쪽이 크게 */
+.fcover{display:none}
+body.paper .stage .ctrl{right:92px}
+body.paper .ctrl .play{min-width:46px;font-size:17px}
+@media (orientation:portrait){
+  .pg-text{position:relative}
+  .pb[data-focus="3d"] .pb-book{grid-template-rows:minmax(0,2.5fr) minmax(0,1fr)}
+  .pb[data-focus="text"] .pb-book{grid-template-rows:minmax(0,1fr) minmax(0,2.3fr)}
+  .pb[data-focus="3d"] .tx-cover,.pb[data-focus="text"] .st-cover{display:flex;position:absolute;inset:0;z-index:6;border:0;background:transparent;align-items:flex-end;justify-content:flex-end;padding:8px;cursor:pointer}
+  .fcover span{background:var(--navy);color:#fff;font-weight:700;font-size:13px;padding:5px 11px;border-radius:999px;box-shadow:0 2px 6px rgba(20,40,75,.3)}
+  .pb[data-focus="text"] .sbar,.pb[data-focus="text"] .mini,.pb[data-focus="text"] .ctrl,.pb[data-focus="text"] .st-cam,.pb[data-focus="text"] .thbox,.pb[data-focus="text"] .thadj,.pb[data-focus="text"] .aimbox{display:none!important}
+  body.paper .ctrl button{min-width:42px;padding:0 8px}
+}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -2679,7 +2693,7 @@ playBtn.onclick = () => { state.playing = !state.playing; syncPlay(); };
 slider.oninput = () => { state.playing = false; state.t = slider.value / 1000; syncPlay(); };
 ghostBtn.onclick = () => { state.ghost = !state.ghost; syncGhost(); };
 document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => setView(b.dataset.view));
-function syncPlay() { playBtn.textContent = state.playing ? '⏸ 멈춤' : '▶ 움직이기'; if (state.playing) state.phase = state.def?.cycle === 'loop' ? state.t : Math.acos(clamp(1 - 2 * state.t, -1, 1)) / (2 * Math.PI); }
+function syncPlay() { playBtn.textContent = PAPER ? (state.playing ? '⏸' : '▶') : state.playing ? '⏸ 멈춤' : '▶ 움직이기'; playBtn.setAttribute('aria-label', state.playing ? '멈춤' : '움직이기'); if (state.playing) state.phase = state.def?.cycle === 'loop' ? state.t : Math.acos(clamp(1 - 2 * state.t, -1, 1)) / (2 * Math.PI); }
 function syncGhost() { ghostBtn.setAttribute('aria-pressed', state.ghost); ghost.g.visible = state.ghost; }
 let camGoal = null;
 const VIEWDIR = { diag: V(.62, .42, .66), side: V(1, .28, .02), front: V(0, .3, 1), back: V(.01, .36, -1) };
@@ -3085,6 +3099,11 @@ if (PAPER) {
     $('pbToc').querySelectorAll('.toc-row').forEach(b => b.onclick = () => show(+b.dataset.i));
     $('tocBack').onclick = () => openToc(null); if ($('tocResume')) $('tocResume').onclick = () => show(cur); }
   $('pbHome').onclick = () => openToc(null);
+  // 세로 화면: 작은 쪽을 누르면 그쪽이 크게 (3D 크게 ↔ 글 크게)
+  $('stage').insertAdjacentHTML('beforeend', '<button type="button" class="fcover st-cover" id="stCover" aria-label="3D 화면 크게 보기"><span>눌러서 3D 크게</span></button>');
+  $('pgText').insertAdjacentHTML('beforeend', '<button type="button" class="fcover tx-cover" id="txCover" aria-label="글 크게 보기"><span>눌러서 글 크게</span></button>');
+  const setFocus = w => { root.dataset.focus = w; setTimeout(() => { resize(); flow(); }, 60); setTimeout(flow, 400); };
+  $('stCover').onclick = () => setFocus('3d'); $('txCover').onclick = () => setFocus('text'); root.dataset.focus = '3d';
   { let seen = false; try { seen = !!sessionStorage.getItem('rot-tip'); } catch (e) { } if (!seen && mqPort.matches) { root.insertAdjacentHTML('beforeend', '<button type="button" class="rot-tip" id="rotTip">↻ 가로로 돌리면 더 크게 보여요 ✕</button>');
     const hide = () => { $('rotTip')?.remove(); try { sessionStorage.setItem('rot-tip', '1'); } catch (e) { } }; $('rotTip').onclick = hide; setTimeout(hide, 7000); mqPort.addEventListener('change', hide); } }
   mqPort.addEventListener('change', () => { resize(); setView(state.view); flow(); });
