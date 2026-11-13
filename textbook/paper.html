@@ -788,7 +788,7 @@ body.paper .stage .ctrl{right:152px}
 }
 
 /* 첫 화면: 기본 · 응용 · 일상에서 · 스포츠에서로 나눔 */
-.toc-cats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.toc-cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(58px,1fr));gap:6px}
 .toc-cats button{display:grid;gap:0;justify-items:center;min-height:58px;border-radius:14px;border:2px solid var(--pline);border-bottom:4px solid var(--gc);background:#fff;padding:4px 2px;line-height:1.3}
 .toc-cats button b{font-size:16px;color:var(--navy);white-space:nowrap}
 .toc-cats button small{font-size:12px;font-weight:600;color:var(--pmuted)}
@@ -1021,6 +1021,32 @@ body.hybrid .pb .stage .ctrl{order:3;position:static!important;flex:none;margin:
 body.hybrid .pb .ctrl button{min-height:40px;min-width:40px;padding:0 9px;box-shadow:none}
 body.hybrid .pb .st-cam{bottom:6px;right:6px;min-height:40px;height:40px}
 body.hybrid .pb .thbox,body.hybrid .pb .thadj,body.hybrid .pb .aimbox{top:calc(var(--sbh,50px) + 8px)!important}
+
+/* 던지기 원리 장면(사람 없음): 읽을거리 · 그래프 · 이름표 */
+body.nofig .mini,body.nofig .ctrl #ghost{display:none!important}
+.xbox{position:absolute;left:8px;top:calc(var(--sbh,48px) + 10px);z-index:3;display:flex;flex-wrap:wrap;gap:5px;max-width:calc(100% - 16px);pointer-events:none}
+.xbox[hidden]{display:none}
+.xbox span{background:rgba(255,255,255,.94);border:1px solid #d3dbe2;border-radius:9px;padding:2px 9px;font-size:12.5px;color:#5c6475}
+.xbox b{font-family:var(--f-num);color:#14284b;margin-left:4px}
+.xchart{position:absolute;z-index:3;pointer-events:none;border-radius:12px;border:1px solid #d3dbe2}
+.xchart[hidden]{display:none}
+.xchart.card{right:8px;bottom:60px;width:min(46%,260px);height:min(34%,140px)}
+.xchart.wide{left:8px;bottom:60px;width:calc(100% - 16px);height:min(30%,140px)}
+@media (max-width:600px){.xchart.card{width:min(52%,210px);height:min(30%,118px)}}
+body.hybrid .xchart{bottom:58px}
+.lbl.xl{background:rgba(255,255,255,.92);color:#14284b;border-color:#d3dbe2}
+.rd-quiz{border-top:2px solid #e7dfcd;margin-top:30px}
+.rd-q{display:grid;gap:6px;margin:14px 0}
+.rd-q p{margin:0}
+.rd-q button{text-align:left;min-height:48px;padding:8px 12px;border-radius:10px;border:1.5px solid #e2d6bb;background:#fff;font-size:16px}
+.rd-q button.right{border-color:var(--good);background:#eaf7ec}.rd-q button.wrong{border-color:var(--bad);background:#fff0e6}
+.rd-qfb{font-size:15.5px;color:var(--muted)}
+
+body.hybrid .pb .stage canvas.xchart{flex:none!important;order:9}
+body.hybrid .pb .stage canvas.xchart.card{height:min(34%,140px)!important}
+body.hybrid .pb .stage canvas.xchart.wide{height:min(30%,140px)!important}
+@media (max-width:600px){body.hybrid .pb .stage canvas.xchart.card{height:min(30%,118px)!important}}
+body.nofig .pg-flow .detail{display:none}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -1052,6 +1078,7 @@ body.hybrid .pb .thbox,body.hybrid .pb .thadj,body.hybrid .pb .aimbox{top:calc(v
       <div class="labels" id="labels"></div>
       <div class="chips" id="chips"></div>
       <div class="thbox" id="throwBox" hidden></div>
+      <div class="xbox" id="xBox" hidden></div><canvas class="xchart" id="xChart" hidden></canvas>
       <div class="thadj" id="throwAdj" hidden><button type="button" data-d="-3" aria-label="더 뒤에서(일찍) 놓기">◀ 뒤</button><span id="thAdjV"></span><button type="button" data-d="3" aria-label="더 앞에서(늦게) 놓기">앞 ▶</button></div>
       <div class="aimbox" id="aimbox" hidden><b>과녁에 맞은 자리</b><svg viewBox="-1.08 -1.08 2.16 2.16" aria-hidden="true"><circle r="1" fill="#f1f3f5"/><circle r=".8" fill="#212529"/><circle r=".6" fill="#228be6"/><circle r=".4" fill="#e03131"/><circle r=".2" fill="#fcc419"/><path d="M-1 0H1M0-1V1" stroke="rgba(255,255,255,.35)" stroke-width=".015"/><g id="aimDots"></g></svg><span id="aimTxt"></span></div>
       <div class="mini" id="mini"><button class="mh" id="miniT" type="button" aria-expanded="true">일하는 근육 ▾</button><div class="ml" id="miniL"></div></div>
@@ -2414,7 +2441,7 @@ const BODYMAP = { name: '몸 지도', sceneLabel: '몸 지도', env: 'gym', cycl
   notes: {} };
 MOVES.body = { name: '몸 지도', tag: '몸으로 찾기', pattern: '근육을 누르면 그 근육을 쓰는 동작', uses: null, scenes: [['base', '기본', BODYMAP]] };
 // ---------- 틀 통일: 움직임마다 기본 · 응용 · 일상에서 · 스포츠에서 ----------
-const FRAME = [['기본', '기본'], ['응용', '응용'], ['일상', '일상에서'], ['스포츠', '스포츠에서']];
+const FRAME = [['기본', '기본'], ['원리', '원리'], ['응용', '응용'], ['일상', '일상에서'], ['스포츠', '스포츠에서']];
 MOVES.pull = { name: '당기기', pattern: '몸 쪽으로 끌어당기기', uses: null,
   scenes: [['base', '기본', ROW], ['a_stance', '스포츠', AR_STANCE], ['a_draw', '스포츠', AR_DRAW], ['a_anchor', '스포츠', AR_ANCHOR], ['a_release', '스포츠', AR_RELEASE], ['a_aim', '스포츠', AR_AIM]] };
 MOVES.squat.scenes.push(['thruster', '응용', THRUSTER], ['wallball', '응용', WALLBALL], ['boxjump', '응용', BOXJUMP]);
@@ -2468,7 +2495,52 @@ const TH_CHAIN = { ...TH_BASE, name: '온몸으로 던지기', sceneLabel: '야�
     arm: { short: '팔로만', name: '팔로만 밀어 던지기', danger: [['shoulder', [1]]], desc: '팔꿈치가 어깨보다 낮게 처진 채 팔뚝만 펴서 공을 밀어 던져요.',
       why: '작은 팔 근육만 쓰니 공이 가장 느려요. 느린 공은 금방 떨어져서 미트까지 못 가요. 또 팔꿈치가 처진 채 세게 던지려고 하면 어깨와 팔꿈치 안쪽에 무리가 가요.', fix: ['팔꿈치를 어깨 높이까지 들기', '어깨를 돌려 팔꿈치가 먼저 나오게', '앞발을 내딛고 허리 돌리기'], p: t => ({ t, a: 0, mode: 'arm', v: 11 }) },
   } };
-MOVES.throw = { name: '던지기', pattern: '공을 놓는 타점과 온몸의 힘', uses: null, scenes: [['base', '기본', TH_REL], ['chain', '스포츠', TH_CHAIN]] };
+
+// ---------- 던지기 단원: 사람이 필요한 장면은 사람, 원리는 공·궤적·회전판·그래프 ----------
+const TH_BASIC = { ...TH_BASE, name: '바른 던지기 자세', sceneLabel: '바른 던지기 자세', props: [], throwing: false, cam: { y: 1.05, z: .25, dist: 3.6 }, defaultView: 'side', badLabel: '다치기 쉬운 자세',
+  variants: {
+    good: { name: '온몸으로 던지기', desc: '목표와 옆으로 서서, 앞발을 크게 내딛고 허리와 몸통을 먼저 돌려요. 팔꿈치는 어깨 높이로 따라오고, 손이 머리 위를 지날 때 공을 놓아요. 던진 뒤에는 몸이 앞으로 자연스럽게 따라가요.',
+      checks: ['목표와 옆으로 서기', '앞발을 목표 쪽으로 크게 내딛기', '허리·몸통이 먼저, 팔은 나중에', '팔꿈치는 어깨 높이', '던진 뒤 몸이 따라가기'], p: t => ({ t, a: thFit(23, 'full'), mode: 'full', v: 23 }) },
+    arm: { name: '팔로만 밀어 던지기', danger: [['shoulder', [1]]], desc: '발을 내딛지 않고, 팔꿈치가 어깨보다 낮게 처진 채 팔뚝만 펴서 공을 밀어 던져요.',
+      why: '큰 근육(다리·허리·몸통)을 쓰지 않아 공이 느리고, 작은 팔 근육이 혼자 버텨요. 팔꿈치가 처진 채 세게 던지면 어깨와 팔꿈치 안쪽에 무리가 가서 다치기 쉬워요.', fix: ['앞발을 내딛고 허리부터 돌리기', '팔꿈치를 어깨 높이까지 들기', '처음에는 가까운 거리에서 가볍게'], p: t => ({ t, a: 0, mode: 'arm', v: 11 }) },
+  } };
+TH_REL.name = '어디서 놓느냐'; TH_REL.sceneLabel = '어디서 놓느냐: 머리 뒤·머리 위·눈앞'; TH_CHAIN.sceneLabel = '야구: 투수의 온몸 던지기';
+const XC = { ball: 0xff6a1a, vx: 0x2463c4, grav: 0xd6336c, good: 0x2f8a4e, chalk: 0xffffff, muted: 0x8a96a3, ink: 0x14284b, line: 0xc9d2da };
+const XCS = { ball: '#ff6a1a', vx: '#2463c4', grav: '#d6336c', good: '#2f8a4e', muted: '#6b7785', ink: '#14284b', line: '#d3dbe2', surface: '#ffffff' };
+const XS = {};
+function xFlight(v, a, h0, zMax = 1e9) { const vz = v * Math.cos(a * D), vy = v * Math.sin(a * D), pts = []; let T = 0, end = 'ground';
+  for (let t = 0; t < 8; t += .01) { const z = vz * t, y = h0 + vy * t - .5 * 9.8 * t * t; if (z >= zMax) { const tt = zMax / vz; pts.push(V(0, h0 + vy * tt - 4.9 * tt * tt, zMax)); T = tt; end = 'target'; break; } if (y <= 0 && t > 0) { pts.push(V(0, 0, z)); T = t; break; } pts.push(V(0, y, z)); T = t; }
+  const last = pts[pts.length - 1]; return { pts, T, vz, vy, h0, end, at: t => V(0, h0 + vy * t - 4.9 * t * t, vz * t), top: h0 + Math.max(0, vy) ** 2 / 19.6, dist: last.z, endY: last.y }; }
+const XNEU = { neutral: true, noFig: true, noGhost: true, noLabel: true, muscles: [], readouts: [], act: () => ({}), spec: q => ({ ...standK(), q }), cycle: 'loop' };
+const xFieldCam = (zc, yc, w) => ({ x: 0, y: yc, z: zc, dist: 14, fitW: w, dirs: { side: V(-1, .2, .03), diag: V(-.75, .35, -.45), front: V(-.3, .3, 1), back: V(-.2, .3, -1) } });
+const xTopCam = (d, y = 0, z = 0) => ({ x: 0, y, z, dist: d, dirs: { side: V(-.15, 1, .9), diag: V(-.7, 1, .8), front: V(0, 1, .95), back: V(0, 1, -.95) } });
+const XA1 = { ...XNEU, name: '공은 어떻게 날아갈까', sceneLabel: '공은 어떻게 날아갈까 (포물선)', env: 'field', props: ['xa1'], period: 4.2, range: ['던짐', '떨어짐'], cam: xFieldCam(12, 3.5, 27), defaultView: 'side', xkey: 'a1',
+  variants: {
+    grav: { name: '중력이 있을 때', desc: '손을 떠난 공에는 "던진 방향으로 가려는 움직임"과 "아래로 당기는 중력"만 남아요. 흐린 공은 0.1초마다 남긴 공의 자리예요. 앞뒤 간격은 늘 같고(파란 화살표), 위로 가던 움직임은 점점 줄다가 아래로 바뀌어요(분홍 화살표). 두 움직임이 합쳐진 길이 포물선이에요.',
+      checks: ['앞으로 가는 빠르기는 그대로', '위아래 빠르기만 중력 때문에 바뀜', '그래프: 거리는 곧은 선, 높이는 산 모양'], p: t => ({ t }) },
+    nograv: { name: '중력이 없다면?', desc: '중력이 없다면 공은 던진 방향으로 곧게 날아가요. 우리가 보는 포물선은 중력이 공을 계속 아래로 당겨서 생긴 거예요.', checks: ['두 길을 비교해 보기'], p: t => ({ t }) },
+  } };
+const XA2 = { ...XNEU, name: '발사각과 거리', sceneLabel: '발사각과 거리', env: 'field', props: ['xa2'], period: 4.4, range: ['던짐', '떨어짐'], cam: xFieldCam(14, 4.5, 32), defaultView: 'side', xkey: 'a2',
+  variants: Object.fromEntries([15, 30, 45, 60, 75].map(a => ['a' + a, { name: `발사각 ${a}°`, desc: a === 45 ? '같은 빠르기라면 45° 근처에서 가장 멀리 가요. 너무 낮으면 금방 땅에 닿고, 너무 높으면 높이만 올라가요.' : a < 45 ? `${a}°는 낮게 날아가요. 빨리 도착하지만 멀리 가지는 못해요. 포수에게 빠르게 보낼 때는 이렇게 낮게 던져요.` : `${a}°는 높이 떠요. 오래 날지만 앞으로는 덜 가요.${a === 60 ? ' 30°와 떨어지는 곳이 같아요.' : ''}`,
+    checks: ['흐린 선: 다른 각도의 공의 길', '그래프: 발사각–거리, 산꼭대기가 45°'], p: t => ({ t, a }) }])) };
+const XB1 = { ...XNEU, name: '돌 때는 바깥쪽이 빨라요', sceneLabel: '돌 때는 바깥쪽이 빨라요 (회전)', env: 'gym', props: ['xb1'], period: 4, range: ['', ''], cam: xTopCam(7.5), defaultView: 'side', xkey: 'b1',
+  variants: { w3: { name: '천천히 돌기', desc: '회전판 위 세 공은 한 바퀴 도는 시간이 같아요. 그런데 바깥쪽 공은 같은 시간에 더 긴 원을 돌아서 더 빨라요.', checks: ['손끝 빠르기 = 몸에서 떨어진 거리 × 도는 빠르기'], p: t => ({ t, w: 3 }) },
+    w6: { name: '빨리 돌기', desc: '더 빨리 돌면 세 공 모두 빨라지고, 바깥쪽 공은 가장 많이 빨라져요. 그래서 팔을 뻗어 빠르게 돌리면 손끝의 공이 빨라요.', checks: ['팔을 뻗을수록, 빨리 돌릴수록 공이 빨라요'], p: t => ({ t, w: 6 }) } } };
+const XCHAIN = [['다리·허리', 0x7a8b99, '#7a8b99', 1.1], ['몸통·어깨', 0x2463c4, '#2463c4', 1], ['위팔', 0xc2410c, '#c2410c', .8], ['아래팔·손', 0xff6a1a, '#ff6a1a', .75]];
+const XMODES = { seq: { peaks: [.18, .3, .41, .5], amp: [.35, .55, .8, 1], tip: 31 }, all: { peaks: [.36, .36, .36, .36], amp: [.42, .45, .5, .55], tip: 20 }, arm: { peaks: [9, 9, .38, .45], amp: [0, 0, .5, .6], tip: 13 } };
+const XB2 = { ...XNEU, name: '채찍처럼 차례로', sceneLabel: '채찍처럼 차례로 (운동 사슬)', env: 'gym', props: ['xb2'], period: 3.4, range: ['시작', '던짐'], cam: xTopCam(9.5, -.2, .5), defaultView: 'side', xkey: 'b2',
+  variants: { seq: { name: '차례로 (채찍처럼)', desc: '채찍 손잡이를 휘두르면 끝이 가장 빨라지는 것처럼, 먼저 돈 부위가 멈추면서 다음 부위에 힘을 넘겨요. 그래서 끝(손)으로 갈수록 빨라져요. 사람 몸에서는 다리·허리 → 몸통·어깨 → 위팔 → 아래팔·손 순서예요. 스포츠 › 야구에서 사람 몸으로 확인해 보세요.', checks: ['그래프: 가장 빨리 도는 순간이 차례로 와요', '숫자는 원리를 보여 주는 예시예요'], p: t => ({ t, m: 'seq' }) },
+    all: { name: '한꺼번에 돌리기', desc: '모든 부위를 한꺼번에 돌리면 넘겨받는 힘이 없어서 손끝이 덜 빨라요.', checks: ['그래프의 봉우리가 한곳에 모여요'], p: t => ({ t, m: 'all' }) },
+    arm: { name: '팔로만', desc: '다리와 몸통을 쓰지 않고 팔만 돌리면 손끝이 가장 느려요.', checks: ['큰 부위(다리·몸통)가 빠졌어요'], p: t => ({ t, m: 'arm' }) } } };
+const XB3 = { ...XNEU, name: '빠른 공은 덜 떨어져요', sceneLabel: '빠른 공은 덜 떨어져요', env: 'field', props: ['xb3'], period: 4.4, range: ['던짐', '도착'], cam: xFieldCam(9.5, 1.2, 22), defaultView: 'side', xkey: 'b3',
+  variants: { cmp: { name: '느린 공과 빠른 공', desc: '두 공을 같은 높이에서 수평으로 던졌어요. 느린 공(47km/h)은 18.44m를 가는 동안 오래 날아서 많이 떨어지고 홈플레이트에 못 가요. 빠른 공(115km/h)은 조금만 떨어져서 거의 직선처럼 가요. 몸을 차례로 써서 공이 빨라지면 이렇게 곧게 보낼 수 있어요.', checks: ['빠를수록 날아가는 시간이 짧아요', '시간이 짧으면 중력이 끌어내리는 양도 적어요'], p: t => ({ t }) } } };
+MOVES.throw = { name: '던지기', pattern: '공을 놓는 곳과 온몸의 힘', uses: null,
+  scenes: [['base', '기본', TH_BASIC], ['x1', '원리', XA1], ['x2', '원리', XA2], ['x3', '원리', TH_REL], ['x4', '원리', XB1], ['x5', '원리', XB2], ['x6', '원리', XB3], ['chain', '스포츠', TH_CHAIN]],
+  quiz: [['공이 자꾸 포수 머리 위로 높이 날아가요. 무엇을 바꿔야 할까요?', ['공을 조금 더 앞(머리 위)에서 놓는다', '공을 더 일찍(머리 뒤에서) 놓는다', '더 세게만 던진다'], 0, '머리 뒤에서 놓으면 손이 위로 가는 중이라 공이 떠요. 머리 위에서 놓으면 발사각이 낮아져요.'],
+    ['같은 힘으로 가장 멀리 던지려면 발사각은?', ['45° 근처', '10°', '80°'], 0, '너무 낮으면 금방 떨어지고, 너무 높으면 높이만 올라가요.'],
+    ['손끝(공)을 더 빠르게 하려면?', ['팔을 뻗고 다리·허리부터 차례로 돌린다', '팔을 몸에 붙이고 팔만 돌린다', '모든 부위를 한꺼번에 멈춘다'], 0, '바깥쪽일수록 빠르고, 큰 부위부터 차례로 돌면 채찍처럼 끝이 빨라져요.'],
+    ['팔로만 던진 느린 공이 포수에게 못 가는 까닭은?', ['날아가는 시간이 길어 중력이 오래 끌어내려서', '공이 무거워져서', '바람이 없어서'], 0, '느린 공은 같은 거리를 가는 데 오래 걸려요. 그동안 중력이 계속 당겨요.']] };
+
 
 // ---------- 학교에서 맨몸으로: 카프 레이즈 · 경사 푸시업 · 파이크 푸시업 · 숄더 탭 · 베어 크롤 · 윗몸 말아올리기 ----------
 const CALF = { name: '카프 레이즈', sceneLabel: '카프 레이즈', env: 'gym', range: ['서기', '발뒤꿈치 들기'], cam: { y: .7, z: 0, dist: 3.4 }, defaultView: 'side',
@@ -2832,6 +2904,107 @@ const TH3 = (() => { const g = PROPS.throwing, DZ = TH.DIST;
   const tubes = new THREE.Group(); g.add(tubes); const mark = new THREE.Mesh(new THREE.SphereGeometry(.11, 16, 12), new THREE.MeshBasicMaterial({ color: 0xffffff })); g.add(mark);
   return { ball, arrow, ring, tubes, mark, key: '', sims: {} }; })();
 const TH_COL = [0x2f8a4e, 0x1c7ed6, 0xe8590c], TH_CSS = ['#2f8a4e', '#1c7ed6', '#e8590c'];
+
+// ---------- 사람 없이 원리 보기: 3D 물체 ----------
+const xBasic = (c, o = 1) => new THREE.MeshBasicMaterial({ color: c, transparent: o < 1, opacity: o, depthWrite: o === 1 });
+function xBall(c, r = .11) { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 20, 14), std(c, { roughness: .5 })); m.castShadow = true; return m; }
+function xArrow(c, r = .045) { const g = new THREE.Group(), m = std(c), sh = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 1, 10), m), hd = new THREE.Mesh(new THREE.ConeGeometry(r * 2.8, r * 7, 14), m); g.add(sh, hd);
+  g.set = (o, v) => { const L = v.length(); g.visible = L > 1e-3; if (!g.visible) return; const hl = Math.min(r * 7, L * .5); g.position.copy(o); g.quaternion.setFromUnitVectors(V(0, 1, 0), v.clone().normalize()); sh.scale.y = Math.max(.001, L - hl); sh.position.y = (L - hl) / 2; hd.position.y = L - hl / 2; }; return g; }
+function xTube(pts, c, r = .05, o = 1) { const n = Math.max(8, pts.length), m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.length > 1 ? pts : [pts[0], pts[0].clone().add(V(0, 0, .01))]), n, r, 8), xBasic(c, o)); m.userData.tub = n; return m; }
+const xReveal = (m, f) => m.geometry.setDrawRange(0, Math.floor(clamp(f, 0, 1) * m.userData.tub) * 8 * 6);
+function xRod(c, r) { const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 1, 12), std(c)); m.castShadow = true; m.place = (a, b) => { const d = b.clone().sub(a), L = d.length(); m.position.copy(a).addScaledVector(d, .5); m.scale.set(1, Math.max(.001, L), 1); m.quaternion.setFromUnitVectors(V(0, 1, 0), d.normalize()); }; return m; }
+function xField(g, len, wid, step, extra = []) { const grd = new THREE.Mesh(new THREE.PlaneGeometry(wid + 30, len + 30), std(0x4c9a63, { roughness: 1 })); grd.rotation.x = -Math.PI / 2; grd.position.set(0, .004, len / 2); grd.receiveShadow = true; g.add(grd);
+  const labs = []; for (const z of [...Array(Math.floor(len / step) + 1).keys()].map(i => i * step).concat(extra)) { const l = new THREE.Mesh(new THREE.PlaneGeometry(wid, .06), xBasic(XC.chalk, .85)); l.rotation.x = -Math.PI / 2; l.position.set(0, .008, z); g.add(l); labs.push([V(-wid / 2 - .5, 0, z), (Math.round(z * 100) / 100) + 'm']); }
+  return labs; }
+function xZone(g, z) { const lo = .5, hi = 1.2, w = .43, f = new THREE.Mesh(new THREE.PlaneGeometry(w, hi - lo), xBasic(XC.good, .25)); f.position.set(0, (lo + hi) / 2, z); g.add(f);
+  const e = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w, hi - lo, .02)), new THREE.LineBasicMaterial({ color: XC.good })); e.position.copy(f.position); g.add(e);
+  const pl = new THREE.Mesh(new THREE.CircleGeometry(.25, 5), xBasic(XC.chalk)); pl.rotation.x = -Math.PI / 2; pl.position.set(0, .01, z); g.add(pl); }
+for (const k of ['xa1', 'xa2', 'xb1', 'xb2', 'xb3']) { PROPS[k] = new THREE.Group(); PROPS[k].visible = false; scene.add(PROPS[k]); }
+{ // 포물선
+  const g = PROPS.xa1, A = XS.a1 = { labs: xField(g, 25, 5, 5) }, h0 = 1.6; const post = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, h0, 8), xBasic(XC.muted, .7)); post.position.y = h0 / 2; g.add(post);
+  A.ghosts = Array.from({ length: 30 }, () => { const b = xBall(XC.ball, .085); b.material.transparent = true; b.material.opacity = .5; g.add(b); return b; });
+  A.guides = Array.from({ length: 30 }, () => { const l = new THREE.Mesh(new THREE.CylinderGeometry(.012, .012, 1, 6), xBasic(XC.chalk, .5)); g.add(l); return l; });
+  A.b = xBall(XC.ball, .14); A.ax = xArrow(XC.vx); A.ay = xArrow(XC.grav); g.add(A.b, A.ax, A.ay);
+  const v = 15, a = 40; A.Fg = xFlight(v, a, h0); A.Fn = { T: 1.9, at: t => V(0, h0 + v * Math.sin(a * D) * t, v * Math.cos(a * D) * t) };
+  A.pg = xTube(Array.from({ length: 50 }, (_, i) => A.Fg.at(A.Fg.T * i / 49)), XC.ball, .03, .55); A.pn = xTube(Array.from({ length: 50 }, (_, i) => A.Fn.at(A.Fn.T * i / 49)), XC.vx, .03, .55); g.add(A.pg, A.pn); }
+{ // 발사각
+  const g = PROPS.xa2, A = XS.a2 = { labs: xField(g, 30, 7, 5), F: {}, arcs: {}, tubes: {} };
+  for (const a of [15, 30, 45, 60, 75]) { const F = A.F[a] = xFlight(16, a, 0); A.tubes[a] = xTube(F.pts, XC.ball, .07); g.add(A.tubes[a]); const arc = new THREE.Mesh(new THREE.RingGeometry(1.4, 1.52, 32, 1, 0, a * D), xBasic(XC.vx)); arc.rotation.y = -Math.PI / 2; g.add(arc); A.arcs[a] = arc; }
+  A.b = xBall(XC.ball, .2); A.arr = xArrow(XC.vx, .06); A.land = new THREE.Mesh(new THREE.RingGeometry(.35, .5, 32), xBasic(XC.chalk)); A.land.rotation.x = -Math.PI / 2; A.land.position.y = .012; g.add(A.b, A.arr, A.land); }
+{ // 회전판
+  const g = PROPS.xb1, A = XS.b1 = { ang: 0, last: 0 }; A.disk = new THREE.Group(); g.add(A.disk);
+  const plate = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.6, .12, 64), std(0xffffff)); plate.position.y = .06; plate.receiveShadow = true; A.disk.add(plate);
+  for (const r of [.8, 1.6, 2.4]) { const l = new THREE.Mesh(new THREE.TorusGeometry(r, .014, 6, 96), xBasic(XC.muted, .7)); l.rotation.x = Math.PI / 2; l.position.y = .125; A.disk.add(l); }
+  const bar = new THREE.Mesh(new THREE.BoxGeometry(2.5, .06, .1), std(XC.ink)); bar.position.set(1.25, .16, 0); A.disk.add(bar); const post = new THREE.Mesh(new THREE.CylinderGeometry(.12, .12, 1.2, 16), std(XC.ink)); post.position.y = .6; g.add(post);
+  A.rs = [[.8, '몸 가까이', XC.muted, XCS.muted], [1.6, '팔 굽힘', XC.vx, XCS.vx], [2.4, '팔 뻗음', XC.ball, XCS.ball]];
+  A.balls = A.rs.map(([r, , c]) => { const b = xBall(c, r > 2 ? .2 : .15); g.add(b); return b; }); A.arrows = A.rs.map(([, , c]) => { const a = xArrow(c, .04); g.add(a); return a; });
+  A.trails = A.rs.map(([, , c]) => { const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints(Array.from({ length: 40 }, () => V(0, 0, 0))), new THREE.LineBasicMaterial({ color: c, transparent: true, opacity: .8 })); g.add(l); return l; }); }
+{ // 채찍(운동 사슬)
+  const g = PROPS.xb2, A = XS.b2 = { tp: [] }; const post = new THREE.Mesh(new THREE.CylinderGeometry(.14, .18, .9, 16), std(XC.ink)); post.position.y = .45; g.add(post);
+  A.segs = XCHAIN.map(([, c]) => { const r = xRod(c, .11); g.add(r); return r; }); A.joints = XCHAIN.map(([, c]) => { const j = xBall(c, .14); g.add(j); return j; }); A.tip = xBall(XC.ball, .2); g.add(A.tip);
+  A.trail = new THREE.Line(new THREE.BufferGeometry().setFromPoints(Array.from({ length: 50 }, () => V(0, .9, 0))), new THREE.LineBasicMaterial({ color: XC.ball })); g.add(A.trail); }
+{ // 빠른 공 vs 느린 공
+  const g = PROPS.xb3, A = XS.b3 = { labs: xField(g, 20, 4, 6, [18.44]).filter(l => l[1] !== '18m') }; xZone(g, 18.44);
+  const post = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, 1.8, 8), xBasic(XC.muted, .7)); post.position.y = .9; g.add(post);
+  A.set = [[13, '팔로만 47km/h', XC.muted, XCS.muted, -.45], [32, '온몸으로 115km/h', XC.ball, XCS.ball, .45]].map(([v, nm, c, cs, x]) => { const F = xFlight(v, 0, 1.8, 18.44); F.pts.forEach(p => p.x = x); const at = F.at; F.at = t => at(t).setX(x);
+    g.add(xTube(F.pts, c, .02, .5)); const b = xBall(c, .11); g.add(b); const gh = Array.from({ length: 16 }, () => { const m = xBall(c, .08); m.material.transparent = true; m.material.opacity = .5; g.add(m); return m; }); return { v, nm, c, cs, x, F, b, gh }; }); }
+const xGauss = (x, p) => Math.exp(-((x - p) ** 2) / (2 * .045 ** 2)), xErf = x => { const t = 1 / (1 + .3275911 * Math.abs(x)), y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - .284496736) * t + .254829592) * t * Math.exp(-x * x); return x >= 0 ? y : -y; };
+const xCum = (x, p) => .5 * (1 + xErf((x - p) / (.045 * Math.SQRT2)));
+// 매 프레임: 장면마다 움직임 + 읽을거리 + 이름표 + 그래프
+const X_UPDATE = {
+  a1(v, t) { const A = XS.a1, grav = v === 'grav', F = grav ? A.Fg : A.Fn, T = F.T, tt = t * T, sp = 15, an = 40; A.pg.visible = grav; A.pn.visible = !grav; xReveal(grav ? A.pg : A.pn, t);
+    let i = 0; for (let k = 0; k <= tt + 1e-6 && i < 30; k += .1, i++) { const p = F.at(k); A.ghosts[i].visible = true; A.ghosts[i].position.copy(p); A.guides[i].visible = true; A.guides[i].position.set(0, p.y / 2, p.z); A.guides[i].scale.y = Math.max(.001, p.y); }
+    for (; i < 30; i++) { A.ghosts[i].visible = false; A.guides[i].visible = false; }
+    const p = F.at(tt), vz = sp * Math.cos(an * D), vy = sp * Math.sin(an * D) - (grav ? 9.8 * tt : 0), k = .12; A.b.position.copy(p); A.ax.set(p, V(0, 0, vz * k)); A.ay.set(p, V(0, vy * k, 0)); A.tt = tt; A.F = F;
+    return { read: [['시간', tt.toFixed(1) + '초'], ['높이', p.y.toFixed(1) + 'm'], ['거리', p.z.toFixed(1) + 'm']], labels: [...A.labs, [p.clone().add(V(0, .25, vz * k + .3)), '앞으로 (그대로)'], [p.clone().add(V(0, vy * k + (vy >= 0 ? .45 : -.05), 0)), vy >= 0 ? '위로 (점점 느려짐)' : '아래로 (점점 빨라짐)']] }; },
+  a2(v, t) { const A = XS.a2, a = +v.slice(1), F = A.F[a]; for (const k in A.tubes) { const on = +k === a; A.tubes[k].material.color.setHex(on ? XC.ball : XC.muted); A.tubes[k].material.transparent = !on; A.tubes[k].material.opacity = on ? 1 : .35; A.tubes[k].scale.setScalar(1); xReveal(A.tubes[k], on ? t * 1.15 : 1); A.arcs[k].visible = on; }
+    const tt = Math.min(F.T, t * 1.15 * F.T); A.b.position.copy(tt >= F.T ? F.pts[F.pts.length - 1] : F.at(tt)); A.arr.set(V(0, 0, 0), V(0, Math.sin(a * D), Math.cos(a * D)).multiplyScalar(2.6)); A.land.position.z = F.dist; A.land.visible = tt >= F.T; A.a = a;
+    const labs = [...A.labs, [V(0, .6, 1.9), a + '°'], [V(0, F.top + .7, F.pts[Math.floor(F.pts.length / 2)].z), '최고 ' + F.top.toFixed(1) + 'm']]; if (tt >= F.T) labs.push([V(0, .7, F.dist), F.dist.toFixed(1) + 'm']);
+    return { read: [['최고 높이', F.top.toFixed(1) + 'm'], ['날아간 거리', F.dist.toFixed(1) + 'm'], ['걸린 시간', F.T.toFixed(2) + '초']], labels: labs }; },
+  b1(v, t, now) { const A = XS.b1, w = state.def.variants[v].p(0).w, om = w * .32, dt = Math.min(.05, (now - (A.last || now)) / 1000); A.last = now; if (state.playing) A.ang += om * dt; A.disk.rotation.y = -A.ang; A.om = om;
+    const read = [], labels = [[V(0, 1.4, 0), '회전축(몸)']];
+    A.rs.forEach(([r, nm], i) => { const p = V(r * Math.cos(A.ang), .32, r * Math.sin(A.ang)); A.balls[i].position.copy(p); const sp = r * om; A.arrows[i].set(p, V(-Math.sin(A.ang), 0, Math.cos(A.ang)).multiplyScalar(sp * .45));
+      const pos = A.trails[i].geometry.attributes.position; for (let k = 0; k < 40; k++) { const a = A.ang - k * .03; pos.setXYZ(k, r * Math.cos(a), .32, r * Math.sin(a)); } pos.needsUpdate = true; labels.push([p.clone().add(V(0, .45, 0)), nm]); read.push([nm, (sp * 1.4).toFixed(1) + ' m/s']); });
+    return { read, labels }; },
+  b2(v, t) { const A = XS.b2, M = XMODES[v]; if (t < .02) A.tp = []; let p = V(0, .9, 0), ang = 160; const labels = [];
+    XCHAIN.forEach(([nm, , , L], i) => { ang -= M.amp[i] ? 115 * xCum(t, M.peaks[i]) : 0; const a = (ang + i * 10) * D, q = p.clone().add(V(Math.cos(a) * L, 0, -Math.sin(a) * L)); A.segs[i].place(p, q); A.joints[i].position.copy(p); labels.push([p.clone().lerp(q, .5).add(V(0, .25, 0)), nm]); p = q; });
+    A.tip.position.copy(p); A.tp.unshift(p.clone()); if (A.tp.length > 50) A.tp.pop(); const pos = A.trail.geometry.attributes.position; for (let k = 0; k < 50; k++) { const q = A.tp[Math.min(k, A.tp.length - 1)]; pos.setXYZ(k, q.x, q.y, q.z); } pos.needsUpdate = true; A.t = t; A.m = v;
+    return { read: [['손끝 최고 빠르기', M.tip + ' m/s'], ['공 빠르기', Math.round(M.tip * 3.6 * .82) + ' km/h']], labels }; },
+  b3(v, t) { const A = XS.b3, read = [], labels = [...A.labs, [V(0, 1.45, 18.44), '스트라이크 존']], el = t * 1.5;
+    A.set.forEach(s => { const F = s.F, tt = Math.min(F.T, el); let i = 0; for (let k = 0; k <= tt + 1e-6 && i < 16; k += .1, i++) { const p = F.at(k); s.gh[i].visible = p.y >= 0; s.gh[i].position.copy(p); } for (; i < 16; i++) s.gh[i].visible = false;
+      s.b.position.copy(tt >= F.T ? F.pts[F.pts.length - 1] : F.at(tt)); const e = F.pts[F.pts.length - 1]; labels.push([V(s.x, Math.max(e.y, .1) + .55, Math.min(e.z, 14)), s.nm]);
+      read.push([s.nm.split(' ')[0], F.end === 'target' ? `${F.T.toFixed(2)}초 · ${(1.8 - e.y).toFixed(1)}m 떨어짐` : `${F.T.toFixed(2)}초 · ${(18.44 - e.z).toFixed(1)}m 앞에서 땅`]); });
+    return { read, labels }; } };
+function xTxt(x, s, a, b, col, al = 'left', w = 700) { x.font = `${w} 11.5px "IBM Plex Sans KR", sans-serif`; x.fillStyle = col; x.textAlign = al; x.fillText(s, a, b); }
+function xCurve(x, pts, col, w = 2.5) { x.beginPath(); pts.forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b)); x.strokeStyle = col; x.lineWidth = w; x.stroke(); }
+function xDot(x, a, b, r, col) { x.beginPath(); x.arc(a, b, r, 0, 7); x.fillStyle = col; x.fill(); }
+const X_CHART = {
+  a1(x, W, H) { const A = XS.a1, F = A.F, T = F.T, tt = A.tt || 0, half = (W - 12) / 2;
+    [['앞으로 간 거리', t => F.at(t).z, 25, XCS.vx], ['높이', t => F.at(t).y, 13, XCS.grav]].forEach(([nm, fn, mx, col], i) => { const l = 6 + i * half + 10, b = 18, w = half - 18, h = H - 36, X = t => l + t / T * w, Y = v => H - b - clamp(v / mx, 0, 1) * h;
+      x.strokeStyle = XCS.line; x.lineWidth = 1.2; x.beginPath(); x.moveTo(l, 8); x.lineTo(l, H - b); x.lineTo(l + w, H - b); x.stroke();
+      xCurve(x, Array.from({ length: 40 }, (_, k) => { const t = T * k / 39; return [X(t), Y(fn(t))]; }), col); xDot(x, X(tt), Y(fn(tt)), 4.5, XCS.ball); xTxt(x, nm, l + 4, 14, col); xTxt(x, '시간 →', l + w, H - 5, XCS.muted, 'right', 600); }); },
+  a2(x, W, H) { const A = XS.a2, l = 28, b = 20, w = W - l - 10, h = H - b - 24, X = a => l + a / 90 * w, Y = d => H - b - d / 27 * h, dist = a => 256 * Math.sin(2 * a * D) / 9.8;
+    x.strokeStyle = XCS.line; x.lineWidth = 1.2; x.beginPath(); x.moveTo(l, 8); x.lineTo(l, H - b); x.lineTo(W - 8, H - b); x.stroke(); xTxt(x, '날아간 거리', l + 4, 14, XCS.muted, 'left', 600); xTxt(x, '발사각 →', W - 8, H - 5, XCS.muted, 'right', 600);
+    xCurve(x, Array.from({ length: 91 }, (_, a) => [X(a), Y(dist(a))]), XCS.vx); for (const a of [15, 30, 45, 60, 75]) xDot(x, X(a), Y(dist(a)), a === A.a ? 6 : 3.5, a === A.a ? XCS.ball : XCS.muted);
+    xTxt(x, dist(A.a || 45).toFixed(1) + 'm', X(A.a || 45), Y(dist(A.a || 45)) - 9, XCS.ball, 'center'); },
+  b1(x, W, H) { const A = XS.b1, mx = 2.4 * 6 * .32 * 1.4, l = 66, top = 24, rh = (H - top - 6) / 3; xTxt(x, '손끝 빠르기 (m/s)', 8, 15, XCS.muted, 'left', 600);
+    A.rs.forEach(([r, nm, , cs], i) => { const v = r * (A.om || 1) * 1.4, y = top + i * rh; xTxt(x, nm, 8, y + rh * .62, XCS.ink, 'left', 600); x.fillStyle = XCS.line; x.fillRect(l, y + rh * .2, W - l - 44, rh * .55); x.fillStyle = cs; x.fillRect(l, y + rh * .2, (W - l - 44) * clamp(v / mx, 0, 1), rh * .55); xTxt(x, v.toFixed(1), W - 8, y + rh * .62, XCS.ink, 'right', 600); }); },
+  b2(x, W, H) { const A = XS.b2, M = XMODES[A.m || 'seq'], t = A.t || 0, gx = 12, gw = W - 24, gy = H - 16, gH = H - 40;
+    x.strokeStyle = XCS.line; x.lineWidth = 1.5; x.beginPath(); x.moveTo(gx, gy); x.lineTo(gx + gw, gy); x.stroke(); xTxt(x, '시간 →', gx + gw, gy + 13, XCS.muted, 'right', 600); xTxt(x, '도는 빠르기', gx, 14, XCS.muted, 'left', 600);
+    XCHAIN.forEach(([nm, , cs], i) => { if (!M.amp[i]) return; xCurve(x, Array.from({ length: 121 }, (_, k) => [gx + k / 120 * gw, gy - M.amp[i] * xGauss(k / 120, M.peaks[i]) * gH]), cs); xTxt(x, nm, gx + M.peaks[i] * gw, gy - M.amp[i] * gH - 5, cs, 'center'); });
+    x.setLineDash([3, 4]); x.strokeStyle = XCS.ink; x.beginPath(); x.moveTo(gx + t * gw, 20); x.lineTo(gx + t * gw, gy); x.stroke(); x.setLineDash([]); },
+  b3(x, W, H) { const A = XS.b3, rows = A.set.map(s => { const e = s.F.pts[s.F.pts.length - 1]; return [s.nm.split(' ')[0], s.F.T, s.F.end === 'target' ? 1.8 - e.y : 1.8, s.cs]; }), half = (H - 8) / 2;
+    [['포수까지 걸린 시간', 1, 1.5, '초'], ['떨어진 높이', 2, 1.8, 'm']].forEach(([nm, k, mx, u], j) => { const y0 = 4 + j * half; xTxt(x, nm, 8, y0 + 12, XCS.muted, 'left', 600);
+      rows.forEach((r, i) => { const bh = (half - 26) / 2, y = y0 + 18 + i * (bh + 4); x.fillStyle = XCS.line; x.fillRect(64, y, W - 116, bh); x.fillStyle = r[3]; x.fillRect(64, y, (W - 116) * clamp(r[k] / mx, 0, 1), bh); xTxt(x, r[0], 8, y + bh * .85, XCS.ink, 'left', 600); xTxt(x, r[k].toFixed(2) + u + (k === 2 && r[2] >= 1.8 ? '+' : ''), W - 8, y + bh * .85, XCS.ink, 'right', 600); }); }); } };
+let xLast = null;
+function xFrame(M, vk, t) { const box = $('xBox'), cvx = $('xChart'); if (!M.xkey) { if (xLast) { xLast = null; box.hidden = cvx.hidden = true; document.body.classList.remove('nofig'); } return null; }
+  xLast = M.xkey; document.body.classList.add('nofig'); const r = X_UPDATE[M.xkey](vk, t, performance.now());
+  const html = r.read.map(([k, v]) => `<span>${k}<b>${v}</b></span>`).join(''); if (box.innerHTML !== html) box.innerHTML = html; box.hidden = false;
+  const wide = M.xkey === 'b2'; cvx.hidden = false; cvx.className = 'xchart ' + (wide ? 'wide' : 'card'); const rc = cvx.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+  if (rc.width) { if (cvx.width !== Math.round(rc.width * d) || cvx.height !== Math.round(rc.height * d)) { cvx.width = Math.round(rc.width * d); cvx.height = Math.round(rc.height * d); }
+    const x = cvx.getContext('2d'); x.setTransform(d, 0, 0, d, 0, 0); x.clearRect(0, 0, rc.width, rc.height); x.fillStyle = 'rgba(255,255,255,.94)'; x.fillRect(0, 0, rc.width, rc.height); X_CHART[M.xkey](x, rc.width, rc.height); }
+  return r.labels; }
+
 function throwFrame(M, vk, t, P) { const box = $('throwBox'), adj = $('throwAdj'); if (!M.throwing) { if (!box.hidden) { box.hidden = adj.hidden = true; document.body.classList.remove('throwing'); } return; } document.body.classList.add('throwing');
   if (TH3.scene !== state.m + state.sc) { TH3.scene = state.m + state.sc; TH.adj = 0; }
   if (!adj.dataset.on) { adj.dataset.on = 1; adj.querySelectorAll('button').forEach(b => b.onclick = () => { TH.adj = clamp(TH.adj + 2 * +b.dataset.d, -36, 36); }); }
@@ -3096,6 +3269,7 @@ function focusStage() { // 폰에서는 무엇을 누르든 3D 화면이 보이�
   scrollTo({ top: el.getBoundingClientRect().top + scrollY - 6, behavior: reduce ? 'auto' : 'smooth' }); }
 // 바른 자세 단계별 설명: [동작 단계(0~1), 제목, 설명] — 누르면 3D가 그 단계에서 멈춰요
 const STEPS = {
+  'throw:base': [[.05, '옆으로 서기', '던지는 팔 쪽 어깨가 뒤로 가게, 목표와 옆으로 서요.'], [.22, '발 내딛기', '앞발을 목표 쪽으로 크게 내디뎌요.'], [.27, '몸통 돌리기', '허리와 몸통이 먼저 돌고, 팔꿈치는 어깨 높이로 따라와요.'], [.3, '머리 위에서 놓기', '손이 머리 위를 지날 때 공을 놓아요.'], [.6, '따라가기', '던진 뒤 팔과 몸이 앞으로 자연스럽게 따라가요.']],
   'squat:base': [[0, '준비', '발을 어깨너비로 벌리고 발끝은 살짝 바깥으로 둬요. 가슴을 펴고 배에 힘을 줘요.'], [.45, '내려가기', '엉덩이를 뒤로 빼면서 의자에 앉듯이 내려가요. 무릎은 발끝과 같은 방향으로 굽혀요.'], [1, '가장 낮은 자세', '허벅지가 바닥과 수평이 될 때까지 앉아요. 발 전체로 바닥을 누르고 허리는 곧게 지켜요.'], [.5, '일어서기', '발바닥으로 바닥을 밀면서 엉덩이와 무릎을 함께 펴요. 끝까지 서면 엉덩이에 힘을 줘요.']],
   'lunge:base': [[0, '준비', '골반 너비로 서서 한 발을 크게 앞으로 내디뎌요. 상체는 곧게 세워요.'], [.5, '내려가기', '상체를 세운 채 몸을 수직으로 내려요. 앞으로 쏠리지 않게 해요.'], [1, '가장 낮은 자세', '앞 무릎은 발목 위에, 뒤 무릎은 바닥 가까이에 와요. 두 무릎 모두 약 90°예요.'], [.5, '올라오기', '앞발 뒤꿈치로 바닥을 밀며 올라와요. 앞 무릎이 안으로 모이지 않게 해요.']],
   'pushup:base': [[0, '준비', '손을 어깨 바로 아래에 짚고 머리부터 발까지 일직선을 만들어요. 배와 엉덩이에 힘을 줘요.'], [.5, '내려가기', '팔꿈치를 몸 옆 45° 정도로 굽히며 천천히 내려가요. 몸통은 판자처럼 그대로예요.'], [1, '가장 낮은 자세', '가슴이 바닥 가까이 올 때까지 내려가요. 허리가 처지거나 엉덩이가 들리지 않게 해요.'], [.5, '밀어 올리기', '손바닥으로 바닥을 밀어 팔을 펴요. 몸 전체가 한 덩어리로 올라와요.']],
@@ -3128,7 +3302,7 @@ function setMove(k) {
 }
 function setScene(key) {
   const M = MOVES[state.m], entry = M.scenes?.find(x => x[0] === key), D0 = entry ? entry[2] : M;
-  state.sc = key; state.def = D0; setEnv(D0.env || 'gym'); for (const k in PROPS) PROPS[k].visible = (D0.props || []).includes(k); CHAIR_G.visible = key === 'chair' || !!D0.chair;
+  state.sc = key; state.def = D0; fig.g.visible = !D0.noFig; setEnv(D0.env || 'gym'); for (const k in PROPS) PROPS[k].visible = (D0.props || []).includes(k); CHAIR_G.visible = key === 'chair' || !!D0.chair;
   state.grp = entry ? entry[1] : null; renderScenes(); if (document.querySelector('aside').dataset.p === 'mus') showPane('pose');
   $('tFrom').textContent = D0.range[0]; $('tTo').textContent = D0.range[1]; slider.setAttribute('aria-label', `동작 단계: ${D0.range[0]}에서 ${D0.range[1]}까지`);
   tabs.innerHTML = '';
@@ -3163,7 +3337,7 @@ function setVariant(vk, fromMove) {
   select(state.sel);
 }
 function select(id) {
-  state.sel = id; const [nm, easy, desc] = MUSCLES[id];
+  state.sel = id; if (!MUSCLES[id]) { $('dname').textContent = ''; $('ddesc').textContent = ''; $('dnote').hidden = true; return; } const [nm, easy, desc] = MUSCLES[id];
   for (const k in rows) { rows[k].r.setAttribute('aria-pressed', k === id); rows[k].m?.setAttribute('aria-pressed', k === id); }
   $('dname').innerHTML = `${nm}<small>${easy}</small>`; $('ddesc').textContent = desc;
   const n = $('dnote'), note = state.def.notes?.[id]?.[state.v]; n.hidden = !note; n.textContent = note || '';
@@ -3208,6 +3382,7 @@ function updateLabels() {
   if (vr?.mainLabel) { place(lbl('who', 'who'), fig.P.head.clone().add(V(0, .22, 0)), vr.mainLabel); used.add('who'); }
   multi.forEach((m, i) => { const f = extras[i]; if (!f.P) return; place(lbl('who' + i, 'who'), f.P.head.clone().add(V(m.x, .22, 0)), m.label); used.add('who' + i);
     for (const d of f.dangers) { if (!d.mesh.visible || used.has(d.key + i)) continue; const e = lbl(d.key + i, 'warn'); place(e, d.mesh.position.clone().add(V(m.x, 0, 0)), DANGERS[d.key]); e.style.opacity = d.mesh.material.opacity / .55; used.add(d.key + i); } });
+  (state.xlabels || []).forEach(([p, text], i) => { place(lbl('x' + i, 'xl'), p, text); used.add('x' + i); });
   for (const k in pool) if (!used.has(k)) pool[k].hidden = true;
 }
 const chipsEl = $('chips');
@@ -3239,7 +3414,7 @@ function loop() {
   if (state.playing) { const loopM = state.def.cycle === 'loop'; state.phase += dt / (state.def.period || 4.4);
     state.t = loopM ? state.phase % 1 : .5 - .5 * Math.cos(state.phase * 2 * Math.PI); slider.value = Math.round(state.t * 1000); }
   if (camGoal) { camera.position.lerp(camGoal[0], .09); controls.target.lerp(camGoal[1], .09); if (camera.position.distanceTo(camGoal[0]) < .02) camGoal = null; }
-  fig.update(state.def, state.v, state.t, time); state.def.frame?.(state.t, state.v, fig.P); archFrame(state.def, state.v, state.t, fig.P); throwFrame(state.def, state.v, state.t, fig.P); state.com = updateCom(state.def, fig.P);
+  fig.update(state.def, state.v, state.t, time); state.def.frame?.(state.t, state.v, fig.P); archFrame(state.def, state.v, state.t, fig.P); throwFrame(state.def, state.v, state.t, fig.P); state.xlabels = xFrame(state.def, state.v, state.t); state.com = updateCom(state.def, fig.P);
   if (state.ghost) ghost.update(state.def, 'good', state.t, time);
   { const multi = state.def.variants[state.v]?.multi || []; extras.forEach((f, i) => { const m = multi[i]; f.g.visible = !!m; if (m) { f.g.position.x = m.x; f.update(m.def, m.v, state.t, time); } });
     fig.g.position.x = 0; if (state.def.livePanel && time - (state.panelAt || 0) > .3) { state.panelAt = time; $('prCard').innerHTML = state.def.panel(state.v, state.t); } }
@@ -3551,16 +3726,17 @@ if (READER) {
     let h = `<p class="rd-kick">${ci + 1}단원 · ${CH[ci][1]}</p><h1>${esc(M.name)}</h1><p class="rd-lead">${esc(M.pattern || '')}</p>`;
     if (m === 'squat' || m === 'pushup') h += `<a class="rd-cta cam" href="${camUrl(m)}" target="_blank" rel="noopener"><b>📷 카메라로 내 ${M.name} 자세 평가</b><span>폰 카메라가 자세를 보고 바로 알려 줘요 ›</span></a>`;
     if (m === 'train') h += `<a class="rd-cta lab" href="${labUrl()}" target="_blank" rel="noopener"><b>🧪 실험실: 내가 고른 무게로 근육 키우기</b><span>다섯 가지 원리를 직접 해 보고 퀴즈로 정리해요 ›</span></a>`;
-    if (m === 'throw') h += `<a class="rd-cta sci" href="https://claude.ai/artifact/WabJNMwy8qUtWLXhKDrcJX" target="_blank" rel="noopener"><b>⚾ 던지기의 과학: 3D 실험으로 원리 이해하기</b><span>발사각과 공의 길, 몸의 회전과 채찍 효과를 공·궤적·그래프로 실험해요 ›</span></a>`;
     const groups = framed ? FRAME.map(([g, lb]) => [lb, sc.filter(x => x[1] === g)]).filter(([, xs]) => xs.length) : [['', sc]];
     h += `<nav class="rd-toc">${groups.map(([lb, xs]) => `${lb ? `<b>${lb}</b>` : ''}${xs.map(([k, , d]) => `<a href="#sec-${m}-${k}">${esc(d.sceneLabel || d.name)}</a>`).join('')}`).join('')}</nav>`;
     let n = 0; groups.forEach(([lb, xs]) => { if (lb) h += `<p class="rd-grp">${lb}</p>`; xs.forEach(([k, , d]) => { n++; h += scenePart(m, k, d, `${ci + 1}-${n}`); }); });
+    if (M.quiz) h += `<section class="rd-sec rd-quiz"><h2><span class="rd-no">✓</span><span class="rd-h2t">확인 문제</span></h2>${M.quiz.map(([q, o, a, fb], qi) => `<div class="rd-q" data-a="${a}" data-fb="${fb}"><p><b>${qi + 1}.</b> ${q}</p>${[0, 1, 2].map(k => (k + qi) % 3).map(k => `<button type="button" data-k="${k}">${o[k]}</button>`).join('')}<p class="rd-qfb"></p></div>`).join('')}</section>`;
     const nx = CH[ci + 1]; if (nx) h += `<button type="button" class="rd-next" data-ch="${nx[0]}">다음 단원: ${MOVES[nx[0]].name} ›</button>`;
     $('rdPage').innerHTML = h; $('rdPage').scrollTop = 0; $('rdCh').value = m;
     $('rdPage').querySelectorAll('.rd-figbtn').forEach(b => b.onclick = () => { lastY = $('rdPage').scrollTop; open3D(b); });
     $('rdPage').querySelectorAll('.rd-step').forEach(b => b.onclick = () => { const fb = b.closest('.rd-sec').querySelector('.rd-figbtn'); lastY = $('rdPage').scrollTop; show3D(b.dataset.m, b.dataset.sc, b.dataset.v, mqPop.matches ? b : fb, true);
       state.playing = false; state.t = +b.dataset.t; syncPlay(); slider.value = Math.round(state.t * 1000); $('rdPage').querySelectorAll('.rd-step').forEach(x => x.setAttribute('aria-pressed', x === b)); });
     $('rdPage').querySelectorAll('.rd-next').forEach(b => b.onclick = () => render(b.dataset.ch));
+    $('rdPage').querySelectorAll('.rd-q').forEach(q => q.querySelectorAll('button').forEach(b => b.onclick = () => { const ok = b.dataset.k === q.dataset.a; q.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong')); b.classList.add(ok ? 'right' : 'wrong'); if (!ok) q.querySelector(`[data-k="${q.dataset.a}"]`).classList.add('right'); q.querySelector('.rd-qfb').textContent = (ok ? '맞아요! ' : '다시 생각해 봐요. ') + q.dataset.fb; }));
     $('rdPage').querySelectorAll('.rd-toc a').forEach(a => a.onclick = e => { e.preventDefault(); const t = $(a.getAttribute('href').slice(1)); $('rdPage').scrollTo({ top: t.offsetTop - 8, behavior: reduce ? 'auto' : 'smooth' }); });
     const first = $('rdPage').querySelector('.rd-figbtn'); if (first) show3D(first.dataset.m, first.dataset.sc, first.dataset.v, first, false); }
   function show3D(m, sc, v, btn, openIt) { if (state.m !== m) setMove(m); if (state.sc !== sc) setScene(sc); setVariant(v);
