@@ -1169,6 +1169,8 @@ body.paper #ghost::after{font-size:12.5px}
 .rd-panel .zones{font-size:13px}
 .rd-panel p{margin:6px 0 0;font-size:14.5px!important;color:var(--muted)}
 .rd-photo{display:block;width:100%;height:auto;border-radius:10px;max-width:640px;margin:0 auto}
+.toc-extra{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+a.toc-mv{text-decoration:none;color:inherit}.toc-mv.x4{border-color:#f2c94c!important;background:#fffbe6!important}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -3911,7 +3913,7 @@ if (PAPER) {
       right = `<span class="ribbon">난이도별</span><div class="toc-ch">${[1, 2, 3, 4, 5].map(k => { const ys = all.filter(x => x[1] === k); return ys.length ? `<div class="toc-grp"><h3 class="lv">${'★'.repeat(k)}</h3>${ys.map(x => exRow(x, partOf[x[0]])).join('')}</div>` : ''; }).join('')}</div>`;
     }
     $('pbToc').innerHTML = `<section class="pg pg-l toc-l"><div class="toc-head"><h1><span>3D 체육 교과서</span></h1></div><p class="toc-lab">분류 기준</p>${modeBar}${left}
-        <div class="toc-extra"><button type="button" class="toc-mv x1" data-m="fitness"><b>💓 체력 요소</b><span>체력의 5가지 영역</span></button><button type="button" class="toc-mv x2" data-m="train"><b>🏋️ 훈련 원리</b><span>효과적인 운동 방법</span></button><button type="button" class="toc-mv x3" data-m="body"><b>🧍 몸 지도</b><span>근육으로 운동 찾기</span></button></div>
+        <div class="toc-extra"><button type="button" class="toc-mv x1" data-m="fitness"><b>💓 체력 요소</b><span>체력의 5가지 영역</span></button><button type="button" class="toc-mv x2" data-m="train"><b>🏋️ 훈련 원리</b><span>효과적인 운동 방법</span></button><button type="button" class="toc-mv x3" data-m="body"><b>🧍 몸 지도</b><span>근육으로 운동 찾기</span></button><a class="toc-mv x4" href="train.html"><b>⏱️ 훈련 프로그램</b><span>와드·하이록스·서킷 만들고 해 보기</span></a></div>
         ${started ? '<button type="button" class="toc-resume" id="tocResume">보던 장면으로 돌아가기 ›</button>' : ''}</section>
       <section class="pg pg-r toc-r">${right}</section>`;
     $('pbToc').dataset.view = 'home'; $('pbToc').hidden = false; $('pbBook').hidden = true; root.dataset.toc = '1'; if ($('nvTitle')) $('nvTitle').textContent = '차례';
@@ -4070,7 +4072,9 @@ if (READER) {
     show3D = (m, sc, v, btn, openIt) => { if (openIt) hyOpen(m, sc, v); };
     open3D = b => hyOpen(b.dataset.m, b.dataset.sc, b.dataset.v);
     // 따라 해 보기 단계: 장면을 열고 그 단계에서 멈춤
-    $('rdPage').addEventListener('click', e => { const b = e.target.closest('.rd-step'); if (!b) return; e.stopImmediatePropagation(); hyOpen(b.dataset.m, b.dataset.sc, b.dataset.v, +b.dataset.t); }, true);
+    $('rdPage').addEventListener('click', e => { const b = e.target.closest('.rd-step'); if (!b) return; e.stopImmediatePropagation(); hyOpen(b.dataset.m, b.dataset.sc, b.dataset.v, +b.dataset.t); }, true);    // 주소 #s-동작-장면 으로 바로 그 장면 열기 (훈련장의 "자세 보기")
+    const hashGo = () => { const h = location.hash.match(/^#s-([a-z]+)-([a-z_0-9]+)$/); if (!h || !MOVES[h[1]]?.scenes?.some(x => x[0] === h[2])) return; const v = Object.keys(MOVES[h[1]].scenes.find(x => x[0] === h[2])[2].variants || {})[0]; hyOpen(h[1], h[2], v); };
+    window.addEventListener('hashchange', hashGo); setTimeout(hashGo, 0);
   }
   if (!HYBRID) render('squat');
 }
