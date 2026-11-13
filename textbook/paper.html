@@ -1149,6 +1149,8 @@ body.hybrid .pb .mi{min-height:26px;font-size:12px}
 body.paper .pb .ctrl button[data-view="diag"],body.paper .pb .ctrl button#ghost{font-size:0!important}
 body.paper .ctrl [data-view="diag"]::after{font-size:15px}
 body.paper #ghost::after{font-size:12.5px}
+
+.toc-sub{margin:6px 0 -2px;font-size:13px;font-weight:700;color:var(--navy);border-left:4px solid var(--navy);padding-left:8px}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -2745,6 +2747,59 @@ const EXMAP = { 하체: [['squat:calf', 1], ['squat:base', 2], ['squat:goblet', 
   상체: [['pushup:wallpu', 1], ['pushup:incline', 1], ['pushup:kneepu', 2], ['pull:base', 2], ['pushup:base', 3], ['pushup:diamond', 4], ['pushup:pike', 4], ['pushup:clap', 5]],
   몸통: [['plank:crunch', 1], ['plank:kneeplank', 1], ['plank:base', 2], ['plank:birddog', 2], ['plank:tap', 2], ['plank:bear', 2], ['plank:carry', 2], ['plank:legraise', 3], ['plank:climber', 3]],
   전신: [['squat:thruster', 3], ['squat:wallball', 3], ['pushup:burpee', 3], ['lunge:getup', 4]] };
+
+// ---------- 당기기 더하기: 덤벨 컬 · 로잉 머신 · 조정 ----------
+const CURL = { name: '덤벨 컬', sceneLabel: '덤벨 컬', env: 'gym', range: ['팔 펴기', '팔 굽히기'], cam: { y: .95, z: 0, dist: 3.6 }, defaultView: 'side',
+  muscles: ['bi', 'delt', 'abs', 'erector'],
+  variants: {
+    good: { name: '팔꿈치는 옆구리에 고정', desc: '덤벨을 들고 바르게 서서, 팔꿈치를 옆구리에 붙인 채 아래팔만 굽혀 덤벨을 어깨 쪽으로 끌어올려요. 천천히 내려요. 팔 앞쪽 근육(이두근)이 당기는 힘을 기르는 가장 쉬운 당기기 운동이에요.',
+      checks: ['팔꿈치는 옆구리에 붙인 채', '몸통은 흔들지 않기', '올릴 때 2초, 내릴 때 2초', '손목은 곧게'], p: t => ({ t, swing: 0 }) },
+    swing: { name: '몸을 뒤로 젖혀 반동', danger: [['back', [0]]], desc: '무거운 덤벨을 올리려고 허리를 뒤로 젖히며 반동을 써요.',
+      why: '반동을 쓰면 이두근 대신 허리가 덤벨을 던져 올려요. 허리가 뒤로 꺾이며 다치기 쉽고 팔 운동 효과도 줄어요.', fix: ['덤벨 무게를 줄이기', '배에 힘을 주고 몸통 고정', '팔꿈치를 앞으로 내밀지 않기'], p: t => ({ t, swing: 1 }) },
+  },
+  spec(q) { const t = q.t, S = standK(), lean = -16 * q.swing * ss(.2, .7, t); S.low = lean * .4; S.up = lean; S.head = 0; S.dumb = 6;
+    S.arms = { mode: 'angle', flex: 3 + 28 * q.swing * ss(.3, .8, t), abd: 7, elbow: 135 * t }; return { ...S, q }; },
+  act: (v, P, t) => v === 'swing' ? { bi: .4 + .4 * t, delt: .35, abs: .2, erector: .45 + .35 * t } : { bi: .3 + .65 * t, delt: .2, abs: .35, erector: .2 },
+  readouts: [['팔꿈치', P => ang3(P.side[1].sh, P.side[1].el, P.side[1].wr)]],
+  notes: { bi: { good: '팔꿈치를 굽히며 덤벨을 끌어올릴 때 이두근이 짧아지며 일해요. 당기기 동작의 마지막을 맡는 근육이에요.' }, erector: { swing: '허리가 반동을 만드느라 척추세움근에 부담이 몰려요.' } } };
+
+function rowPhase(u, early) { // 로잉: 다리로 밀기 → 몸 젖히기 → 팔로 당기기, 돌아올 때는 거꾸로
+  const leg = u < .45 ? ss(0, .25, u) : 1 - ss(.65, .95, u), lean = u < .45 ? ss(.15, .32, u) : 1 - ss(.55, .72, u),
+    arm = early ? (u < .45 ? ss(0, .22, u) : 1 - ss(.45, .6, u)) : (u < .45 ? ss(.28, .45, u) : 1 - ss(.45, .6, u));
+  return { leg, lean, arm, name: u < .45 ? (u < .25 ? '① 다리로 밀기' : u < .32 ? '② 몸 젖히기' : '③ 팔로 당기기') : '돌아오기 (팔 → 몸 → 다리)' }; }
+function rowSpec(q, y0 = 0) { const P0 = rowPhase(q.t, q.early), zH = -.08 - .44 * P0.leg, lean = 30 - 46 * P0.lean, round = 26 * (q.round || 0) * (1 - P0.lean);
+  const feet = sym(s => ({ ankle: V(s * .11, y0 + .22, .34), toe: V(s * .11, y0 + .34, .44), heel: V(s * .11, y0 + .12, .3) })), hip = V(0, y0 + .4, zH);
+  const shZ = zH + Math.sin(lean * D) * .52, shY = hip.y + Math.cos(lean * D) * .52, reach = V(0, y0 + .62, .78), chest = V(0, shY - .2, shZ + .14);
+  const hand = reach.clone().lerp(chest, P0.arm);
+  return { feet, hip, low: lean - round * .6, up: lean + round, head: lean * .5, kneePole: sym(s => V(s * .15, 1, .25)),
+    arms: { mode: 'ik', wr: sym(s => V(s * .2, hand.y, hand.z)), pole: sym(s => V(s * .8, -.2, -1)) }, q, ph: P0 }; }
+const rowAct = (v, P) => { const { leg, lean, arm } = P.ph, k = P.q.t < .45 ? 1 : .35;
+  return { quad: .2 + .7 * k * (1 - leg * .6), glute: .2 + .6 * k * (leg > .2 && leg < .95 ? 1 : .4), ham: .2 + .4 * k * lean, erector: v === 'round' ? .8 : .3 + .3 * k * lean, abs: .35 + .2 * lean, lat: .15 + .75 * k * arm, bi: .1 + .6 * k * arm, trap: .15 + .6 * k * arm }; };
+const ERG = { name: '로잉 머신', sceneLabel: '로잉 머신 (에르그)', env: 'gym', props: ['erg'], cycle: 'loop', period: 2.8, range: ['시작', '한 번'], cam: { y: .55, z: .05, dist: 4.4 }, defaultView: 'side', dangerShow: () => 1,
+  muscles: ['quad', 'glute', 'lat', 'bi', 'trap', 'erector'],
+  variants: {
+    good: { name: '다리 → 몸 → 팔 순서로', desc: '크로스핏과 조정 선수가 쓰는 로잉 머신이에요. 손잡이를 잡고 ① 다리로 발판을 밀고, ② 몸을 살짝 뒤로 젖히고, ③ 마지막에 팔로 손잡이를 배꼽 쪽으로 당겨요. 돌아올 때는 팔 → 몸 → 다리 순서로 거꾸로 해요. 힘의 대부분은 다리에서 나와요.',
+      checks: ['다리 → 몸 → 팔 순서', '돌아올 때는 팔 → 몸 → 다리', '등은 곧게', '손잡이는 배꼽 높이로'], p: t => ({ t }) },
+    early: { name: '팔부터 당김', desc: '다리를 밀기도 전에 팔부터 손잡이를 당겨요.',
+      why: '다치는 자세는 아니지만, 큰 다리 힘을 쓰지 못하고 작은 팔 근육으로만 당기게 돼서 금방 지쳐요. 다리로 먼저 밀어야 힘이 팔까지 이어져요.', fix: ['팔은 쭉 편 채 다리부터 밀기', '다리를 다 편 뒤에 팔 당기기'], p: t => ({ t, early: 1 }) },
+    round: { name: '등이 굽음', danger: [['back', [0]]], desc: '앞으로 갈 때 등을 둥글게 말아 손잡이를 멀리 잡아요.',
+      why: '굽은 등으로 다리를 세게 밀면 그 힘이 허리로 몰려서 허리를 다치기 쉬워요.', fix: ['가슴을 펴고 엉덩이부터 앞으로', '앞으로는 정강이가 수직이 될 때까지만'], p: t => ({ t, round: 1 }) },
+  },
+  spec: q => rowSpec(q), act: rowAct, readouts: [['단계', P => P.ph.name]],
+  frame: (t, v, P) => { if (!P) return; ERG3.seat.position.set(0, .3, P.hipC.z); const h = P.side[1].wr.clone().add(P.side[-1].wr).multiplyScalar(.5); ERG3.handle.position.copy(h); ERG3.chain.place(h, V(0, .5, .95)); },
+  notes: { quad: { good: '① 다리로 발판을 밀 때 대퇴사두근이 가장 크게 일해요. 다리로 밀고 팔로 당기는, 밀기와 당기기가 합쳐진 운동이에요.' }, lat: { good: '③ 마지막에 팔로 당길 때 등(광배근)과 이두근이 일해요.' } } };
+const BOAT = { ...ERG, name: '조정 (노 젓기)', sceneLabel: '조정·카누: 노 젓기', env: 'pool', props: ['boat'], cam: { y: 1.45, z: 0, dist: 5.2 },
+  variants: { good: { name: '다리로 밀고 팔로 당기기', desc: '조정 선수는 배 안의 미끄러지는 자리에 앉아, 로잉 머신과 똑같이 다리 → 몸 → 팔 순서로 노를 당겨 배를 앞으로 보내요. 노 끝이 물을 뒤로 밀어서 배가 앞으로 나가요.', checks: ['다리 → 몸 → 팔 순서', '노는 물속에서 당기고, 물 밖에서 돌아오기'], p: t => ({ t }) },
+    early: ERG.variants.early },
+  spec: q => rowSpec(q, .92),
+  frame: (t, v, P) => { if (!P) return; BOAT3.seat.position.set(0, 1.22, P.hipC.z); const h = P.side[1].wr.clone().add(P.side[-1].wr).multiplyScalar(.5), u = t, inWater = u < .45;
+    for (const s of [1, -1]) { const o = BOAT3.oars[s], pin = V(s * .75, 1.42, .1), grip = V(s * .12, h.y, h.z); const dir = pin.clone().sub(grip).normalize(), tip = pin.clone().addScaledVector(dir, 1.6); tip.y = inWater ? 1.05 : 1.3; o.place(grip, tip); BOAT3.blades[s].position.copy(tip); } },
+  notes: { quad: { good: '조정의 힘은 대부분 다리에서 나와요. 다리로 밀고 팔로 당겨 마무리해요.' } } };
+MOVES.pull.scenes.splice(1, 0, ['curl', '응용', CURL], ['erg', '응용', ERG], ['boat', '스포츠', BOAT]);
+EXMAP.상체.splice(0, 0, ['pull:curl', 1]); EXMAP.전신.splice(0, 0, ['pull:erg', 2]);
+// 밀기·당기기를 상체(팔)와 하체(다리)로 나누어 보기
+const PUSHPULL = { pushup: { up: '팔로 밀기 (상체)', down: '다리로 밀기 (하체)', downNote: '다리로 바닥을 밀어 몸을 올리는 동작도 밀기예요. 앉았다 일어서기, 한 발로 딛고 일어서기, 점프가 모두 하체 밀기예요.', links: [['squat', 'base'], ['lunge', 'base'], ['squat', 'jump'], ['squat', 'boxjump'], ['pull', 'erg']] },
+  pull: { up: '팔로 당기기 (상체)', down: '엉덩이·다리로 당기기 (하체)', downNote: '바닥의 물건을 엉덩이와 허벅지 뒤 힘으로 끌어올리는 동작이 하체 당기기예요. 숙였다가 엉덩이를 앞으로 밀며 일어서요.', links: [['hinge', 'base'], ['hinge', 'swing']] } };
 let USES_CACHE = null;
 function muscleUses(id) {
   if (!USES_CACHE) { USES_CACHE = [];
@@ -2989,6 +3044,24 @@ const DOOR_PIVOT = new THREE.Group(); DOOR_PIVOT.position.set(.5, 0, .62); PROPS
   boxAt(PROPS.bench, .5, .05, .42, 0, .45, -.68, wood);
   for (const [x, z] of [[.21, -.5], [-.21, -.5], [.21, -.86], [-.21, -.86]]) cylAt(PROPS.bench, .015, .43, x, .215, z, leg); }
 for (const k in PROPS) scene.add(PROPS[k]);
+// 로잉 머신과 조정 배
+const ERG3 = (() => { const g = PROPS.erg = new THREE.Group(); g.visible = false; scene.add(g); const dk = std(0x343a40, { metalness: .3 }), lt = std(0xadb5bd, { metalness: .5 });
+  const rail = new THREE.Mesh(new THREE.BoxGeometry(.12, .06, 2.2), lt); rail.position.set(0, .22, -.25); g.add(rail);
+  for (const z of [-1.3, .8]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(.5, .2, .1), dk); leg.position.set(0, .1, z); g.add(leg); }
+  const fw = new THREE.Mesh(new THREE.CylinderGeometry(.3, .3, .2, 32), dk); fw.rotation.z = Math.PI / 2; fw.position.set(0, .5, 1.05); g.add(fw);
+  for (const s of [1, -1]) { const fp = new THREE.Mesh(new THREE.BoxGeometry(.14, .26, .03), dk); fp.position.set(s * .11, .26, .38); fp.rotation.x = -.6; g.add(fp); }
+  const seat = new THREE.Mesh(new THREE.BoxGeometry(.32, .06, .3), std(0x212529)); g.add(seat);
+  const handle = new THREE.Mesh(new THREE.CylinderGeometry(.02, .02, .5, 10), std(0x212529)); handle.rotation.z = Math.PI / 2; g.add(handle);
+  const chain = new THREE.Mesh(new THREE.CylinderGeometry(.006, .006, 1, 6), lt); chain.place = (a, b) => { const d = b.clone().sub(a), L = d.length(); chain.position.copy(a).addScaledVector(d, .5); chain.scale.set(1, L, 1); chain.quaternion.setFromUnitVectors(V(0, 1, 0), d.normalize()); }; g.add(chain);
+  return { seat, handle, chain }; })();
+const BOAT3 = (() => { const g = PROPS.boat = new THREE.Group(); g.visible = false; scene.add(g); const hull = new THREE.Mesh(new THREE.CylinderGeometry(.32, .32, 4.5, 24, 1, false, 0, Math.PI), std(0xf1f3f5, { side: THREE.DoubleSide }));
+  hull.rotation.set(Math.PI / 2, 0, Math.PI); hull.scale.set(1.2, 1, .7); hull.position.set(0, 1.13, -.2); g.add(hull);
+  const seat = new THREE.Mesh(new THREE.BoxGeometry(.3, .05, .28), std(0x495057)); g.add(seat);
+  const oarM = std(0x8d6e63), oars = {}, blades = {};
+  for (const s of [1, -1]) { const rig = new THREE.Mesh(new THREE.CylinderGeometry(.012, .012, .8, 6), std(0xadb5bd)); rig.rotation.z = Math.PI / 2; rig.position.set(s * .4, 1.42, .1); g.add(rig);
+    const o = new THREE.Mesh(new THREE.CylinderGeometry(.018, .018, 1, 8), oarM); o.place = (a, b) => { const d = b.clone().sub(a), L = d.length(); o.position.copy(a).addScaledVector(d, .5); o.scale.set(1, L, 1); o.quaternion.setFromUnitVectors(V(0, 1, 0), d.normalize()); }; g.add(o); oars[s] = o;
+    const bl = new THREE.Mesh(new THREE.BoxGeometry(.04, .14, .38), std(0x1971c2)); g.add(bl); blades[s] = bl; }
+  return { seat, oars, blades }; })();
 // 던지기 장면: 잔디, 포수 미트, 공, 공이 날아간 길
 const TH3 = (() => { const g = PROPS.throwing, DZ = TH.DIST;
   const pl = (w, d, color, y, z) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), std(color, { roughness: 1 })); m.rotation.x = -Math.PI / 2; m.position.set(0, y, z); m.receiveShadow = true; g.add(m); return m; };
@@ -3749,7 +3822,7 @@ if (PAPER) {
   window.__pbGoScene = (m, sc) => { const i = idxOf(m, sc); if (i >= 0) show(i); };
   // 차례
   let tocCat = '기본', tocMode = 'move', tocMv = 'squat'; try { tocMode = localStorage.getItem('toc-mode') || 'move'; } catch (e) { }
-  const VERB = { squat: ['앉기', '스쿼트'], lunge: ['한 발 딛기', '런지'], hinge: ['숙이기', '힙힌지'], pushup: ['밀기', '푸시업'], pull: ['당기기', '덤벨 로우'], plank: ['버티기', '플랭크'], throw: ['던지기', '공 던지기'] };
+  const VERB = { squat: ['앉기', '스쿼트'], lunge: ['한 발 딛기', '런지'], hinge: ['숙이기', '힙힌지'], pushup: ['밀기', '푸시업'], pull: ['당기기', '로우·컬'], plank: ['버티기', '플랭크'], throw: ['던지기', '공 던지기'] };
   const MVO = ['squat', 'lunge', 'hinge', 'pushup', 'pull', 'plank', 'throw'];
   const MODES = [['move', '동작별'], ['frame', '묶음별'], ['part', '부위별'], ['level', '난이도별']];
   const PART_N = { 하체: '하체', 상체: '상체', 몸통: '코어', 전신: '전신' };
@@ -3765,7 +3838,8 @@ if (PAPER) {
       left = `<div class="toc-base">${MVO.map(k => `<button type="button" class="toc-mv" data-mv="${k}" aria-pressed="${k === tocMv}"><b>${VERB[k][0]}</b><span>${VERB[k][1]}</span></button>`).join('')}</div>`;
       const xs = g => SEQ.filter(p => p.m === tocMv && p.g === g), uses = g => xs(g).map(p => `<button type="button" class="toc-chip" data-i="${SEQ.indexOf(p)}">${nm(p)}</button>`).join('');
       right = `<span class="ribbon">${VERB[tocMv][0]}</span><p class="toc-desc">${MOVES[tocMv].pattern || ''}</p><div class="toc-ch">
-        ${['기본', '원리', '응용'].filter(g => xs(g).length).map(g => `<div class="toc-grp"><h3 style="--gc:${GROUP_COLOR[g] || '#7048e8'}">${lbOf(g)}</h3>${xs(g).map(row).join('')}</div>`).join('')}
+        ${PUSHPULL[tocMv] ? `<p class="toc-sub">${PUSHPULL[tocMv].up}</p>` : ''}${['기본', '원리', '응용'].filter(g => xs(g).length).map(g => `<div class="toc-grp"><h3 style="--gc:${GROUP_COLOR[g] || '#7048e8'}">${lbOf(g)}</h3>${xs(g).map(row).join('')}</div>`).join('')}
+        ${PUSHPULL[tocMv] ? `<p class="toc-sub">${PUSHPULL[tocMv].down}</p><div class="toc-use"><p>${PUSHPULL[tocMv].downNote}</p><div class="toc-chips">${PUSHPULL[tocMv].links.map(([m, sc]) => { const i = idx(m, sc); return i < 0 ? '' : `<button type="button" class="toc-chip" data-i="${i}">${nm(SEQ[i])}</button>`; }).join('')}</div></div>` : ''}
         ${['일상', '스포츠'].filter(g => xs(g).length).map(g => `<div class="toc-use"><h3 style="--gc:${GROUP_COLOR[g]}">${g === '일상' ? '일상에서는' : '스포츠에서는'}</h3><p>${VERB[tocMv][0]} 동작은 ${g === '일상' ? '생활 속' : '경기 속'} 이런 장면에서 쓰여요.</p><div class="toc-chips">${uses(g)}</div></div>`).join('')}</div>`;
     } else if (tocMode === 'frame') {
       left = `<div class="toc-cats" role="tablist" aria-label="기본, 원리, 응용, 일상에서, 스포츠에서">${FRAME.map(([g, lb]) => `<button type="button" role="tab" data-cat="${g}" aria-selected="${g === tocCat}" style="--gc:${GROUP_COLOR[g] || '#7048e8'}"><b>${lb.replace('에서', '')}</b><small>${n(g)}</small></button>`).join('')}</div>`;
