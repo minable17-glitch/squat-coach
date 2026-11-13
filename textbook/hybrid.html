@@ -1063,6 +1063,44 @@ body.nofig .pg-flow .detail{display:none}
 .toc-chip{min-height:40px;padding:0 13px;border-radius:999px;border:1.5px solid var(--pline);background:#fff;font-weight:600;font-size:14.5px}
 .toc-grp h3.lv{background:#f28c38;letter-spacing:1px}
 .toc-row.ex small{display:inline}
+
+/* ===== 차례 화면 다듬기: 한 단계 작은 글자, 같은 높이 버튼, 한 줄 정렬 ===== */
+.pb-toc .pg{padding:14px 16px;gap:10px}
+.pb-toc .toc-head h1{font-size:22px;line-height:1.25}
+.toc-lab{font-size:12px;letter-spacing:.04em;margin:2px 0 -4px}
+.toc-modes{grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;padding:3px;border-radius:12px}
+.toc-modes button{min-height:40px;font-size:14px;border-radius:9px;white-space:nowrap}
+.toc-cats{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:5px}
+.toc-cats button{min-height:52px;border-radius:12px;padding:4px 2px;border-bottom-width:3px;overflow:hidden}
+.toc-cats button b{font-size:14.5px;white-space:nowrap}
+.toc-cats button small{font-size:11.5px}
+.toc-base{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))!important;gap:6px}
+.toc-base .toc-mv{min-height:56px;padding:6px 10px}
+.toc-base .toc-mv b{font-size:17px}
+.toc-base .toc-mv span{font-size:12px}
+.toc-extra{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px}
+.toc-extra .toc-mv{min-height:48px!important;padding:6px 10px;display:flex!important;align-items:center;justify-content:flex-start!important}
+.toc-extra .toc-mv b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toc-extra .toc-mv span{display:none}
+.toc-resume{min-height:46px;font-size:15px}
+.pb-toc .ribbon{font-size:13px;padding:2px 14px 2px 10px}
+.toc-desc{font-size:14px}
+.toc-ch{gap:8px}
+.toc-grp h3{font-size:12.5px;padding:2px 10px}
+.toc-row{min-height:42px;font-size:16px}
+.toc-row.ex{font-size:15.5px}
+@media (orientation:landscape) and (max-height:500px){
+  .pb-toc .pg{padding:10px 14px;gap:8px}
+  .pb-toc .toc-head h1{font-size:19px}
+  .toc-lab{display:none}
+  .toc-modes button{min-height:36px;font-size:13px}
+  .toc-cats button{min-height:44px}.toc-cats button b{font-size:13.5px}
+  .toc-base .toc-mv{min-height:48px}.toc-base .toc-mv b{font-size:15.5px}
+  .toc-extra .toc-mv{min-height:42px!important}
+  .toc-resume{min-height:40px;font-size:14px}
+  .toc-row{min-height:38px;font-size:15px}
+}
+@media (max-width:480px){.toc-cats button b{font-size:13px}.toc-modes button{font-size:13px}.toc-extra .toc-mv b{font-size:13px}}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -3665,7 +3703,7 @@ if (PAPER) {
   let tocCat = '기본', tocMode = 'move', tocMv = 'squat'; try { tocMode = localStorage.getItem('toc-mode') || 'move'; } catch (e) { }
   const VERB = { squat: ['앉기', '스쿼트'], lunge: ['한 발 딛기', '런지'], hinge: ['숙이기', '힙힌지'], pushup: ['밀기', '푸시업'], pull: ['당기기', '덤벨 로우'], plank: ['버티기', '플랭크'], throw: ['던지기', '공 던지기'] };
   const MVO = ['squat', 'lunge', 'hinge', 'pushup', 'pull', 'plank', 'throw'];
-  const MODES = [['move', '인체 동작별'], ['frame', '기본·응용·일상·스포츠'], ['part', '몸 부위별'], ['level', '난이도별']];
+  const MODES = [['move', '동작별'], ['frame', '묶음별'], ['part', '부위별'], ['level', '난이도별']];
   const PART_N = { 하체: '하체', 상체: '상체', 몸통: '코어', 전신: '전신' };
   function openToc(cat) { if (cat) tocCat = cat; const CATD = { 기본: '움직임마다 가장 기본이 되는 동작', 원리: '동작에 숨어 있는 과학 원리', 응용: '기본 동작을 바꾸거나 도구를 더한 동작', 일상: '생활 속에서 같은 움직임이 쓰이는 장면', 스포츠: '경기에서 같은 움직임이 쓰이는 장면' };
     const n = g => SEQ.filter(p => p.g === g).length, lbOf = g => FRAME.find(fr => fr[0] === g)[1], idx = (m, sc) => SEQ.findIndex(p => p.m === m && p.sc === sc), nm = p => p.d.sceneLabel || p.d.name;
@@ -3682,7 +3720,7 @@ if (PAPER) {
         ${['기본', '원리', '응용'].filter(g => xs(g).length).map(g => `<div class="toc-grp"><h3 style="--gc:${GROUP_COLOR[g] || '#7048e8'}">${lbOf(g)}</h3>${xs(g).map(row).join('')}</div>`).join('')}
         ${['일상', '스포츠'].filter(g => xs(g).length).map(g => `<div class="toc-use"><h3 style="--gc:${GROUP_COLOR[g]}">${g === '일상' ? '일상에서는' : '스포츠에서는'}</h3><p>${VERB[tocMv][0]} 동작은 ${g === '일상' ? '생활 속' : '경기 속'} 이런 장면에서 쓰여요.</p><div class="toc-chips">${uses(g)}</div></div>`).join('')}</div>`;
     } else if (tocMode === 'frame') {
-      left = `<div class="toc-cats" role="tablist" aria-label="기본, 원리, 응용, 일상에서, 스포츠에서">${FRAME.map(([g, lb]) => `<button type="button" role="tab" data-cat="${g}" aria-selected="${g === tocCat}" style="--gc:${GROUP_COLOR[g] || '#7048e8'}"><b>${lb}</b><small>${n(g)}개</small></button>`).join('')}</div>`;
+      left = `<div class="toc-cats" role="tablist" aria-label="기본, 원리, 응용, 일상에서, 스포츠에서">${FRAME.map(([g, lb]) => `<button type="button" role="tab" data-cat="${g}" aria-selected="${g === tocCat}" style="--gc:${GROUP_COLOR[g] || '#7048e8'}"><b>${lb.replace('에서', '')}</b><small>${n(g)}</small></button>`).join('')}</div>`;
       right = `<span class="ribbon" style="background:${GROUP_COLOR[tocCat] || '#7048e8'}">${lbOf(tocCat)}</span><p class="toc-desc">${CATD[tocCat]}</p><div class="toc-ch">${MV.map(k => { const ys = SEQ.filter(p => p.m === k && p.g === tocCat); return ys.length ? `<div class="toc-grp"><h3 style="--gc:${GROUP_COLOR[tocCat] || '#7048e8'}">${MOVES[k].name}</h3>${ys.map(row).join('')}</div>` : ''; }).join('')}</div>`;
     } else if (tocMode === 'part') {
       left = `<p class="toc-desc">학교에서 맨몸이나 뜀틀로 할 수 있는 운동을 몸 부위별로, 쉬운 것부터 모았어요.</p>`;
@@ -3691,11 +3729,11 @@ if (PAPER) {
       const all = Object.values(EXMAP).flat(); left = `<p class="toc-desc">★ 하나부터 차례로 올라가요. 지금 쉽게 되는 단계 바로 위를 골라 보세요.</p>`;
       right = `<span class="ribbon">난이도별</span><div class="toc-ch">${[1, 2, 3, 4, 5].map(k => { const ys = all.filter(x => x[1] === k); return ys.length ? `<div class="toc-grp"><h3 class="lv">${'★'.repeat(k)}</h3>${ys.map(x => exRow(x, partOf[x[0]])).join('')}</div>` : ''; }).join('')}</div>`;
     }
-    $('pbToc').innerHTML = `<section class="pg pg-l toc-l"><span class="ribbon">차례</span><h1><span>3D 체육 교과서</span></h1><p class="toc-lab">분류 기준</p>${modeBar}${left}
-        <div class="toc-extra"><button type="button" class="toc-mv x1" data-m="fitness"><b>💓 체력 요소</b><span>체력의 5가지 영역</span></button><button type="button" class="toc-mv x2" data-m="train"><b>🏋️ 트레이닝 원리</b><span>효과적인 운동 방법</span></button><button type="button" class="toc-mv x3" data-m="body"><b>🧍 몸 지도</b><span>근육으로 운동 찾기</span></button></div>
+    $('pbToc').innerHTML = `<section class="pg pg-l toc-l"><div class="toc-head"><h1><span>3D 체육 교과서</span></h1></div><p class="toc-lab">분류 기준</p>${modeBar}${left}
+        <div class="toc-extra"><button type="button" class="toc-mv x1" data-m="fitness"><b>💓 체력 요소</b><span>체력의 5가지 영역</span></button><button type="button" class="toc-mv x2" data-m="train"><b>🏋️ 훈련 원리</b><span>효과적인 운동 방법</span></button><button type="button" class="toc-mv x3" data-m="body"><b>🧍 몸 지도</b><span>근육으로 운동 찾기</span></button></div>
         ${started ? '<button type="button" class="toc-resume" id="tocResume">보던 장면으로 돌아가기 ›</button>' : ''}</section>
       <section class="pg pg-r toc-r">${right}</section>`;
-    $('pbToc').dataset.view = 'home'; $('pbToc').hidden = false; $('pbBook').hidden = true; root.dataset.toc = '1';
+    $('pbToc').dataset.view = 'home'; $('pbToc').hidden = false; $('pbBook').hidden = true; root.dataset.toc = '1'; if ($('nvTitle')) $('nvTitle').textContent = '차례';
     $('pbToc').querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { tocMode = b.dataset.mode; try { localStorage.setItem('toc-mode', tocMode); } catch (e) { } openToc(null); });
     $('pbToc').querySelectorAll('[data-mv]').forEach(b => b.onclick = () => { tocMv = b.dataset.mv; openToc(null); if (mqPort.matches) $('pbToc').querySelector('.toc-r')?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); });
     $('pbToc').querySelectorAll('[data-cat]').forEach(b => b.onclick = () => openToc(b.dataset.cat));
