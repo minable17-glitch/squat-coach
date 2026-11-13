@@ -91,7 +91,12 @@ details.more[open] summary { margin-bottom: 6px }
 
 /* 만들기 */
 .panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 10px }
-.types { display: grid; grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); gap: 5px }
+.types { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px }
+.jump { display: flex; gap: 6px; flex-wrap: wrap }
+.jump button { border: 1px solid var(--line); background: var(--card); border-radius: 99px; padding: 3px 12px; font-size: 13px; font-weight: 600 }
+.jump small { font: 500 11.5px var(--f-num); color: var(--mute); margin-left: 2px }
+.grp { display: grid; gap: 10px; scroll-margin-top: 60px }
+.grp-h { display: grid; gap: 2px; border-top: 2px solid var(--navy); padding-top: 10px }
 .types button { border: 1px solid var(--line); background: var(--bg); border-radius: 9px; padding: 5px 6px; font-size: 13px; font-weight: 600; line-height: 1.3 }
 .types button small { display: block; font-weight: 400; font-size: 11px; color: var(--mute) }
 .types button[aria-pressed="true"] { background: var(--navy); color: var(--on-navy); border-color: var(--navy) }
@@ -159,9 +164,9 @@ input[type="number"] { width: 76px; font-family: var(--f-num) }
   .item { grid-template-columns: 16px minmax(0, 1fr) auto auto; gap: 4px }
   .item .amt input { width: 52px }
   .ico { width: 26px }
-  .types { grid-template-columns: repeat(4, minmax(0, 1fr)) }
+  .types { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px }
   .types button small { display: none }
-  .types button { padding: 7px 4px; font-size: 12.5px }
+  .types button { padding: 7px 2px; font-size: 12px; letter-spacing: -.02em }
   .p-ctl button { padding: 11px 12px; min-width: 80px }
 }
 @media (max-height: 460px) {
@@ -228,40 +233,79 @@ const poseLink = ex => EX[ex] && EX[ex][3] ? `${BOOK}#s-${EX[ex][3]}` : null;
 const TYPES = {
   amrap:   { name: 'AMRAP', ko: '시간 안에 최대한 많이', from: '크로스핏 와드', timed: false },
   fortime: { name: 'For Time', ko: '정해진 양을 빨리', from: '크로스핏 와드', timed: false },
-  emom:    { name: 'EMOM', ko: '매 분 시작마다', from: '크로스핏 와드', timed: true },
+  emom:    { name: 'EMOM', ko: '매 분(2분) 시작마다', from: '크로스핏 와드', timed: true },
   tabata:  { name: '타바타', ko: '20초 운동·10초 휴식', from: '인터벌 훈련', timed: true },
   chipper: { name: '치퍼', ko: '긴 목록 한 번에', from: '크로스핏 와드', timed: false },
+  ladder:  { name: '숫자 줄이기', ko: '21-15-9처럼', from: '크로스핏 와드', timed: false },
+  deathby: { name: '1분마다 +1', ko: '못 할 때까지', from: '크로스핏 와드', timed: true },
+  partner: { name: '짝 번갈아', ko: '너 한 번 나 한 번', from: '크로스핏 와드', timed: false },
   race:    { name: '하이록스식', ko: '달리기+스테이션', from: '하이록스 방식', timed: false },
   circuit: { name: 'F45식 서킷', ko: '스테이션 돌기', from: 'F45 방식', timed: true },
 };
-const DEF = { amrap: { min: 10 }, fortime: { rounds: 3, cap: 15 }, emom: { min: 12 }, tabata: { work: 20, rest: 10, rounds: 8 },
-  chipper: { cap: 15 }, race: { runM: 200, cap: 30 }, circuit: { work: 40, rest: 20, laps: 2 } };
+const STYLES = { basic: ['기본', '칸마다 한 번씩'], double: ['2세트', '한 칸에서 두 번'], descend: ['시간 줄이기', '바퀴마다 짧게'],
+  pair: ['짝 교대', '운동 ↔ 버티기'], pod: ['모둠 묶음', '몇 칸씩 묶어 돌기'], alt: ['유산소 교대', '근력 사이 유산소'] };
+const SCHEMES = ['21-15-9', '15-12-9', '10-8-6-4-2', '5-10-15-20', '50-40-30-20-10'];
+const HOLDS = ['plank', 'wallsit'], CARDIOS = ['jack', 'highknee', 'rope', 'shuttle'];
+const DEF = { amrap: { min: 10 }, fortime: { rounds: 3, cap: 15 }, emom: { min: 12, every: 1 }, tabata: { work: 20, rest: 10, rounds: 8 },
+  chipper: { cap: 15 }, ladder: { scheme: '21-15-9', cap: 12 }, deathby: { start: 1, inc: 1, max: 20 }, partner: { rounds: 6, cap: 20 },
+  race: { runM: 200, cap: 30 }, circuit: { style: 'basic', work: 40, rest: 20, laps: 2, step: 10, podSize: 3, podRest: 60, hold: 'plank', cardio: 'jack' } };
+const pv = (pr, k) => pr.p[k] ?? DEF[pr.type][k];
+const noAmt = pr => ['tabata', 'circuit', 'deathby', 'ladder'].includes(pr.type);
+function keysOf(pr) {
+  if (pr.type !== 'circuit') return Object.keys(DEF[pr.type]);
+  return ['style', 'work', 'rest', 'laps', ...({ descend: ['step'], pod: ['podSize', 'podRest'], pair: ['hold'], alt: ['cardio'] }[pv(pr, 'style')] || [])];
+}
 
 // ── 학교 체육관에 맞춘 예시 프로그램
+const C = (style, p, ex) => ({ type: 'circuit', p: { style, ...p }, items: ex.map(e => [e, 0]) });
 const TEMPLATES = [
   { id: 'tp-amrap', type: 'amrap', name: '10분 AMRAP 맛보기', p: { min: 10 }, items: [['burpee', 5], ['squat', 10], ['climber', 16]] },
   { id: 'tp-fortime', type: 'fortime', name: '3라운드 포타임', p: { rounds: 3, cap: 15 }, items: [['run', 200], ['squat', 15], ['kneepu', 10]] },
-  { id: 'tp-emom', type: 'emom', name: 'EMOM 12분', p: { min: 12 }, items: [['jsquat', 10], ['pushup', 8], ['tap', 20]] },
+  { id: 'tp-emom', type: 'emom', name: 'EMOM 12분', p: { min: 12, every: 1 }, items: [['jsquat', 10], ['pushup', 8], ['tap', 20]] },
+  { id: 'tp-e2mom', type: 'emom', name: '2분마다 12분', p: { min: 12, every: 2 }, items: [['burpee', 8], ['lunge', 20], ['kneepu', 12]] },
   { id: 'tp-tabata', type: 'tabata', name: '4분 타바타', p: { work: 20, rest: 10, rounds: 8 }, items: [['squat', 0], ['climber', 0]] },
   { id: 'tp-chipper', type: 'chipper', name: '학교 체육관 치퍼', p: { cap: 15 }, items: [['jack', 50], ['squat', 40], ['climber', 30], ['kneepu', 20], ['burpee', 10]] },
+  { id: 'tp-ladder', type: 'ladder', name: '21-15-9 스쿼트·푸시업', p: { scheme: '21-15-9', cap: 12 }, items: [['squat', 0], ['kneepu', 0]] },
+  { id: 'tp-deathby', type: 'deathby', name: '버피 1분마다 +1', p: { start: 1, inc: 1, max: 20 }, items: [['burpee', 0]] },
+  { id: 'tp-partner', type: 'partner', name: '짝 번갈아 6라운드', p: { rounds: 6, cap: 20 }, items: [['squat', 10], ['tap', 10], ['shuttle', 2]] },
   { id: 'tp-race', type: 'race', name: '학교판 하이록스 레이스', p: { runM: 200, cap: 30 },
     items: [['jack', 50], ['bear', 20], ['drag', 20], ['bbj', 10], ['row', 20], ['carry', 40], ['lunge', 20], ['wallball', 20]] },
-  { id: 'tp-circuit', type: 'circuit', name: '9스테이션 팀 서킷', p: { work: 40, rest: 20, laps: 2 },
-    items: [['jsquat', 0], ['kneepu', 0], ['climber', 0], ['revlunge', 0], ['tap', 0], ['jack', 0], ['crunch', 0], ['bear', 0], ['plank', 0]] },
+  { id: 'tp-circuit', name: '9스테이션 팀 서킷', ...C('basic', { work: 40, rest: 20, laps: 2 }, ['jsquat', 'kneepu', 'climber', 'revlunge', 'tap', 'jack', 'crunch', 'bear', 'plank']) },
+  { id: 'tp-c-double', name: '6칸 2세트 서킷', ...C('double', { work: 40, rest: 15, laps: 1 }, ['squat', 'kneepu', 'revlunge', 'tap', 'crunch', 'calf']) },
+  { id: 'tp-c-desc', name: '45-35-25 서킷', ...C('descend', { work: 45, rest: 15, laps: 3, step: 10 }, ['jsquat', 'climber', 'jack', 'burpee', 'highknee']) },
+  { id: 'tp-c-pair', name: '짝 교대 서킷', ...C('pair', { work: 40, rest: 20, laps: 1, hold: 'plank' }, ['squat', 'kneepu', 'lunge', 'crunch', 'tap', 'calf']) },
+  { id: 'tp-c-pod', name: '3묶음 모둠 서킷', ...C('pod', { work: 30, rest: 15, laps: 2, podSize: 3, podRest: 60 }, ['squat', 'kneepu', 'climber', 'lunge', 'tap', 'jack', 'calf', 'crunch', 'bear']) },
+  { id: 'tp-c-alt', name: '근력·유산소 교대 서킷', ...C('alt', { work: 40, rest: 15, laps: 2, cardio: 'jack' }, ['squat', 'kneepu', 'revlunge', 'crunch']) },
 ];
 
 // ── 계획 → 구간(시간형) / 할 일 목록(과제형)
-function segsOf(pr) { // 시간형: [{k:'w'|'r', ex, n, dur, tag}]
-  const p = pr.p, it = pr.items, out = [];
-  if (pr.type === 'emom') for (let i = 0; i < p.min; i++) { const [ex, n] = it[i % it.length]; out.push({ k: 'w', ex, n, dur: 60, tag: `${i + 1}분째` }); }
-  if (pr.type === 'tabata') for (let i = 0; i < p.rounds; i++) { const [ex] = it[i % it.length]; out.push({ k: 'w', ex, dur: p.work, tag: `${i + 1}/${p.rounds}` }); if (i < p.rounds - 1) out.push({ k: 'r', dur: p.rest, tag: '휴식' }); }
-  if (pr.type === 'circuit') for (let l = 0; l < p.laps; l++) it.forEach(([ex], i) => { out.push({ k: 'w', ex, dur: p.work, tag: `${l + 1}바퀴 · ${i + 1}번 스테이션` }); if (!(l === p.laps - 1 && i === it.length - 1)) out.push({ k: 'r', dur: p.rest, tag: '다음 스테이션으로 이동' }); });
+function segsOf(pr) { // 시간형: [{k:'w'|'r', ex, n, dur, tag, who, note}]
+  const it = pr.items, out = [], W = pv(pr, 'work'), R = pv(pr, 'rest'), L = pv(pr, 'laps') || 1;
+  const w = o => out.push({ k: 'w', ...o }), r = (dur, tag) => { if (dur > 0) out.push({ k: 'r', dur, tag }); };
+  if (pr.type === 'emom') { const ev = pv(pr, 'every'), c = Math.max(1, Math.floor(pr.p.min / ev)); for (let i = 0; i < c; i++) { const [ex, n] = it[i % it.length]; w({ ex, n, dur: 60 * ev, tag: `${i * ev + 1}분째` }); } }
+  if (pr.type === 'deathby') for (let k = 1; k <= pv(pr, 'max'); k++) w({ ex: it[(k - 1) % it.length][0], n: pv(pr, 'start') + (k - 1) * pv(pr, 'inc'), dur: 60, tag: `${k}분째`, note: '1분 안에 끝내면 다음 분에 늘어나요' });
+  if (pr.type === 'tabata') for (let i = 0; i < pr.p.rounds; i++) { w({ ex: it[i % it.length][0], dur: W, tag: `${i + 1}/${pr.p.rounds}` }); r(R, '휴식'); }
+  if (pr.type === 'circuit') {
+    const st = pv(pr, 'style'), tag = (l, i) => `${l + 1}바퀴 · ${i + 1}번 칸`;
+    for (let l = 0; l < L && st !== 'pod'; l++) {
+      if (st === 'basic' || st === 'alt') (st === 'alt' ? it.flatMap(x => [x, [pv(pr, 'cardio'), 0, 1]]) : it).forEach(([ex, , c], i) => { w({ ex, dur: W, tag: tag(l, i), note: c ? '유산소 칸 · 시간 동안 최대한' : '' }); r(R, '다음 칸으로 이동'); });
+      if (st === 'double') it.forEach(([ex], i) => { w({ ex, dur: W, tag: tag(l, i) + ' · 1세트' }); r(R, '같은 칸에서 잠깐 쉬기'); w({ ex, dur: W, tag: tag(l, i) + ' · 2세트' }); r(R, '다음 칸으로 이동'); });
+      if (st === 'descend') { const wl = Math.max(10, W - l * pv(pr, 'step')), rl = W + R - wl; it.forEach(([ex], i) => { w({ ex, dur: wl, tag: `${tag(l, i)} · ${wl}초` }); r(rl, '다음 칸으로 이동'); }); }
+      if (st === 'pair') { const h = exName(pv(pr, 'hold')); it.forEach(([ex], i) => { w({ ex, dur: W, tag: tag(l, i), who: '1번 친구', note: `2번 친구는 ${h}로 버티기` }); r(10, '역할 바꾸기'); w({ ex, dur: W, tag: tag(l, i), who: '2번 친구', note: `1번 친구는 ${h}로 버티기` }); r(R, '다음 칸으로 이동'); }); }
+    }
+    if (st === 'pod') { const ps = pv(pr, 'podSize'); for (let a = 0, pi = 0; a < it.length; a += ps, pi++) { const pod = it.slice(a, a + ps);
+      for (let l = 0; l < L; l++) pod.forEach(([ex], i) => { w({ ex, dur: W, tag: `${pi + 1}묶음 · ${l + 1}바퀴 · ${a + i + 1}번 칸` }); r(R, '다음 칸으로 이동'); });
+      if (out[out.length - 1]?.k === 'r') out.pop(); r(pv(pr, 'podRest'), '다음 묶음으로 이동'); } }
+  }
+  while (out.length && out[out.length - 1].k === 'r') out.pop();
   return out;
 }
-function stepsOf(pr) { // 과제형: [{ex, n, tag}]
+function stepsOf(pr) { // 과제형: [{ex, n, tag, who}]
   const p = pr.p, it = pr.items, out = [];
   if (pr.type === 'fortime') for (let r = 0; r < p.rounds; r++) it.forEach(([ex, n]) => out.push({ ex, n, tag: `${r + 1}/${p.rounds}라운드` }));
   if (pr.type === 'chipper' || pr.type === 'amrap') it.forEach(([ex, n]) => out.push({ ex, n, tag: '' }));
+  if (pr.type === 'ladder') pv(pr, 'scheme').split('-').map(Number).forEach(c => it.forEach(([ex]) => out.push({ ex, n: c, tag: `${c}회 차례` })));
+  if (pr.type === 'partner') for (let r = 0; r < p.rounds; r++) it.forEach(([ex, n]) => out.push({ ex, n, who: `${r % 2 ? 2 : 1}번 친구`, tag: `${r + 1}/${p.rounds}라운드` }));
   if (pr.type === 'race') it.forEach(([ex, n], i) => { out.push({ ex: 'run', n: p.runM, tag: `달리기 ${i + 1}/${it.length}`, run: 1 }); out.push({ ex, n, tag: `스테이션 ${i + 1}/${it.length}` }); });
   return out;
 }
@@ -284,35 +328,42 @@ function timeline(pr) {
   return `<div class="tl" aria-hidden="true">${blocks.map(b => `<i class="${b[0]}" style="flex:${(b[1] / tot).toFixed(4)}"></i>`).join('')}</div>`;
 }
 function summary(pr) {
-  const p = pr.p;
-  return { amrap: `${p.min}분 동안 반복`, fortime: `${p.rounds}라운드 · 제한 ${p.cap}분`, emom: `${p.min}분 · 매 분 한 동작`,
-    tabata: `${p.work}초/${p.rest}초 × ${p.rounds}`, chipper: `한 번씩 · 제한 ${p.cap}분`, race: `${p.runM}m 달리기 × ${pr.items.length} · 제한 ${p.cap}분`,
-    circuit: `${pr.items.length}스테이션 · ${p.work}초/${p.rest}초 × ${p.laps}바퀴` }[pr.type];
+  const p = pr.p, N = pr.items.length;
+  if (pr.type === 'circuit') { const st = pv(pr, 'style'), W = pv(pr, 'work'), R = pv(pr, 'rest'), L = pv(pr, 'laps');
+    return { basic: `${N}칸 · ${W}초/${R}초 × ${L}바퀴`, double: `${N}칸 · 칸마다 ${W}초 × 2세트 · ${L}바퀴`, descend: `${N}칸 · ${W}초에서 바퀴마다 ${pv(pr, 'step')}초씩 줄이기 · ${L}바퀴`,
+      pair: `${N}칸 · 짝이 ${W}초씩 교대(${exName(pv(pr, 'hold'))}) · ${L}바퀴`, pod: `${N}칸을 ${pv(pr, 'podSize')}칸씩 묶어 · 묶음마다 ${L}바퀴`, alt: `근력 ${N}칸 + 사이사이 ${exName(pv(pr, 'cardio'))} · ${L}바퀴` }[st]; }
+  return { amrap: `${p.min}분 동안 반복`, fortime: `${p.rounds}라운드 · 제한 ${p.cap}분`, emom: `${p.min}분 · ${pv(pr, 'every') > 1 ? pv(pr, 'every') + '분마다' : '매 분'} 한 동작`,
+    tabata: `${p.work}초/${p.rest}초 × ${p.rounds}`, chipper: `한 번씩 · 제한 ${p.cap}분`, ladder: `${pv(pr, 'scheme')}회 · 제한 ${p.cap}분`,
+    deathby: `${pv(pr, 'start')}회부터 1분마다 +${pv(pr, 'inc')} · 최대 ${pv(pr, 'max')}분`, partner: `둘이 번갈아 ${p.rounds}라운드 · 제한 ${p.cap}분`,
+    race: `${p.runM}m 달리기 × ${N} · 제한 ${p.cap}분` }[pr.type];
 }
-const itemsTxt = pr => pr.items.map(([ex, n]) => TYPES[pr.type].timed && pr.type !== 'emom' ? exName(ex) : `${exName(ex)} ${amt(ex, n)}`).join(' · ');
+const itemsTxt = pr => pr.items.map(([ex, n]) => noAmt(pr) ? exName(ex) : `${exName(ex)} ${amt(ex, n)}`).join(' · ');
 
 // ── 배우기
 const LEARN = [
-  { type: 'amrap', full: 'As Many Rounds As Possible', rule: '정해진 시간 안에 목록을 최대한 많이 반복해요.', how: '10분이면 10분 동안 버피 5 → 스쿼트 10 → 마운틴 클라이머 16을 계속 돌아요. 기록은 "몇 라운드 + 몇 동작"이에요.', fit: ['근지구력', '심폐지구력'], tip: '처음 2분에 힘을 다 쓰면 뒤에서 멈춰요. 끝까지 같은 속도를 지키는 것이 요령이에요.', tp: 'tp-amrap' },
-  { type: 'fortime', full: 'For Time', rule: '정해진 양을 최대한 빨리 끝내요. 기록은 걸린 시간이에요.', how: '200m 달리기 → 스쿼트 15 → 무릎 푸시업 10을 3라운드. 너무 길어지지 않게 시간 제한(캡)을 둬요.', fit: ['심폐지구력', '근지구력', '순발력'], tip: '지난 기록보다 빨라졌는지 비교하면 점진성의 원리를 직접 확인할 수 있어요.', tp: 'tp-fortime' },
-  { type: 'emom', full: 'Every Minute On the Minute', rule: '매 분이 시작될 때 정해진 횟수를 하고, 남은 시간은 쉬어요.', how: '1분째 점프 스쿼트 10, 2분째 푸시업 8, 3분째 숄더 탭 20 … 12분 동안 돌아요. 빨리 끝낼수록 쉬는 시간이 길어져요.', fit: ['근지구력', '순발력'], tip: '1분 안에 40초가 넘게 걸리면 횟수를 줄이세요. 쉬는 시간이 있어야 끝까지 자세가 유지돼요.', tp: 'tp-emom' },
-  { type: 'tabata', full: 'Tabata Interval', rule: '20초 최대 강도, 10초 휴식을 8번. 딱 4분이에요.', how: '스쿼트와 마운틴 클라이머를 번갈아 8번 해요. 기록은 가장 적게 한 라운드의 횟수예요.', fit: ['심폐지구력', '순발력'], tip: '짧지만 아주 힘들어요. 준비 운동을 충분히 한 뒤에 하세요.', tp: 'tp-tabata' },
-  { type: 'chipper', full: 'Chipper', rule: '긴 목록을 위에서부터 한 번씩, 나무를 깎아 내려가듯 끝내요.', how: '점핑잭 50 → 스쿼트 40 → 마운틴 클라이머 30 → 무릎 푸시업 20 → 버피 10. 숫자가 점점 작아져서 끝이 보여요.', fit: ['근지구력', '심폐지구력'], tip: '한 동작을 쉬지 않고 다 하려고 하지 말고, 10개씩 나눠서 해도 돼요.', tp: 'tp-chipper' },
-  { type: 'race', full: 'Hybrid Fitness Race', rule: '달리기와 운동 스테이션을 번갈아 8번. 달리기 실력과 근력을 함께 겨뤄요.', how: '대회에서는 1km 달리기와 스테이션 8개를 번갈아 해요. 학교판은 200m 달리기와 체육관 기구로 바꾼 스테이션을 써요.', fit: ['심폐지구력', '근력', '근지구력'], tip: '달리기에서 힘을 아껴야 스테이션에서 자세가 무너지지 않아요.', tp: 'tp-race', table: true },
-  { type: 'circuit', full: 'Team Station Circuit', rule: '여러 스테이션을 정해진 시간 동안 하고 다음 칸으로 옮겨 가요.', how: '9개 스테이션에서 40초 운동, 20초 이동을 2바퀴. 모둠이 스테이션에 나눠 서서 동시에 시작하면 체육 수업에 딱 맞아요.', fit: ['근지구력', '심폐지구력', '협응성'], tip: '시간 동안 횟수를 세어 두면, 다음 시간에 같은 스테이션에서 몇 개 늘었는지 볼 수 있어요.', tp: 'tp-circuit' },
+  { g: 'cf', type: 'amrap', full: 'As Many Rounds As Possible', rule: '정해진 시간 안에 목록을 최대한 많이 반복해요.', how: '10분이면 10분 동안 버피 5 → 스쿼트 10 → 마운틴 클라이머 16을 계속 돌아요. 기록은 "몇 라운드 + 몇 동작"이에요.', fit: ['근지구력', '심폐지구력'], tip: '처음 2분에 힘을 다 쓰면 뒤에서 멈춰요. 끝까지 같은 속도를 지키는 것이 요령이에요.', tp: 'tp-amrap' },
+  { g: 'cf', type: 'fortime', full: 'For Time', rule: '정해진 양을 최대한 빨리 끝내요. 기록은 걸린 시간이에요.', how: '200m 달리기 → 스쿼트 15 → 무릎 푸시업 10을 3라운드. 너무 길어지지 않게 시간 제한(캡)을 둬요.', fit: ['심폐지구력', '근지구력', '순발력'], tip: '지난 기록보다 빨라졌는지 비교하면 점진성의 원리를 직접 확인할 수 있어요.', tp: 'tp-fortime' },
+  { g: 'cf', type: 'emom', full: 'Every Minute On the Minute', rule: '매 분이 시작될 때 정해진 횟수를 하고, 남은 시간은 쉬어요.', how: '1분째 점프 스쿼트 10, 2분째 푸시업 8, 3분째 숄더 탭 20 … 12분 동안 돌아요. 빨리 끝낼수록 쉬는 시간이 길어져요.', fit: ['근지구력', '순발력'], tip: '1분 안에 40초가 넘게 걸리면 횟수를 줄이세요. 쉬는 시간이 있어야 끝까지 자세가 유지돼요.', tp: 'tp-emom' },
+  { g: 'cf', type: 'emom', title: '2분마다 (E2MOM)', full: 'Every 2 Minutes On the Minute', rule: '2분마다 정해진 횟수를 하고 남은 시간은 쉬어요.', how: '버피 8 → 런지 20 → 무릎 푸시업 12를 2분 간격으로 돌며 12분 동안 해요. EMOM보다 한 번에 하는 양이 많고 쉬는 시간도 길어요.', fit: ['근력', '근지구력'], tip: '만들기에서 EMOM의 간격을 2분, 3분으로 바꾸면 돼요.', tp: 'tp-e2mom' },
+  { g: 'cf', type: 'tabata', full: 'Tabata Interval', rule: '20초 최대 강도, 10초 휴식을 8번. 딱 4분이에요.', how: '스쿼트와 마운틴 클라이머를 번갈아 8번 해요. 기록은 가장 적게 한 라운드의 횟수예요.', fit: ['심폐지구력', '순발력'], tip: '짧지만 아주 힘들어요. 준비 운동을 충분히 한 뒤에 하세요.', tp: 'tp-tabata' },
+  { g: 'cf', type: 'chipper', full: 'Chipper', rule: '긴 목록을 위에서부터 한 번씩, 나무를 깎아 내려가듯 끝내요.', how: '점핑잭 50 → 스쿼트 40 → 마운틴 클라이머 30 → 무릎 푸시업 20 → 버피 10. 숫자가 점점 작아져서 끝이 보여요.', fit: ['근지구력', '심폐지구력'], tip: '한 동작을 쉬지 않고 다 하려고 하지 말고, 10개씩 나눠서 해도 돼요.', tp: 'tp-chipper' },
+  { g: 'cf', type: 'ladder', title: '숫자 줄이기 (21-15-9)', full: 'Descending Ladder', rule: '두세 동작을 21회 → 15회 → 9회로 줄여 가며 끝내요. 기록은 걸린 시간이에요.', how: '스쿼트 21 → 무릎 푸시업 21 → 스쿼트 15 → 무릎 푸시업 15 → 스쿼트 9 → 무릎 푸시업 9. 숫자가 줄어서 마지막에 힘을 낼 수 있어요.', fit: ['근지구력', '심폐지구력'], tip: '처음 21회가 가장 길어요. 여기서 나눠서 쉬어도 괜찮아요. 만들기에서 15-12-9, 10-8-6-4-2로 바꿀 수 있어요.', tp: 'tp-ladder' },
+  { g: 'cf', type: 'deathby', title: '1분마다 하나씩 늘리기', full: 'Death By', rule: '1분째 1회, 2분째 2회… 1분 안에 못 끝내는 순간 끝나요. 기록은 성공한 분 수예요.', how: '버피로 하면 10분째에는 버피 10개를 1분 안에 해야 해요. 앞쪽은 쉽지만 갈수록 쉬는 시간이 없어져요.', fit: ['근지구력', '심폐지구력'], tip: '못 끝냈을 때 "못 끝냈어요"를 누르면 그때까지 성공한 분이 기록돼요.', tp: 'tp-deathby' },
+  { g: 'cf', type: 'partner', title: '짝 번갈아 (너 한 번 나 한 번)', full: 'You Go, I Go', rule: '짝이 한 라운드씩 번갈아 해요. 한 사람이 할 때 다른 사람은 쉬면서 횟수를 세어 줘요.', how: '스쿼트 10 → 숄더 탭 10 → 왕복 달리기 2회를 1번 친구, 2번 친구가 번갈아 6라운드. 둘이 걸린 시간이 하나의 기록이에요.', fit: ['근지구력', '심폐지구력'], tip: '쉬는 친구는 자세를 봐 주세요. 화면의 "자세 보기"로 바른 자세를 같이 확인할 수 있어요.', tp: 'tp-partner' },
+  { g: 'hx', type: 'race', title: '하이록스식 레이스', full: 'Hybrid Fitness Race', rule: '달리기와 운동 스테이션을 번갈아 8번. 달리기 실력과 근력을 함께 겨뤄요.', how: '대회에서는 1km 달리기와 스테이션 8개를 번갈아 해요. 학교판은 200m 달리기와 체육관 기구로 바꾼 스테이션을 써요.', fit: ['심폐지구력', '근력', '근지구력'], tip: '달리기에서 힘을 아껴야 스테이션에서 자세가 무너지지 않아요.', tp: 'tp-race', table: true },
+  { g: 'f45', type: 'circuit', title: '기본 서킷', full: 'Station Circuit', rule: '여러 스테이션을 정해진 시간 동안 하고 다음 칸으로 옮겨 가요.', how: '9개 스테이션에서 40초 운동, 20초 이동을 2바퀴. 모둠이 스테이션에 나눠 서서 동시에 시작하면 체육 수업에 딱 맞아요.', fit: ['근지구력', '심폐지구력'], tip: '시간 동안 횟수를 세어 두면, 다음 시간에 같은 스테이션에서 몇 개 늘었는지 볼 수 있어요.', tp: 'tp-circuit' },
+  { g: 'f45', type: 'circuit', title: '스테이션 2세트', full: 'Double Station', rule: '한 스테이션에서 두 번 하고 나서 다음 칸으로 옮겨요.', how: '6개 스테이션에서 40초 운동 → 15초 쉬기 → 40초 운동 → 15초 이동. 이동이 적어서 자세에 집중하기 좋아요.', fit: ['근지구력', '근력'], tip: '두 번째 세트 횟수가 첫 세트보다 크게 줄면 강도를 낮추세요.', tp: 'tp-c-double' },
+  { g: 'f45', type: 'circuit', title: '시간 줄이기', full: 'Descending Intervals', rule: '바퀴가 지날수록 운동 시간은 줄고 쉬는 시간은 늘어요.', how: '5개 스테이션을 45초/15초 → 35초/25초 → 25초/35초로 3바퀴 돌아요. 한 칸에 1분은 그대로라 진행이 일정해요.', fit: ['심폐지구력', '순발력'], tip: '시간이 짧아질수록 더 빠르고 힘 있게 해 보세요.', tp: 'tp-c-desc' },
+  { g: 'f45', type: 'circuit', title: '짝 교대 스테이션', full: 'Partner Station', rule: '한 칸에 둘이 서서 한 명은 운동, 한 명은 버티기를 하다가 역할을 바꿔요.', how: '1번 친구가 40초 스쿼트를 하는 동안 2번 친구는 플랭크로 버텨요. 10초 동안 자리를 바꾸고 다시 40초.', fit: ['근지구력', '근력'], tip: '버티기 동작은 만들기에서 플랭크나 벽 스쿼트로 바꿀 수 있어요.', tp: 'tp-c-pair' },
+  { g: 'f45', type: 'circuit', title: '모둠 묶음 돌기', full: 'Pods', rule: '스테이션을 몇 칸씩 묶어, 한 묶음 안에서 여러 바퀴 돈 다음 다음 묶음으로 옮겨요.', how: '9칸을 3칸씩 3묶음으로 나눠 30초 운동/15초 휴식으로 묶음마다 2바퀴, 묶음 사이에는 1분 이동. 모둠마다 다른 묶음에서 시작하면 체육관 전체를 동시에 써요.', fit: ['근지구력', '심폐지구력'], tip: '타이머는 하나로 같이 쓰고, 모둠은 시작 묶음만 다르게 정하면 돼요.', tp: 'tp-c-pod' },
+  { g: 'f45', type: 'circuit', title: '유산소 교대', full: 'Cardio Alternating', rule: '근력 스테이션 사이사이에 유산소 칸이 들어가요.', how: '스쿼트 → 점핑잭 → 무릎 푸시업 → 점핑잭 … 근력 칸에서는 근육을, 유산소 칸에서는 심장을 많이 써요.', fit: ['심폐지구력', '근지구력'], tip: '유산소 칸에서 심장이 빨라지고 근력 칸에서 조금 내려오는 것을 느껴 보세요.', tp: 'tp-c-alt' },
 ];
+const GROUPS = [['cf', '크로스핏 와드', '짧고 강하게, 기록을 남기는 오늘의 운동(WOD) 형식이에요.'], ['hx', '하이록스 방식', '달리기와 운동 스테이션을 번갈아 하는 레이스예요.'], ['f45', 'F45식 서킷', '여러 스테이션을 시간에 맞춰 도는 팀 수업 형식이에요. 같은 서킷도 도는 방법을 바꿀 수 있어요.']];
 function renderLearn() {
   const tp = id => TEMPLATES.find(t => t.id === id);
-  $('v-learn').innerHTML = `
-  <section style="display:grid;gap:6px">
-    <p class="eyebrow">하이브리드 체력 훈련</p>
-    <h2>근력 운동과 달리기를 한 번의 훈련에 섞어요</h2>
-    <p class="lead">"몇 분 동안, 어떤 순서로, 얼마나"라는 규칙을 형식이라고 해요. 형식만 바꿔도 같은 스쿼트가 근지구력 훈련도 되고 순발력 훈련도 돼요. 형식을 고르고 예시를 바로 해 보거나, 내 프로그램으로 고쳐 보세요.</p>
-    <div class="legend"><span><b style="background:var(--orange)"></b>시간 운동</span><span><b style="background:var(--rest)"></b>휴식·이동</span><span><b style="background:var(--lime)"></b>정해진 횟수</span><span><b style="background:var(--sky)"></b>달리기</span></div>
-  </section>
-  ${LEARN.map(L => { const t = tp(L.tp), T = TYPES[L.type]; return `
-  <article class="fmt" id="f-${L.type}">
-    <div class="fmt-h"><h3>${T.name}</h3><span class="tag">${L.full}</span><span class="from">${T.from}</span></div>
+  const card = L => { const t = tp(L.tp), T = TYPES[L.type]; return `
+  <article class="fmt" id="f-${L.tp}">
+    <div class="fmt-h"><h3>${L.title || T.name}</h3><span class="tag">${L.full}</span></div>
     <p class="rule">${L.rule}</p>
     <p>${L.how}</p>
     ${L.table ? `<details class="more"><summary>대회 규정과 학교판 비교</summary><div class="tbl-w"><table><thead><tr><th>순서</th><th>대회 스테이션</th><th>대회 양</th><th>학교판</th></tr></thead><tbody>
@@ -323,40 +374,58 @@ function renderLearn() {
     <p class="lead">${L.tip}</p>
     <div class="fmt-f"><span class="lead" style="font-size:12.5px">${itemsTxt(t)}</span>
       <span class="btn-row"><button type="button" class="btn" data-edit="${t.id}">고쳐서 만들기</button><button type="button" class="btn go" data-run="${t.id}">바로 해 보기 ▶</button></span></div>
-  </article>`; }).join('')}
+  </article>`; };
+  $('v-learn').innerHTML = `
+  <section style="display:grid;gap:6px">
+    <p class="eyebrow">하이브리드 체력 훈련</p>
+    <h2>근력 운동과 달리기를 한 번의 훈련에 섞어요</h2>
+    <p class="lead">"몇 분 동안, 어떤 순서로, 얼마나"라는 규칙을 형식이라고 해요. 형식만 바꿔도 같은 스쿼트가 근지구력 훈련도 되고 순발력 훈련도 돼요. 형식을 고르고 예시를 바로 해 보거나, 내 프로그램으로 고쳐 보세요.</p>
+    <div class="jump">${GROUPS.map(([g, n]) => `<button type="button" data-jump="${g}">${n} <small>${LEARN.filter(L => L.g === g).length}</small></button>`).join('')}</div>
+    <div class="legend"><span><b style="background:var(--orange)"></b>시간 운동</span><span><b style="background:var(--rest)"></b>휴식·이동</span><span><b style="background:var(--lime)"></b>정해진 횟수</span><span><b style="background:var(--sky)"></b>달리기</span></div>
+  </section>
+  ${GROUPS.map(([g, n, d]) => `<section class="grp" id="g-${g}"><div class="grp-h"><h2>${n}</h2><p class="lead">${d}</p></div>${LEARN.filter(L => L.g === g).map(card).join('')}</section>`).join('')}
   <section class="note">
     <b>강도는 내가 정해요</b>
     <p>운동 중에 짧은 문장으로 말할 수 있으면 알맞은 강도예요. 말이 전혀 안 나오면 횟수를 줄이거나 쉬운 동작으로 바꾸세요. 푸시업 → 무릎 대고 푸시업, 점프 스쿼트 → 스쿼트, 버피 → 일어서며 손뼉치기처럼요.</p>
     <p>어지럽거나 가슴이 아프면 바로 멈추고 선생님께 알려요.</p>
   </section>`;
+  $('v-learn').querySelectorAll('[data-jump]').forEach(b => b.onclick = () => { const t = $('g-' + b.dataset.jump); window.scrollTo({ top: t.getBoundingClientRect().top + scrollY - 60, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); });
 }
 
 // ── 만들기
 let draft = store.get('train-draft', null) || clone(TEMPLATES[0], true);
+if (!TYPES[draft.type]) draft = clone(TEMPLATES[0], true);
 function clone(t, fresh) { return { id: fresh ? 'u' + Date.now().toString(36) : t.id, type: t.type, name: t.name, p: { ...t.p }, items: t.items.map(x => [...x]) }; }
 const exOpts = sel => PARTS.map(pt => `<optgroup label="${pt}">${Object.entries(EX).filter(e => e[1][2] === pt).map(([k, e]) => `<option value="${k}"${k === sel ? ' selected' : ''}>${e[0]}</option>`).join('')}</optgroup>`).join('');
-const FIELD = { min: ['전체 시간', '분', 1, 40], rounds: ['라운드', '번', 1, 12], cap: ['시간 제한', '분', 3, 60], work: ['운동', '초', 10, 120], rest: ['휴식·이동', '초', 0, 120], laps: ['바퀴', '번', 1, 5], runM: ['한 번 달리기', 'm', 50, 1000] };
+const FIELD = { min: ['전체 시간', '분', 1, 40], rounds: ['라운드', '번', 1, 12], cap: ['시간 제한', '분', 3, 60], work: ['운동', '초', 10, 120], rest: ['휴식·이동', '초', 0, 120], laps: ['바퀴', '번', 1, 5], runM: ['한 번 달리기', 'm', 50, 1000],
+  every: ['간격', '분', 1, 5], step: ['바퀴마다 줄이기', '초', 5, 20], podSize: ['한 묶음', '칸', 2, 5], podRest: ['묶음 사이 이동', '초', 10, 180], start: ['처음 횟수', '회', 1, 20], inc: ['1분마다 늘리기', '회', 1, 5], max: ['최대', '분', 5, 30] };
+const SELF = { style: ['서킷 방식', () => Object.entries(STYLES).map(([k, v]) => [k, `${v[0]} · ${v[1]}`])], scheme: ['횟수 순서', () => SCHEMES.map(s => [s, s])],
+  hold: ['버티기 동작', () => HOLDS.map(k => [k, exName(k)])], cardio: ['유산소 칸 동작', () => CARDIOS.map(k => [k, exName(k)])] };
 function renderBuild() {
-  const pr = draft, T = TYPES[pr.type], noAmt = T.timed && pr.type !== 'emom';
-  const unitHint = { amrap: '한 라운드에 할 동작', fortime: '한 라운드에 할 동작', chipper: '위에서부터 한 번씩 할 동작', emom: '1분마다 하나씩 돌아가며 할 동작', tabata: '20초마다 번갈아 할 동작', race: '달리기 사이사이에 할 스테이션', circuit: '스테이션 (시간 동안 최대한)' }[pr.type];
+  const pr = draft, noA = noAmt(pr);
+  const hint = pr.type === 'circuit' ? { basic: '스테이션 (시간 동안 최대한)', double: '스테이션 (칸마다 2세트)', descend: '스테이션 (바퀴마다 시간이 줄어요)', pair: '스테이션 (짝이 번갈아 운동)', pod: `스테이션 (${pv(pr, 'podSize')}칸씩 묶여요)`, alt: '근력 스테이션 (사이에 유산소 칸이 자동으로 들어가요)' }[pv(pr, 'style')]
+    : { amrap: '한 라운드에 할 동작', fortime: '한 라운드에 할 동작', chipper: '위에서부터 한 번씩 할 동작', emom: '간격마다 하나씩 돌아가며 할 동작', tabata: '20초마다 번갈아 할 동작', race: '달리기 사이사이에 할 스테이션',
+      ladder: `${pv(pr, 'scheme')}회 순서로 모든 동작을 해요`, deathby: '1분마다 번갈아 할 동작 (하나면 계속 같은 동작)', partner: '한 라운드에 할 동작 (짝이 번갈아)' }[pr.type];
+  const fieldHtml = f => SELF[f] ? `<label>${SELF[f][0]}<select id="f-${f}" data-sf="${f}">${SELF[f][1]().map(([v, lb]) => `<option value="${v}"${v === pv(pr, f) ? ' selected' : ''}>${lb}</option>`).join('')}</select></label>`
+    : (([lb, u, mn, mx]) => `<label>${lb}<span><input type="number" id="f-${f}" data-f="${f}" min="${mn}" max="${mx}" value="${pv(pr, f)}"> ${u}</span></label>`)(FIELD[f]);
   $('v-build').innerHTML = `
   <section class="panel">
     <label class="fields" style="align-items:center"><span class="eyebrow">프로그램 이름</span><input type="text" id="pName" maxlength="30" value="${esc(pr.name)}"></label>
     <div><p class="eyebrow" style="margin-bottom:4px">형식</p><div class="types" role="group" aria-label="형식">${Object.entries(TYPES).map(([k, t]) => `<button type="button" data-type="${k}" aria-pressed="${k === pr.type}">${t.name}<small>${t.ko}</small></button>`).join('')}</div></div>
-    <div class="fields">${Object.keys(DEF[pr.type]).map(f => { const [lb, u, mn, mx] = FIELD[f]; return `<label>${lb}<span><input type="number" id="f-${f}" data-f="${f}" min="${mn}" max="${mx}" value="${pr.p[f]}"> ${u}</span></label>`; }).join('')}</div>
+    <div class="fields">${keysOf(pr).map(fieldHtml).join('')}</div>
   </section>
   <section class="panel">
-    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap"><h3>동작</h3><span class="lead" style="font-size:12.5px">${unitHint}</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap"><h3>동작</h3><span class="lead" style="font-size:12.5px">${hint}</span></div>
     <div class="items" id="items">${pr.items.map(([ex, n], i) => `
       <div class="item">
         <select id="ex-${i}" data-i="${i}" aria-label="${i + 1}번 동작">${exOpts(ex)}</select>
-        ${noAmt ? '<span class="amt">시간 동안</span>' : `<span class="amt"><input type="number" id="n-${i}" data-n="${i}" min="1" max="2000" value="${n || 10}" aria-label="${i + 1}번 양"> ${UNIT[EX[ex][1]]}</span>`}
+        ${noA ? `<span class="amt">${pr.type === 'deathby' || pr.type === 'ladder' ? '정해진 횟수' : '시간 동안'}</span>` : `<span class="amt"><input type="number" id="n-${i}" data-n="${i}" min="1" max="2000" value="${n || 10}" aria-label="${i + 1}번 양"> ${UNIT[EX[ex][1]]}</span>`}
         <span class="ops"><button type="button" class="ico" data-up="${i}" aria-label="위로" ${i ? '' : 'disabled'}>↑</button><button type="button" class="ico" data-del="${i}" aria-label="빼기">✕</button></span>
       </div>`).join('')}</div>
     <div class="btn-row"><button type="button" class="btn" id="addEx">+ 동작 추가</button></div>
   </section>
   <section class="panel">
-    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><h3>미리 보기</h3><span class="est">${minTxt(estimate(pr))}</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><h3>미리 보기</h3><span class="est">${pr.type === 'deathby' ? '최대 ' : ''}${minTxt(estimate(pr))}</span></div>
     ${pr.items.length ? timeline(pr) : '<p class="err">동작을 하나 이상 넣어 주세요.</p>'}
     <p class="sum">${summary(pr)}</p>
     <div class="btn-row"><button type="button" class="btn dark" id="saveP">저장</button><button type="button" class="btn go" id="runP" ${pr.items.length ? '' : 'disabled'}>바로 해 보기 ▶</button><button type="button" class="btn" id="newP">새로 만들기</button></div>
@@ -365,6 +434,7 @@ function renderBuild() {
   $('pName').oninput = e => { draft.name = e.target.value; store.set('train-draft', draft); };
   v.querySelectorAll('[data-type]').forEach(b => b.onclick = () => { const t = b.dataset.type; if (t === draft.type) return; draft.type = t; draft.p = { ...DEF[t] }; draft.items = draft.items.map(([ex, n]) => [ex, n || 10]); re(); });
   v.querySelectorAll('[data-f]').forEach(inp => inp.onchange = () => { const f = inp.dataset.f, [, , mn, mx] = FIELD[f]; draft.p[f] = Math.min(mx, Math.max(mn, Math.round(+inp.value || mn))); re(); });
+  v.querySelectorAll('[data-sf]').forEach(s => s.onchange = () => { draft.p[s.dataset.sf] = s.value; re(); });
   v.querySelectorAll('select[data-i]').forEach(s => s.onchange = () => { draft.items[+s.dataset.i][0] = s.value; re(); });
   v.querySelectorAll('[data-n]').forEach(inp => inp.onchange = () => { draft.items[+inp.dataset.n][1] = Math.min(2000, Math.max(1, Math.round(+inp.value || 1))); re(); });
   v.querySelectorAll('[data-up]').forEach(b => b.onclick = () => { const i = +b.dataset.up; [draft.items[i - 1], draft.items[i]] = [draft.items[i], draft.items[i - 1]]; re(); });
@@ -416,7 +486,7 @@ function tick() {
   const t = elapsed();
   if (P.phase === 'ready') { const left = P.ready - t; const s = Math.ceil(left); if (s <= 3 && s >= 1 && P.lastBeep !== 'r' + s) { P.lastBeep = 'r' + s; beep(660); }
     if (left <= 0) { P.phase = 'go'; P.el = 0; P.t0 = now(); P.paused = false; beep(1100, .35); } }
-  else if (P.timed) { const [i, into, dur] = segAt(t); if (i >= P.segs.length) return finish(`${mmss(P.total)} 완주`);
+  else if (P.timed) { const [i, into, dur] = segAt(t); if (i >= P.segs.length) return finish(P.pr.type === 'deathby' ? `${P.segs.length}분 모두 성공` : `${mmss(P.total)} 완주`);
     if (i !== P.si) { P.si = i; beep(P.segs[i].k === 'w' ? 1100 : 520, .3); }
     const s = Math.ceil(dur - into); if (s <= 3 && P.lastBeep !== i + ':' + s) { P.lastBeep = i + ':' + s; beep(660); } }
   else { if (t >= P.total) return P.pr.type === 'amrap' ? finish(amrapRes()) : finish(`제한 시간 · ${P.done}/${P.steps.length} 완료`, true);
@@ -448,23 +518,23 @@ function drawPlay(fast) {
   let ph, clock, sub, now_, nx, bar, pose, mainBtn;
   if (P.phase === 'ready') {
     ph = 'ready'; clock = Math.max(1, Math.ceil(P.ready - t)); sub = '곧 시작해요';
-    const f = P.timed ? P.segs[0] : P.steps[0]; now_ = `<small>첫 동작</small>${exName(f.ex)}${f.n && !(P.timed && pr.type !== 'emom') ? ' ' + amt(f.ex, f.n) : ''}`; nx = summary(pr); pose = f.ex;
+    const f = P.timed ? P.segs[0] : P.steps[0]; now_ = `<small>첫 동작${f.who ? ' · ' + f.who : ''}</small>${exName(f.ex)}${f.n ? ' ' + amt(f.ex, f.n) : ''}`; nx = summary(pr); pose = f.ex;
     mainBtn = `<button type="button" class="big" id="pSkip">바로 시작</button>`;
   } else if (P.timed) {
     const [i, into, dur] = segAt(t), s = P.segs[Math.min(i, P.segs.length - 1)], n = P.segs.slice(i + 1).find(x => x.k === 'w');
     ph = s.k === 'w' ? 'work' : 'rest'; clock = mmss(dur - into); sub = `${s.tag} · 남은 시간 ${mmss(P.total - t)}`;
-    if (s.k === 'w') { now_ = `${exName(s.ex)}${pr.type === 'emom' ? ` ${amt(s.ex, s.n)}<small>다 하면 남은 시간은 쉬어요</small>` : '<small>시간 동안 최대한</small>'}`; pose = s.ex; }
+    if (s.k === 'w') { now_ = `${s.who ? `<small>${s.who} 차례</small>` : ''}${exName(s.ex)}${s.n ? ' ' + amt(s.ex, s.n) : ''}<small>${s.note || (s.n ? '다 하면 남은 시간은 쉬어요' : '시간 동안 최대한')}</small>`; pose = s.ex; }
     else { now_ = `<small>${s.tag}</small>${n ? '다음: ' + exName(n.ex) : '숨 고르기'}`; pose = n?.ex; }
-    nx = n && s.k === 'w' ? `다음 · ${exName(n.ex)}` : '';
+    nx = n && s.k === 'w' ? `다음 · ${n.who ? n.who + ' ' : ''}${exName(n.ex)}` : '';
     const ws = P.segs.filter(x => x.k === 'w'), wi = P.segs.slice(0, i + 1).filter(x => x.k === 'w').length - 1;
     bar = ws.length <= 40 ? ws.map((_, k) => `<i class="${k < wi || (k === wi && s.k !== 'w') ? 'done' : k === wi ? 'cur' : ''}"></i>`).join('') : '';
-    mainBtn = '';
+    mainBtn = pr.type === 'deathby' && P.phase === 'go' ? `<button type="button" class="big" id="pFail" ${P.paused ? 'disabled' : ''}>못 끝냈어요</button>` : '';
   } else {
     const L = P.steps.length, k = pr.type === 'amrap' ? P.done % L : P.done, s = P.steps[k], n = pr.type === 'amrap' ? P.steps[(k + 1) % L] : P.steps[k + 1];
     ph = s.run ? 'run' : 'work';
     clock = pr.type === 'amrap' ? mmss(P.total - t) : mmss(t);
     sub = pr.type === 'amrap' ? `${Math.floor(P.done / L) + 1}라운드째 · 지금까지 ${amrapRes()}` : `${s.tag ? s.tag + ' · ' : ''}${P.done}/${L} 완료 · 제한 ${mmss(P.total)}`;
-    now_ = `${exName(s.ex)} ${amt(s.ex, s.n)}`; pose = s.ex;
+    now_ = `${s.who ? `<small>${s.who} 차례</small>` : ''}${exName(s.ex)} ${amt(s.ex, s.n)}`; pose = s.ex;
     nx = n ? `다음 · ${exName(n.ex)} ${amt(n.ex, n.n)}` : '마지막 동작이에요';
     bar = pr.type === 'amrap' ? P.steps.map((_, j) => `<i class="${j < k ? 'done' : j === k ? 'cur' : ''}"></i>`).join('') : L <= 40 ? P.steps.map((_, j) => `<i class="${j < k ? 'done' : j === k ? 'cur' : ''}"></i>`).join('') : '';
     mainBtn = `<button type="button" class="big" id="pNext" ${P.paused ? 'disabled' : ''}>다 했어요 ✓</button>`;
@@ -484,6 +554,7 @@ function drawPlay(fast) {
   $('pQuit').onclick = () => { if ($('pQuit').dataset.sure) { P.done && !P.timed ? finish(`그만둠 · ${pr.type === 'amrap' ? amrapRes() : P.done + '/' + P.steps.length}`) : stopPlay(); } else { $('pQuit').dataset.sure = 1; $('pQuit').textContent = '정말 그만하기'; } };
   $('pPause').onclick = togglePause;
   if ($('pNext')) $('pNext').onclick = nextStep;
+  if ($('pFail')) $('pFail').onclick = () => { const i = segAt(elapsed())[0]; finish(i ? `${i}분 성공 · 마지막 ${P.segs[i - 1].n}회` : '1분째에서 멈춤'); };
   if ($('pSkip')) $('pSkip').onclick = () => { P.el = P.ready; P.t0 = now(); };
 }
 function togglePause() { if (!P || P.end) return; if (P.paused) { P.t0 = now(); P.paused = false; } else { P.el = elapsed(); P.paused = true; } drawPlay(); }
