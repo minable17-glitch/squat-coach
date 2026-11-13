@@ -1297,7 +1297,8 @@ function build(S) {
   const hipC = S.hip, mid = hipC.clone().addScaledVector(dirA(S.low), L.low), neck = mid.clone().addScaledVector(dirA(S.up), L.up);
   const head = neck.clone().addScaledVector(dirA(S.head ?? S.up * .45), .14);
   for (const s of [1, -1]) {
-    const f = S.feet[s], hip = hipC.clone().add(V(s * .1, 0, 0));
+    let f = S.feet[s]; const hip = hipC.clone().add(V(s * .1, 0, 0));
+    { const dl = f.ankle.clone().sub(hip), Lm = L.thigh + L.shank - .004; if (dl.length() > Lm) { const sh = hip.clone().addScaledVector(dl.normalize(), Lm).sub(f.ankle); f = { ...f, ankle: f.ankle.clone().add(sh), toe: f.toe.clone().add(sh), heel: f.heel.clone().add(sh) }; } } // 다리가 닿지 않으면 발을 다리 길이까지만
     let knee = ik(hip, f.ankle, L.thigh, L.shank, S.kneePole[s]);
     if (S.kneePole[s].z > 0 && s * knee.x < KNEE_MIN) { const p0 = S.kneePole[s], p1 = V(s * .3, 0, 1); let lo = 0, hi = 1;
       for (let i = 0; i < 10; i++) { const m = (lo + hi) / 2, kk = ik(hip, f.ankle, L.thigh, L.shank, p0.clone().lerp(p1, m)); if (s * kk.x < KNEE_MIN) lo = m; else { hi = m; knee = kk; } } }
@@ -1308,7 +1309,7 @@ function build(S) {
     else if (A.mode === 'hang') { const R = L.uarm + L.farm - .01, dz = clamp(A.z - sh.z, -R, R); wr = sh.clone().add(V(s * -.02, -Math.sqrt(R * R - dz * dz), dz)); el = ik(sh, wr, L.uarm, L.farm, V(s, 0, -1)); }
     else if (A.mode === 'hold') { const tg = neck.clone().addScaledVector(dirA(S.up + 90), A.fwd).addScaledVector(dirA(S.up), -A.drop); P.hold = tg;
       wr = tg.clone().add(V(s * .07, 0, 0)); el = ik(sh, wr, L.uarm, L.farm, V(s * .6, -1, 0)); }
-    else { wr = A.wr[s].clone(); el = ik(sh, wr, L.uarm, L.farm, A.pole[s]); }
+    else { wr = A.wr[s].clone(); const dw = wr.clone().sub(sh), Lm = L.uarm + L.farm - .004; if (dw.length() > Lm) wr = sh.clone().addScaledVector(dw.normalize(), Lm); el = ik(sh, wr, L.uarm, L.farm, A.pole[s]); } // 팔이 닿지 않는 곳이면 손을 팔 길이까지만
     P.side[s] = { ...f, knee, hip, sh, el, wr };
   }
   const kn = P.side[1].knee.clone().add(P.side[-1].knee).multiplyScalar(.5);
@@ -3680,7 +3681,7 @@ function book3dGo(i, dir, go) { if (FL) return; const cur = state.book; i = clam
   FL = { dir, to: i, p: 0, swapped: false, go }; }
 setMove('squat'); { const g = camFor('diag'); camera.position.copy(g[0]); controls.target.copy(g[1]); camGoal = null; }
 syncPlay(); slider.value = Math.round(state.t * 1000);
-$('load').remove(); window.__state = state; window.__setMove = setMove; window.__setScene = setScene; window.__setVariant = setVariant; window.__ready = true;
+$("load").remove(); window.__state = state; window.__MOVES = MOVES; window.__build = build; window.__setMove = setMove; window.__setScene = setScene; window.__setVariant = setVariant; window.__ready = true;
 // ---------- 책 모드 ----------
 const BOOK = [
   { t: '기본 움직임', d: '움직임마다 기본 · 응용 · 일상에서 · 스포츠에서', ch: ['squat', 'lunge', 'pushup', 'pull', 'throw', 'hinge', 'plank'] },

@@ -786,6 +786,371 @@ body.paper .stage .ctrl{right:152px}
   .pb[data-full="1"] .mini .ml{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
   body.paper .pb[data-full="1"] .mi{min-height:34px;font-size:13.5px}
 }
+
+/* 첫 화면: 기본 · 응용 · 일상에서 · 스포츠에서로 나눔 */
+.toc-cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(58px,1fr));gap:6px}
+.toc-cats button{display:grid;gap:0;justify-items:center;min-height:58px;border-radius:14px;border:2px solid var(--pline);border-bottom:4px solid var(--gc);background:#fff;padding:4px 2px;line-height:1.3}
+.toc-cats button b{font-size:16px;color:var(--navy);white-space:nowrap}
+.toc-cats button small{font-size:12px;font-weight:600;color:var(--pmuted)}
+.toc-cats button[aria-selected="true"]{background:var(--gc);border-color:var(--gc)}
+.toc-cats button[aria-selected="true"] b,.toc-cats button[aria-selected="true"] small{color:#fff}
+.toc-base{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.toc-extra{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.toc-extra .toc-mv{min-height:58px!important;grid-auto-flow:row!important;justify-content:stretch!important;padding:6px 8px}
+.toc-extra .toc-mv b{font-size:14px}.toc-extra .toc-mv span{font-size:11.5px}
+@media (orientation:portrait){
+  .pb-toc{display:grid!important;grid-template-rows:auto minmax(0,1fr);gap:6px}
+  .pb-toc .toc-l,.pb-toc .toc-r{display:grid!important;height:auto}
+  .pb-toc .toc-l{overflow:visible}
+  .pb-toc .toc-l .toc-extra{order:9}
+  .toc-cats button b{font-size:14.5px}
+}
+@media (orientation:landscape){.toc-base{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* 글: 쪽 넘기기 대신 위아래 스크롤. 원리·체력은 정의(요약 카드)가 먼저 */
+.pg-text{overflow:hidden;display:flex;flex-direction:column}
+.pg-flow{flex:1;min-height:0;height:auto;column-width:auto!important;columns:auto;display:flex;flex-direction:column;gap:12px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;transform:none!important;padding-right:4px}
+.pg-flow>*{margin:0;flex:none}
+.pg-text.more::after{content:"▾ 아래로 더 있어요";position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:13px;font-weight:700;color:var(--navy);padding:14px 0 5px;background:linear-gradient(transparent,#fff 55%);pointer-events:none;border-radius:0 0 12px 12px}
+.pg-text{position:relative}
+.pb #prCard{order:-2}
+.pb #prCard:not([hidden]){border:2px solid #cfc3f5;background:#f6f2ff;border-radius:12px;padding:10px 12px}
+.pb #prCard h2{font-size:20px}
+.pb #prCard p,.pb #prCard td,.pb #prCard th,.pb #prCard div{font-size:16px!important;line-height:1.5}
+.pb .pg-flow>#labCard{display:none}
+.st-lab{background:#5f3dc4;cursor:pointer}
+.pb[data-full="1"] .pg-text{display:flex}
+@media (orientation:portrait){.st-lab span{display:inline}.st-lab{width:auto;padding:0 10px;font-size:15px}}
+
+/* 운동 모음 */
+.toc-ex{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:52px;padding:0 14px;border-radius:14px;border:2px solid var(--navy);background:#fff;text-align:left}
+.toc-ex b{font-size:17px;color:var(--navy)}.toc-ex span{font-size:13px;color:var(--pmuted)}
+.toc-ex[aria-pressed="true"]{background:var(--navy)}.toc-ex[aria-pressed="true"] b,.toc-ex[aria-pressed="true"] span{color:#fff}
+.toc-row.ex{align-items:center}
+.toc-row.ex span{flex:1;min-width:0}
+.toc-row.ex small{margin-left:8px;font-size:12.5px;font-weight:500;color:var(--pmuted)}
+.toc-row.ex em{font-style:normal;color:#f28c38;font-size:14px;letter-spacing:-1px;white-space:nowrap}
+.toc-row.ex em i{font-style:normal;color:#e2d6bb;border:0;transform:none;flex:none}
+
+/* ===== 글로 읽는 교과서 (READER) ===== */
+html.reader,body.reader{height:100%;overflow:hidden;background:#e9e2d2}
+body.reader .page{display:none}
+.rd{--paper:#fffdf7;--ink:#1f2630;--muted:#5c6475;--navy:#14284b;--acc:#c8372b;--good:#2f8a4e;--bad:#c2410c;height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr);color:var(--ink)}
+.rd button,.rd select{font:inherit;color:inherit;cursor:pointer}
+.rd-top{display:flex;align-items:center;gap:10px;padding:max(8px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));background:var(--navy);color:#fff}
+.rd-logo{font-weight:700;font-size:16px;white-space:nowrap}
+.rd-sel{flex:1;min-width:0;max-width:280px;margin-left:auto}
+.rd-sel select{width:100%;height:42px;border-radius:10px;border:0;background:#fff;color:var(--navy);font-weight:700;font-size:16px;padding:0 10px}
+.rd-body{min-height:0;display:grid;grid-template-columns:minmax(0,1fr)}
+.rd-page{min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--paper);padding:22px max(18px,env(safe-area-inset-left,0px)) 80px;font-size:18px;line-height:1.75}
+.rd-page>*{max-width:680px;margin-left:auto;margin-right:auto}
+.rd-kick{margin-bottom:0;font-size:14px;font-weight:700;color:var(--acc);letter-spacing:.04em}
+.rd-page h1{font-family:'Noto Serif KR',serif;font-size:34px;line-height:1.25;margin-top:4px;margin-bottom:4px;color:var(--navy)}
+.rd-lead{color:var(--muted);margin-top:0}
+.rd-toc{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:12px 0 18px;border-bottom:1px solid #e7dfcd;font-size:14.5px}
+.rd-toc b{width:100%;font-size:12.5px;color:var(--muted);margin-top:6px}
+.rd-toc a{color:var(--navy);text-decoration:none;border:1px solid #d8cfba;border-radius:999px;padding:4px 11px;background:#fff}
+.rd-grp{margin-top:34px;margin-bottom:0;font-size:13px;font-weight:700;letter-spacing:.08em;color:#fff;background:var(--navy);display:inline-block!important;padding:3px 12px;border-radius:6px}
+.rd-sec{padding-top:10px}
+.rd-sec h2{font-family:'Noto Serif KR',serif;font-size:25px;line-height:1.35;margin:18px 0 8px;color:var(--navy);display:flex;align-items:baseline;gap:10px}
+.rd-no{font-family:var(--f-num);font-size:15px;color:var(--acc);font-weight:600}
+.rd-sec h3{font-size:18px;margin:22px 0 6px;color:var(--navy)}
+.rd-sec p{margin:0 0 10px}
+.rd-def{border-left:4px solid #7048e8;background:#f6f2ff;padding:10px 14px;border-radius:0 10px 10px 0}
+.rd-def b{color:#7048e8;margin-right:6px}
+.rd-why b{color:var(--bad)}
+.rd-steps{padding-left:1.4em;margin:0}
+.rd-steps li{margin-bottom:6px}
+.rd-box{border:1.5px solid #e2d6bb;border-radius:12px;padding:12px 14px;margin:12px 0;background:#fff}
+.rd-box>b{display:block;margin-bottom:4px}
+.rd-box ul{margin:4px 0 0;padding-left:1.2em}
+.rd-box.ok{border-color:#bfe3c8;background:#f3fbf4}.rd-box.ok>b{color:var(--good)}
+.rd-box.bad{border-color:#f3c9a6;background:#fff7ef}.rd-box.bad>b{color:var(--bad)}
+.rd-box.cmp>b{color:#2a6fb5}
+.rd-box p{font-size:17px}
+.rd-figbtn{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;min-height:56px;margin:12px 0;padding:10px 14px;border-radius:12px;border:2px dashed #b9c3d4;background:#f4f7fb;text-align:left}
+.rd-figbtn.good{border-color:#9fd0ad;background:#f1f9f3}
+.rd-figbtn.bad{border-color:#f0b48a;background:#fff4ea}
+.rd-figbtn.on{border-style:solid;border-color:var(--navy);box-shadow:0 0 0 2px rgba(20,40,75,.15)}
+.rd-fignum{font-size:12.5px;font-weight:700;color:#fff;background:var(--navy);border-radius:6px;padding:2px 8px;white-space:nowrap}
+.rd-figname{font-weight:700;font-size:16px;line-height:1.4}
+.rd-figgo{font-size:14px;font-weight:700;color:var(--navy);white-space:nowrap}
+.rd-next{display:block;width:100%;min-height:56px;margin-top:40px!important;border:0;border-radius:14px;background:var(--navy);color:#fff!important;font-weight:700;font-size:17px}
+.rd-fig{display:none;flex-direction:column;background:#1b2125;min-height:0}
+.rd-fighead{display:flex;align-items:center;gap:8px;padding:8px 10px;color:#fff;font-size:14.5px}
+.rd-fighead b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rd-x{width:44px;height:44px;border-radius:12px;border:0;background:rgba(255,255,255,.14);color:#fff!important;font-size:18px}
+.rd-tabs{display:flex;gap:6px;overflow-x:auto;padding:0 10px 8px;scrollbar-width:none}
+.rd-tabs::-webkit-scrollbar{display:none}
+.rd-tabs button{flex:0 0 auto;min-height:40px;padding:0 12px;border-radius:10px;border:1.5px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#eef2f3!important;font-size:14px;font-weight:700;white-space:nowrap}
+.rd-tabs button[aria-pressed="true"]{background:#d7f25a;border-color:#d7f25a;color:var(--navy)!important}
+.rd-tabs button.bad[aria-pressed="true"]{background:#ff922b;border-color:#ff922b;color:#1b2125!important}
+.rd-stage{flex:1;min-height:0;position:relative}
+body.reader .rd-stage .stage{display:block;position:absolute;inset:0;height:auto;min-height:0;border-radius:0}
+body.reader .rd-stage .stage canvas{height:100%;min-height:0}
+body.reader .rd-stage .stage .ctrl{position:absolute;left:8px;right:8px;bottom:8px;flex-wrap:nowrap;gap:5px}
+body.reader .rd-stage .scrub span,body.reader .rd-stage .hint{display:none}
+body.reader .rd-stage .chips{display:none}
+/* 폰(세로): 그림을 누르면 3D가 화면 위로 올라옴 */
+@media (max-width:899px){
+  .rd[data-open="1"] .rd-fig{display:flex;position:fixed;inset:0;z-index:50;padding-bottom:env(safe-area-inset-bottom,0px)}
+  .rd-page{font-size:17.5px}
+  .rd-page h1{font-size:30px}
+}
+/* 넓은 화면·가로: 왼쪽 글, 오른쪽 그림이 늘 보임 */
+@media (min-width:900px){
+  .rd-body{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .rd-fig{display:flex}
+  .rd-x{display:none}
+}
+
+body.reader .rd-stage .ctrl .scrub{display:none}
+body.reader .rd-stage .ctrl button{white-space:nowrap;min-height:42px;padding:0 10px;font-size:14px}
+body.reader .rd-stage .views{display:flex;gap:4px;flex:0 0 auto}
+body.reader .rd-stage #ghost,body.reader .rd-stage .ctrl [data-view="diag"]{font-size:0}
+body.reader .rd-stage #ghost::after{content:"겹쳐 보기";font-size:14px}
+body.reader .rd-stage .ctrl [data-view="diag"]::after{content:"↗";font-size:17px}
+body.reader .rd-stage .ctrl{justify-content:flex-start;background:none;padding:0}
+
+/* 글로 읽기: 옮겨 온 기능 */
+.rd-sec h2{flex-wrap:wrap}
+.rd-h2t{flex:1;min-width:0}
+.rd-ytl{flex:none;font-family:var(--f-body);font-size:13.5px;font-weight:700;color:#fff;background:#e03131;border-radius:999px;padding:4px 12px;text-decoration:none;align-self:center}
+.rd-sec h3 small{font-size:13px;font-weight:500;color:var(--muted);margin-left:6px}
+.rd-steps{list-style:none;padding:0}
+.rd-step{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;border:1.5px solid transparent;border-radius:12px;background:#f6f1e4;padding:9px 12px;line-height:1.6;font-size:17px}
+.rd-step .sn{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-weight:700;font-size:14px;margin-top:2px}
+.rd-step[aria-pressed="true"]{border-color:var(--good);background:#eaf7ec}
+.rd-cta{display:grid;gap:2px;margin:14px 0 4px;padding:14px 16px;border-radius:14px;text-decoration:none;color:#fff}
+.rd-cta b{font-size:18px}.rd-cta span{font-size:14.5px;opacity:.9}
+.rd-cta.cam{background:var(--navy)}.rd-cta.lab{background:#5f3dc4}.rd-cta.sci{background:#e8590c}
+.rd-act{flex:none;display:flex;align-items:center;height:40px;padding:0 11px;border-radius:10px;color:#fff;font-weight:700;font-size:14px;text-decoration:none;white-space:nowrap}
+.rd-act[hidden]{display:none}
+.rd-act.yt{background:#e03131}.rd-act.cam{background:#3b5bdb}.rd-act.lab{background:#7048e8}
+.rd-exl{display:grid;gap:6px;margin:10px 0 6px}
+.rd-ex{display:flex;align-items:center;gap:10px;width:100%;min-height:54px;padding:8px 14px;border-radius:12px;border:1.5px solid #e2d6bb;background:#fff;text-align:left}
+.rd-ex span{flex:1;min-width:0;display:grid}.rd-ex b{font-size:17px}.rd-ex small{font-size:13px;color:var(--muted)}
+.rd-ex em{font-style:normal;color:#f28c38;letter-spacing:-1px;white-space:nowrap}.rd-ex em i{font-style:normal;color:#e2d6bb}
+@media (max-width:899px){.rd-fighead{flex-wrap:wrap}.rd-fighead b{flex-basis:100%;order:-1}.rd-x{margin-left:auto}}
+/* 폰을 가로로 눕혀도 글과 3D를 나란히 */
+@media (orientation:landscape) and (min-width:600px) and (max-width:899px){
+  .rd-body{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .rd-fig,.rd[data-open="1"] .rd-fig{display:flex;position:static}
+  .rd-x{display:none}
+  .rd-fighead b{flex-basis:auto;order:0}
+  .rd-fighead{flex-wrap:nowrap}
+  .rd-page{padding-top:14px}
+}
+
+@media (orientation:landscape) and (max-height:500px){
+  .rd-fighead{padding:5px 8px;gap:6px}.rd-fighead b{font-size:13px}.rd-act{height:36px;padding:0 9px;font-size:13px}
+  .rd-tabs{padding:0 8px 5px}.rd-tabs button{min-height:36px;font-size:13px}
+  body.reader .rd-stage .mini{top:6px;width:120px}body.reader .rd-stage .mini .mi:nth-child(n+4){display:none}
+  body.reader .rd-stage .ctrl button{min-height:36px;padding:0 8px;font-size:13px}
+  .rd-page{font-size:16.5px}.rd-page h1{font-size:26px}.rd-sec h2{font-size:21px}
+}
+
+/* 팝업: 종이에서 일어서는 3D 카드 */
+.rd-fig.pop{display:flex!important;position:fixed!important;inset:auto 8px auto 8px;z-index:50;border-radius:18px;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 78%,rgba(255,253,247,.92),rgba(255,253,247,.55) 72%);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+  box-shadow:0 -2px 0 rgba(20,40,75,.08),0 18px 40px rgba(20,40,75,.28);transform-origin:50% 100%;animation:rdPop .5s cubic-bezier(.2,.9,.25,1.15)}
+.rd-fig.pop.closing{animation:rdFold .3s ease-in forwards}
+@keyframes rdPop{from{transform:perspective(900px) rotateX(82deg);opacity:.2}to{transform:none;opacity:1}}
+@keyframes rdFold{to{transform:perspective(900px) rotateX(85deg);opacity:0}}
+@media (prefers-reduced-motion:reduce){.rd-fig.pop,.rd-fig.pop.closing{animation:none}}
+.rd-fig.pop .rd-fighead{color:var(--navy);padding:6px 8px}
+.rd-fig.pop .rd-fighead b{font-size:13.5px}
+.rd-fig.pop .rd-x{background:var(--navy);color:#fff!important;width:40px;height:40px}
+.rd-fig.pop .rd-tabs button{background:#fff;border-color:#d8cfba;color:var(--navy)!important}
+.rd-fig.pop .rd-tabs button[aria-pressed="true"]{background:#d7f25a;border-color:#b9d53f}
+.rd-fig.pop .rd-tabs button.bad[aria-pressed="true"]{background:#ffd8b8;border-color:#ff922b}
+body.reader .rd-fig.pop .stage{background:transparent}
+body.reader .rd-fig.pop .stage .ctrl button{background:#fff;color:var(--navy);border:1.5px solid #d8cfba}
+body.reader .rd-fig.pop .stage .ctrl button[aria-pressed="true"]{background:#d7f25a}
+body.reader .rd-fig.pop .mini{--overlay:rgba(255,255,255,.92);--overlay-ink:#14284b;--overlay-muted:#5c6475}
+body.reader .rd-fig.pop .mini .mi{background:#f3ecdb;color:#14284b}
+.rd-figbtn.on{position:relative;z-index:51}
+
+.rd-fig.pop .rd-fighead b{display:none}
+.rd-fig.pop .rd-fighead{flex-wrap:nowrap}
+
+/* ===== 합친 버전 (HYBRID): 글로 읽기 → 그림 → 장면 화면 ===== */
+body.hybrid .rd{position:fixed;inset:0;z-index:60;background:#e9e2d2}
+body.hybrid .rd[hidden]{display:none}
+body.hybrid .rd-fig{display:none!important}
+body.hybrid .rd-body{grid-template-columns:minmax(0,1fr)!important}
+.rd-toc-btn{flex:none;height:42px;padding:0 12px;border-radius:10px;border:0;background:#fff;color:var(--navy)!important;font-weight:700;font-size:15px}
+body.hybrid .rd-logo{display:none}
+@media (min-width:600px){body.hybrid .rd-logo{display:inline}}
+.nv-read{flex:none;height:46px;padding:0 12px;border-radius:12px;border:0;background:var(--lime);color:var(--navy)!important;font-weight:700;font-size:15px;white-space:nowrap}
+.nv-view{display:none}
+body.hybrid .nv-view{display:flex;gap:3px;background:rgba(255,255,255,.14);border-radius:12px;padding:3px;flex:none}
+.nv-view button{min-height:40px;padding:0 11px;border:0;border-radius:9px;background:transparent;color:#fff!important;font-weight:700;font-size:14px;white-space:nowrap}
+.nv-view button[aria-pressed="true"]{background:#fff;color:var(--navy)!important}
+body.hybrid .nv-sel.m{display:none}
+body.hybrid .fcover,body.hybrid .st-full{display:none!important}
+body.hybrid .pb[data-vw="3d"] .pg-l,body.hybrid .pb[data-vw="text"] .pg-r{display:none!important}
+@media (orientation:portrait){
+  body.hybrid .nv-view{order:9;flex:1 1 100%}
+  body.hybrid .nv-view button{flex:1}
+  body.hybrid .pb[data-vw="both"] .pb-book{grid-template-rows:minmax(0,1.25fr) minmax(0,1fr)!important}
+  body.hybrid .pb[data-vw="text"] .pb-book,body.hybrid .pb[data-vw="3d"] .pb-book{grid-template-rows:minmax(0,1fr)!important}
+  body.hybrid .pb[data-vw="text"] .pg-text,body.hybrid .pb[data-vw="3d"] .plate{grid-row:1/-1!important}
+}
+@media (orientation:landscape){
+  body.hybrid .pb[data-vw="text"] .pb-book,body.hybrid .pb[data-vw="3d"] .pb-book{grid-template-columns:minmax(0,1fr)!important}
+}
+
+body.hybrid .pb[data-toc="1"] .nv-view,body.hybrid .pb[data-toc="1"] .nv-yt{display:none!important}
+body.hybrid .st-cam{right:8px}
+body.hybrid.paper .stage .ctrl{right:64px}
+
+/* 합친 버전 장면 화면: 3D 안에는 인형만. 자세 버튼은 위, 근육·조작은 아래로 뺌 */
+body.hybrid #sbS{display:none!important}
+body.hybrid .pb .stage{display:flex!important;flex-direction:column;background:#f4eedf}
+body.hybrid .pb .stage canvas{order:1;flex:1 1 0;min-height:0;height:auto!important}
+body.hybrid .pb .sbar{order:0;position:static;flex:none;padding:6px 6px 4px;background:#fbf5e6;border-bottom:1px solid var(--pline)}
+body.hybrid .pb .sb{min-height:40px;font-size:14.5px;box-shadow:none}
+body.hybrid .pb .labels{top:var(--sbh,50px);bottom:auto;height:calc(100% - var(--sbh,50px))}
+body.hybrid .pb .mini{order:2;position:static!important;display:block!important;width:auto!important;margin:0;padding:5px 6px 0;border:0;border-top:1px solid var(--pline);border-radius:0;box-shadow:none;background:#fbf5e6}
+body.hybrid .pb .mini .mh{display:none}
+body.hybrid .pb .mini .ml{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+body.hybrid .pb .mini .mi:nth-child(n+4){display:none}
+body.hybrid .pb .mi{min-height:30px;font-size:12.5px}
+body.hybrid .pb .stage .ctrl{order:3;position:static!important;flex:none;margin:0;padding:5px 62px 6px 6px;background:#fbf5e6;gap:5px;flex-wrap:nowrap}
+body.hybrid .pb .ctrl button{min-height:40px;min-width:40px;padding:0 9px;box-shadow:none}
+body.hybrid .pb .st-cam{bottom:6px;right:6px;min-height:40px;height:40px}
+body.hybrid .pb .thbox,body.hybrid .pb .thadj,body.hybrid .pb .aimbox{top:calc(var(--sbh,50px) + 8px)!important}
+
+/* 던지기 원리 장면(사람 없음): 읽을거리 · 그래프 · 이름표 */
+body.nofig .mini,body.nofig .ctrl #ghost{display:none!important}
+.xbox{position:absolute;left:8px;top:calc(var(--sbh,48px) + 10px);z-index:3;display:flex;flex-wrap:wrap;gap:5px;max-width:calc(100% - 16px);pointer-events:none}
+.xbox[hidden]{display:none}
+.xbox span{background:rgba(255,255,255,.94);border:1px solid #d3dbe2;border-radius:9px;padding:2px 9px;font-size:12.5px;color:#5c6475}
+.xbox b{font-family:var(--f-num);color:#14284b;margin-left:4px}
+.xchart{position:absolute;z-index:3;pointer-events:none;border-radius:12px;border:1px solid #d3dbe2}
+.xchart[hidden]{display:none}
+.xchart.card{right:8px;bottom:60px;width:min(46%,260px);height:min(34%,140px)}
+.xchart.wide{left:8px;bottom:60px;width:calc(100% - 16px);height:min(30%,140px)}
+@media (max-width:600px){.xchart.card{width:min(52%,210px);height:min(30%,118px)}}
+body.hybrid .xchart{bottom:58px}
+.lbl.xl{background:rgba(255,255,255,.92);color:#14284b;border-color:#d3dbe2}
+.rd-quiz{border-top:2px solid #e7dfcd;margin-top:30px}
+.rd-q{display:grid;gap:6px;margin:14px 0}
+.rd-q p{margin:0}
+.rd-q button{text-align:left;min-height:48px;padding:8px 12px;border-radius:10px;border:1.5px solid #e2d6bb;background:#fff;font-size:16px}
+.rd-q button.right{border-color:var(--good);background:#eaf7ec}.rd-q button.wrong{border-color:var(--bad);background:#fff0e6}
+.rd-qfb{font-size:15.5px;color:var(--muted)}
+
+body.hybrid .pb .stage canvas.xchart{flex:none!important;order:9}
+body.hybrid .pb .stage canvas.xchart.card{height:min(34%,140px)!important}
+body.hybrid .pb .stage canvas.xchart.wide{height:min(30%,140px)!important}
+@media (max-width:600px){body.hybrid .pb .stage canvas.xchart.card{height:min(30%,118px)!important}}
+body.nofig .pg-flow .detail{display:none}
+
+/* 차례: 분류 기준 고르기 */
+.toc-lab{margin:4px 0 0;font-size:13px;font-weight:700;color:var(--pmuted)}
+.toc-modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;background:#efe7d3;border-radius:14px;padding:4px}
+.toc-modes button{min-height:44px;border:0;border-radius:10px;background:transparent;font-weight:700;font-size:14.5px;color:var(--pmuted)}
+.toc-modes button[aria-selected="true"]{background:var(--navy);color:#fff!important}
+.toc-base{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))!important}
+.toc-base .toc-mv{min-height:62px;align-content:center}
+.toc-base .toc-mv b{font-size:19px}
+.toc-use{border-top:1px dashed var(--pline);padding-top:10px;display:grid;gap:6px}
+.toc-use h3{margin:0;font-size:14px;font-weight:700;color:#fff;background:var(--gc);justify-self:start;padding:2px 12px;border-radius:999px}
+.toc-use p{margin:0;font-size:15px;color:var(--pmuted)}
+.toc-chips{display:flex;flex-wrap:wrap;gap:6px}
+.toc-chip{min-height:40px;padding:0 13px;border-radius:999px;border:1.5px solid var(--pline);background:#fff;font-weight:600;font-size:14.5px}
+.toc-grp h3.lv{background:#f28c38;letter-spacing:1px}
+.toc-row.ex small{display:inline}
+
+/* ===== 차례 화면 다듬기: 한 단계 작은 글자, 같은 높이 버튼, 한 줄 정렬 ===== */
+.pb-toc .pg{padding:14px 16px;gap:10px}
+.pb-toc .toc-head h1{font-size:22px;line-height:1.25}
+.toc-lab{font-size:12px;letter-spacing:.04em;margin:2px 0 -4px}
+.toc-modes{grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;padding:3px;border-radius:12px}
+.toc-modes button{min-height:40px;font-size:14px;border-radius:9px;white-space:nowrap}
+.toc-cats{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:5px}
+.toc-cats button{min-height:52px;border-radius:12px;padding:4px 2px;border-bottom-width:3px;overflow:hidden}
+.toc-cats button b{font-size:14.5px;white-space:nowrap}
+.toc-cats button small{font-size:11.5px}
+.toc-base{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))!important;gap:6px}
+.toc-base .toc-mv{min-height:56px;padding:6px 10px}
+.toc-base .toc-mv b{font-size:17px}
+.toc-base .toc-mv span{font-size:12px}
+.toc-extra{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px}
+.toc-extra .toc-mv{min-height:48px!important;padding:6px 10px;display:flex!important;align-items:center;justify-content:flex-start!important}
+.toc-extra .toc-mv b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toc-extra .toc-mv span{display:none}
+.toc-resume{min-height:46px;font-size:15px}
+.pb-toc .ribbon{font-size:13px;padding:2px 14px 2px 10px}
+.toc-desc{font-size:14px}
+.toc-ch{gap:8px}
+.toc-grp h3{font-size:12.5px;padding:2px 10px}
+.toc-row{min-height:42px;font-size:16px}
+.toc-row.ex{font-size:15.5px}
+@media (orientation:landscape) and (max-height:500px){
+  .pb-toc .pg{padding:10px 14px;gap:8px}
+  .pb-toc .toc-head h1{font-size:19px}
+  .toc-lab{display:none}
+  .toc-modes button{min-height:36px;font-size:13px}
+  .toc-cats button{min-height:44px}.toc-cats button b{font-size:13.5px}
+  .toc-base .toc-mv{min-height:48px}.toc-base .toc-mv b{font-size:15.5px}
+  .toc-extra .toc-mv{min-height:42px!important}
+  .toc-resume{min-height:40px;font-size:14px}
+  .toc-row{min-height:38px;font-size:15px}
+}
+@media (max-width:480px){.toc-cats button b{font-size:13px}.toc-modes button{font-size:13px}.toc-extra .toc-mv b{font-size:13px}}
+
+/* ===== 전체를 한 단계 작게 (폰 기준) ===== */
+.pb{font-size:15.5px}
+.nv-home,.nv-read,.nv-yt,.rd-toc-btn{height:38px!important;min-height:38px;font-size:14px!important;border-radius:10px!important}
+.nv-home{width:38px!important;font-size:17px!important}
+.nv-read{padding:0 10px!important}
+.nv-title{font-size:14.5px!important}
+.nv-view button{min-height:32px!important;font-size:13px!important;padding:0 9px!important}
+.pb-pager .turn{min-height:40px!important;font-size:14px!important;padding:0 12px!important;border-radius:10px!important}
+.pgdots{font-size:12.5px}
+.sb{min-height:34px!important;font-size:13px!important;padding:0 10px!important;border-radius:10px!important}
+body.paper .ctrl button,body.hybrid .pb .ctrl button{min-height:34px!important;min-width:34px!important;font-size:12.5px!important;padding:0 7px!important;border-radius:9px!important}
+.st-cam,body.hybrid .pb .st-cam{min-height:34px!important;height:34px!important;font-size:13px!important}
+body.hybrid .pb .mi{min-height:26px;font-size:12px}
+.pb .vcard h2{font-size:18px!important}
+.pb .vcard p,.pb .detail p,.pb .card p,.pb .checks,.pb .why,.pb .steps{font-size:16px!important;line-height:1.55!important}
+.pb .checks::before{font-size:14px!important}
+.pg-text{padding:10px 12px!important}
+.pb-toc .pg{padding:12px!important;gap:8px!important}
+.pb-toc .toc-head h1{font-size:18px!important}
+.toc-modes button{min-height:34px!important;font-size:12.5px!important}
+.toc-cats button{min-height:42px!important;padding:2px!important}
+.toc-cats button b{font-size:12.5px!important}
+.toc-cats button small{font-size:10.5px!important}
+.toc-base{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important}
+.toc-base .toc-mv{min-height:44px!important;padding:4px 8px!important;border-radius:10px!important}
+.toc-base .toc-mv b{font-size:14px!important;white-space:nowrap}
+.toc-base .toc-mv span{font-size:10.5px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toc-extra .toc-mv{min-height:38px!important;padding:4px 8px!important;border-radius:10px!important}
+.toc-extra .toc-mv b{font-size:12.5px!important}
+.toc-resume{min-height:38px!important;font-size:13.5px!important;border-radius:10px!important}
+.pb-toc .ribbon{font-size:12px!important}
+.toc-desc{font-size:13px!important}
+.toc-row{min-height:36px!important;font-size:14.5px!important}
+.toc-grp h3,.toc-use h3{font-size:11.5px!important}
+.toc-chip{min-height:32px!important;font-size:13px!important}
+.rd-top{padding-block:6px!important}
+.rd-sel select{height:36px!important;font-size:14px!important}
+.rd-page{font-size:16px!important}
+.rd-page h1{font-size:24px!important}
+.rd-sec h2{font-size:20px!important}
+.rd-figbtn{min-height:46px!important;padding:6px 10px!important}
+.rd-figname{font-size:14.5px!important}
+@media (orientation:portrait){.toc-base{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+
+body.paper .pb .ctrl button[data-view="diag"],body.paper .pb .ctrl button#ghost{font-size:0!important}
+body.paper .ctrl [data-view="diag"]::after{font-size:15px}
+body.paper #ghost::after{font-size:12.5px}
+
+.toc-sub{margin:6px 0 -2px;font-size:13px;font-weight:700;color:var(--navy);border-left:4px solid var(--navy);padding-left:8px}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -817,6 +1182,7 @@ body.paper .stage .ctrl{right:152px}
       <div class="labels" id="labels"></div>
       <div class="chips" id="chips"></div>
       <div class="thbox" id="throwBox" hidden></div>
+      <div class="xbox" id="xBox" hidden></div><canvas class="xchart" id="xChart" hidden></canvas>
       <div class="thadj" id="throwAdj" hidden><button type="button" data-d="-3" aria-label="더 뒤에서(일찍) 놓기">◀ 뒤</button><span id="thAdjV"></span><button type="button" data-d="3" aria-label="더 앞에서(늦게) 놓기">앞 ▶</button></div>
       <div class="aimbox" id="aimbox" hidden><b>과녁에 맞은 자리</b><svg viewBox="-1.08 -1.08 2.16 2.16" aria-hidden="true"><circle r="1" fill="#f1f3f5"/><circle r=".8" fill="#212529"/><circle r=".6" fill="#228be6"/><circle r=".4" fill="#e03131"/><circle r=".2" fill="#fcc419"/><path d="M-1 0H1M0-1V1" stroke="rgba(255,255,255,.35)" stroke-width=".015"/><g id="aimDots"></g></svg><span id="aimTxt"></span></div>
       <div class="mini" id="mini"><button class="mh" id="miniT" type="button" aria-expanded="true">일하는 근육 ▾</button><div class="ml" id="miniL"></div></div>
@@ -895,7 +1261,9 @@ body.paper .stage .ctrl{right:152px}
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 const BOOK3D = /[?&]book3d\b/.test(location.search); // 책상 위 3D 책 버전
-const PAPER = /[?&]paper\b/.test(location.search); // 종이 교과서 버전(세로 한 쪽 · 가로 두 쪽)
+const HYBRID = /[?&]hybrid\b/.test(location.search); // 글로 읽다가 그림을 누르면 장면 화면(3D+글)
+const PAPER = HYBRID || /[?&]paper\b/.test(location.search);
+const READER = HYBRID || /[?&]reader\b/.test(location.search); // 글로 읽는 교과서: 그림을 누르면 3D // 종이 교과서 버전(세로 한 쪽 · 가로 두 쪽)
 
 const D = Math.PI / 180;
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
@@ -929,7 +1297,8 @@ function build(S) {
   const hipC = S.hip, mid = hipC.clone().addScaledVector(dirA(S.low), L.low), neck = mid.clone().addScaledVector(dirA(S.up), L.up);
   const head = neck.clone().addScaledVector(dirA(S.head ?? S.up * .45), .14);
   for (const s of [1, -1]) {
-    const f = S.feet[s], hip = hipC.clone().add(V(s * .1, 0, 0));
+    let f = S.feet[s]; const hip = hipC.clone().add(V(s * .1, 0, 0));
+    { const dl = f.ankle.clone().sub(hip), Lm = L.thigh + L.shank - .004; if (dl.length() > Lm) { const sh = hip.clone().addScaledVector(dl.normalize(), Lm).sub(f.ankle); f = { ...f, ankle: f.ankle.clone().add(sh), toe: f.toe.clone().add(sh), heel: f.heel.clone().add(sh) }; } } // 다리가 닿지 않으면 발을 다리 길이까지만
     let knee = ik(hip, f.ankle, L.thigh, L.shank, S.kneePole[s]);
     if (S.kneePole[s].z > 0 && s * knee.x < KNEE_MIN) { const p0 = S.kneePole[s], p1 = V(s * .3, 0, 1); let lo = 0, hi = 1;
       for (let i = 0; i < 10; i++) { const m = (lo + hi) / 2, kk = ik(hip, f.ankle, L.thigh, L.shank, p0.clone().lerp(p1, m)); if (s * kk.x < KNEE_MIN) lo = m; else { hi = m; knee = kk; } } }
@@ -940,7 +1309,7 @@ function build(S) {
     else if (A.mode === 'hang') { const R = L.uarm + L.farm - .01, dz = clamp(A.z - sh.z, -R, R); wr = sh.clone().add(V(s * -.02, -Math.sqrt(R * R - dz * dz), dz)); el = ik(sh, wr, L.uarm, L.farm, V(s, 0, -1)); }
     else if (A.mode === 'hold') { const tg = neck.clone().addScaledVector(dirA(S.up + 90), A.fwd).addScaledVector(dirA(S.up), -A.drop); P.hold = tg;
       wr = tg.clone().add(V(s * .07, 0, 0)); el = ik(sh, wr, L.uarm, L.farm, V(s * .6, -1, 0)); }
-    else { wr = A.wr[s].clone(); el = ik(sh, wr, L.uarm, L.farm, A.pole[s]); }
+    else { wr = A.wr[s].clone(); const dw = wr.clone().sub(sh), Lm = L.uarm + L.farm - .004; if (dw.length() > Lm) wr = sh.clone().addScaledVector(dw.normalize(), Lm); el = ik(sh, wr, L.uarm, L.farm, A.pole[s]); } // 팔이 닿지 않는 곳이면 손을 팔 길이까지만
     P.side[s] = { ...f, knee, hip, sh, el, wr };
   }
   const kn = P.side[1].knee.clone().add(P.side[-1].knee).multiplyScalar(.5);
@@ -2177,7 +2546,7 @@ const BODYMAP = { name: '몸 지도', sceneLabel: '몸 지도', env: 'gym', cycl
   notes: {} };
 MOVES.body = { name: '몸 지도', tag: '몸으로 찾기', pattern: '근육을 누르면 그 근육을 쓰는 동작', uses: null, scenes: [['base', '기본', BODYMAP]] };
 // ---------- 틀 통일: 움직임마다 기본 · 응용 · 일상에서 · 스포츠에서 ----------
-const FRAME = [['기본', '기본'], ['응용', '응용'], ['일상', '일상에서'], ['스포츠', '스포츠에서']];
+const FRAME = [['기본', '기본'], ['원리', '원리'], ['응용', '응용'], ['일상', '일상에서'], ['스포츠', '스포츠에서']];
 MOVES.pull = { name: '당기기', pattern: '몸 쪽으로 끌어당기기', uses: null,
   scenes: [['base', '기본', ROW], ['a_stance', '스포츠', AR_STANCE], ['a_draw', '스포츠', AR_DRAW], ['a_anchor', '스포츠', AR_ANCHOR], ['a_release', '스포츠', AR_RELEASE], ['a_aim', '스포츠', AR_AIM]] };
 MOVES.squat.scenes.push(['thruster', '응용', THRUSTER], ['wallball', '응용', WALLBALL], ['boxjump', '응용', BOXJUMP]);
@@ -2231,7 +2600,207 @@ const TH_CHAIN = { ...TH_BASE, name: '온몸으로 던지기', sceneLabel: '야�
     arm: { short: '팔로만', name: '팔로만 밀어 던지기', danger: [['shoulder', [1]]], desc: '팔꿈치가 어깨보다 낮게 처진 채 팔뚝만 펴서 공을 밀어 던져요.',
       why: '작은 팔 근육만 쓰니 공이 가장 느려요. 느린 공은 금방 떨어져서 미트까지 못 가요. 또 팔꿈치가 처진 채 세게 던지려고 하면 어깨와 팔꿈치 안쪽에 무리가 가요.', fix: ['팔꿈치를 어깨 높이까지 들기', '어깨를 돌려 팔꿈치가 먼저 나오게', '앞발을 내딛고 허리 돌리기'], p: t => ({ t, a: 0, mode: 'arm', v: 11 }) },
   } };
-MOVES.throw = { name: '던지기', pattern: '공을 놓는 타점과 온몸의 힘', uses: null, scenes: [['base', '기본', TH_REL], ['chain', '스포츠', TH_CHAIN]] };
+
+// ---------- 던지기 단원: 사람이 필요한 장면은 사람, 원리는 공·궤적·회전판·그래프 ----------
+const TH_BASIC = { ...TH_BASE, name: '바른 던지기 자세', sceneLabel: '바른 던지기 자세', props: [], throwing: false, cam: { y: 1.05, z: .25, dist: 3.6 }, defaultView: 'side', badLabel: '다치기 쉬운 자세',
+  variants: {
+    good: { name: '온몸으로 던지기', desc: '목표와 옆으로 서서, 앞발을 크게 내딛고 허리와 몸통을 먼저 돌려요. 팔꿈치는 어깨 높이로 따라오고, 손이 머리 위를 지날 때 공을 놓아요. 던진 뒤에는 몸이 앞으로 자연스럽게 따라가요.',
+      checks: ['목표와 옆으로 서기', '앞발을 목표 쪽으로 크게 내딛기', '허리·몸통이 먼저, 팔은 나중에', '팔꿈치는 어깨 높이', '던진 뒤 몸이 따라가기'], p: t => ({ t, a: thFit(23, 'full'), mode: 'full', v: 23 }) },
+    arm: { name: '팔로만 밀어 던지기', danger: [['shoulder', [1]]], desc: '발을 내딛지 않고, 팔꿈치가 어깨보다 낮게 처진 채 팔뚝만 펴서 공을 밀어 던져요.',
+      why: '큰 근육(다리·허리·몸통)을 쓰지 않아 공이 느리고, 작은 팔 근육이 혼자 버텨요. 팔꿈치가 처진 채 세게 던지면 어깨와 팔꿈치 안쪽에 무리가 가서 다치기 쉬워요.', fix: ['앞발을 내딛고 허리부터 돌리기', '팔꿈치를 어깨 높이까지 들기', '처음에는 가까운 거리에서 가볍게'], p: t => ({ t, a: 0, mode: 'arm', v: 11 }) },
+  } };
+TH_REL.name = '어디서 놓느냐'; TH_REL.sceneLabel = '어디서 놓느냐: 머리 뒤·머리 위·눈앞'; TH_CHAIN.sceneLabel = '야구: 투수의 온몸 던지기';
+const XC = { ball: 0xff6a1a, vx: 0x2463c4, grav: 0xd6336c, good: 0x2f8a4e, chalk: 0xffffff, muted: 0x8a96a3, ink: 0x14284b, line: 0xc9d2da };
+const XCS = { ball: '#ff6a1a', vx: '#2463c4', grav: '#d6336c', good: '#2f8a4e', muted: '#6b7785', ink: '#14284b', line: '#d3dbe2', surface: '#ffffff' };
+const XS = {};
+function xFlight(v, a, h0, zMax = 1e9) { const vz = v * Math.cos(a * D), vy = v * Math.sin(a * D), pts = []; let T = 0, end = 'ground';
+  for (let t = 0; t < 8; t += .01) { const z = vz * t, y = h0 + vy * t - .5 * 9.8 * t * t; if (z >= zMax) { const tt = zMax / vz; pts.push(V(0, h0 + vy * tt - 4.9 * tt * tt, zMax)); T = tt; end = 'target'; break; } if (y <= 0 && t > 0) { pts.push(V(0, 0, z)); T = t; break; } pts.push(V(0, y, z)); T = t; }
+  const last = pts[pts.length - 1]; return { pts, T, vz, vy, h0, end, at: t => V(0, h0 + vy * t - 4.9 * t * t, vz * t), top: h0 + Math.max(0, vy) ** 2 / 19.6, dist: last.z, endY: last.y }; }
+const XNEU = { neutral: true, noFig: true, noGhost: true, noLabel: true, muscles: [], readouts: [], act: () => ({}), spec: q => ({ ...standK(), q }), cycle: 'loop' };
+const xFieldCam = (zc, yc, w) => ({ x: 0, y: yc, z: zc, dist: 14, fitW: w, dirs: { side: V(-1, .2, .03), diag: V(-.75, .35, -.45), front: V(-.3, .3, 1), back: V(-.2, .3, -1) } });
+const xTopCam = (d, y = 0, z = 0) => ({ x: 0, y, z, dist: d, dirs: { side: V(-.15, 1, .9), diag: V(-.7, 1, .8), front: V(0, 1, .95), back: V(0, 1, -.95) } });
+const XA1 = { ...XNEU, name: '공은 어떻게 날아갈까', sceneLabel: '공은 어떻게 날아갈까 (포물선)', env: 'field', props: ['xa1'], period: 4.2, range: ['던짐', '떨어짐'], cam: xFieldCam(12, 3.5, 27), defaultView: 'side', xkey: 'a1',
+  variants: {
+    grav: { name: '중력이 있을 때', desc: '손을 떠난 공에는 "던진 방향으로 가려는 움직임"과 "아래로 당기는 중력"만 남아요. 흐린 공은 0.1초마다 남긴 공의 자리예요. 앞뒤 간격은 늘 같고(파란 화살표), 위로 가던 움직임은 점점 줄다가 아래로 바뀌어요(분홍 화살표). 두 움직임이 합쳐진 길이 포물선이에요.',
+      checks: ['앞으로 가는 빠르기는 그대로', '위아래 빠르기만 중력 때문에 바뀜', '그래프: 거리는 곧은 선, 높이는 산 모양'], p: t => ({ t }) },
+    nograv: { name: '중력이 없다면?', desc: '중력이 없다면 공은 던진 방향으로 곧게 날아가요. 우리가 보는 포물선은 중력이 공을 계속 아래로 당겨서 생긴 거예요.', checks: ['두 길을 비교해 보기'], p: t => ({ t }) },
+  } };
+const XA2 = { ...XNEU, name: '발사각과 거리', sceneLabel: '발사각과 거리', env: 'field', props: ['xa2'], period: 4.4, range: ['던짐', '떨어짐'], cam: xFieldCam(14, 4.5, 32), defaultView: 'side', xkey: 'a2',
+  variants: Object.fromEntries([15, 30, 45, 60, 75].map(a => ['a' + a, { name: `발사각 ${a}°`, desc: a === 45 ? '같은 빠르기라면 45° 근처에서 가장 멀리 가요. 너무 낮으면 금방 땅에 닿고, 너무 높으면 높이만 올라가요.' : a < 45 ? `${a}°는 낮게 날아가요. 빨리 도착하지만 멀리 가지는 못해요. 포수에게 빠르게 보낼 때는 이렇게 낮게 던져요.` : `${a}°는 높이 떠요. 오래 날지만 앞으로는 덜 가요.${a === 60 ? ' 30°와 떨어지는 곳이 같아요.' : ''}`,
+    checks: ['흐린 선: 다른 각도의 공의 길', '그래프: 발사각–거리, 산꼭대기가 45°'], p: t => ({ t, a }) }])) };
+const XB1 = { ...XNEU, name: '돌 때는 바깥쪽이 빨라요', sceneLabel: '돌 때는 바깥쪽이 빨라요 (회전)', env: 'gym', props: ['xb1'], period: 4, range: ['', ''], cam: xTopCam(7.5), defaultView: 'side', xkey: 'b1',
+  variants: { w3: { name: '천천히 돌기', desc: '회전판 위 세 공은 한 바퀴 도는 시간이 같아요. 그런데 바깥쪽 공은 같은 시간에 더 긴 원을 돌아서 더 빨라요.', checks: ['손끝 빠르기 = 몸에서 떨어진 거리 × 도는 빠르기'], p: t => ({ t, w: 3 }) },
+    w6: { name: '빨리 돌기', desc: '더 빨리 돌면 세 공 모두 빨라지고, 바깥쪽 공은 가장 많이 빨라져요. 그래서 팔을 뻗어 빠르게 돌리면 손끝의 공이 빨라요.', checks: ['팔을 뻗을수록, 빨리 돌릴수록 공이 빨라요'], p: t => ({ t, w: 6 }) } } };
+const XCHAIN = [['다리·허리', 0x7a8b99, '#7a8b99', 1.1], ['몸통·어깨', 0x2463c4, '#2463c4', 1], ['위팔', 0xc2410c, '#c2410c', .8], ['아래팔·손', 0xff6a1a, '#ff6a1a', .75]];
+const XMODES = { seq: { peaks: [.18, .3, .41, .5], amp: [.35, .55, .8, 1], tip: 31 }, all: { peaks: [.36, .36, .36, .36], amp: [.42, .45, .5, .55], tip: 20 }, arm: { peaks: [9, 9, .38, .45], amp: [0, 0, .5, .6], tip: 13 } };
+const XB2 = { ...XNEU, name: '채찍처럼 차례로', sceneLabel: '채찍처럼 차례로 (운동 사슬)', env: 'gym', props: ['xb2'], period: 3.4, range: ['시작', '던짐'], cam: xTopCam(9.5, -.2, .5), defaultView: 'side', xkey: 'b2',
+  variants: { seq: { name: '차례로 (채찍처럼)', desc: '채찍 손잡이를 휘두르면 끝이 가장 빨라지는 것처럼, 먼저 돈 부위가 멈추면서 다음 부위에 힘을 넘겨요. 그래서 끝(손)으로 갈수록 빨라져요. 사람 몸에서는 다리·허리 → 몸통·어깨 → 위팔 → 아래팔·손 순서예요. 스포츠 › 야구에서 사람 몸으로 확인해 보세요.', checks: ['그래프: 가장 빨리 도는 순간이 차례로 와요', '숫자는 원리를 보여 주는 예시예요'], p: t => ({ t, m: 'seq' }) },
+    all: { name: '한꺼번에 돌리기', desc: '모든 부위를 한꺼번에 돌리면 넘겨받는 힘이 없어서 손끝이 덜 빨라요.', checks: ['그래프의 봉우리가 한곳에 모여요'], p: t => ({ t, m: 'all' }) },
+    arm: { name: '팔로만', desc: '다리와 몸통을 쓰지 않고 팔만 돌리면 손끝이 가장 느려요.', checks: ['큰 부위(다리·몸통)가 빠졌어요'], p: t => ({ t, m: 'arm' }) } } };
+const XB3 = { ...XNEU, name: '빠른 공은 덜 떨어져요', sceneLabel: '빠른 공은 덜 떨어져요', env: 'field', props: ['xb3'], period: 4.4, range: ['던짐', '도착'], cam: xFieldCam(9.5, 1.2, 22), defaultView: 'side', xkey: 'b3',
+  variants: { cmp: { name: '느린 공과 빠른 공', desc: '두 공을 같은 높이에서 수평으로 던졌어요. 느린 공(47km/h)은 18.44m를 가는 동안 오래 날아서 많이 떨어지고 홈플레이트에 못 가요. 빠른 공(115km/h)은 조금만 떨어져서 거의 직선처럼 가요. 몸을 차례로 써서 공이 빨라지면 이렇게 곧게 보낼 수 있어요.', checks: ['빠를수록 날아가는 시간이 짧아요', '시간이 짧으면 중력이 끌어내리는 양도 적어요'], p: t => ({ t }) } } };
+MOVES.throw = { name: '던지기', pattern: '공을 놓는 곳과 온몸의 힘', uses: null,
+  scenes: [['base', '기본', TH_BASIC], ['x1', '원리', XA1], ['x2', '원리', XA2], ['x3', '원리', TH_REL], ['x4', '원리', XB1], ['x5', '원리', XB2], ['x6', '원리', XB3], ['chain', '스포츠', TH_CHAIN]],
+  quiz: [['공이 자꾸 포수 머리 위로 높이 날아가요. 무엇을 바꿔야 할까요?', ['공을 조금 더 앞(머리 위)에서 놓는다', '공을 더 일찍(머리 뒤에서) 놓는다', '더 세게만 던진다'], 0, '머리 뒤에서 놓으면 손이 위로 가는 중이라 공이 떠요. 머리 위에서 놓으면 발사각이 낮아져요.'],
+    ['같은 힘으로 가장 멀리 던지려면 발사각은?', ['45° 근처', '10°', '80°'], 0, '너무 낮으면 금방 떨어지고, 너무 높으면 높이만 올라가요.'],
+    ['손끝(공)을 더 빠르게 하려면?', ['팔을 뻗고 다리·허리부터 차례로 돌린다', '팔을 몸에 붙이고 팔만 돌린다', '모든 부위를 한꺼번에 멈춘다'], 0, '바깥쪽일수록 빠르고, 큰 부위부터 차례로 돌면 채찍처럼 끝이 빨라져요.'],
+    ['팔로만 던진 느린 공이 포수에게 못 가는 까닭은?', ['날아가는 시간이 길어 중력이 오래 끌어내려서', '공이 무거워져서', '바람이 없어서'], 0, '느린 공은 같은 거리를 가는 데 오래 걸려요. 그동안 중력이 계속 당겨요.']] };
+
+
+// ---------- 학교에서 맨몸으로: 카프 레이즈 · 경사 푸시업 · 파이크 푸시업 · 숄더 탭 · 베어 크롤 · 윗몸 말아올리기 ----------
+const CALF = { name: '카프 레이즈', sceneLabel: '카프 레이즈', env: 'gym', range: ['서기', '발뒤꿈치 들기'], cam: { y: .7, z: 0, dist: 3.4 }, defaultView: 'side',
+  muscles: ['calf', 'quad', 'glute', 'abs'],
+  variants: {
+    good: { name: '엄지발가락 쪽으로 곧게', desc: '발을 골반 너비로 벌리고 서서, 발뒤꿈치를 천천히 최대한 높이 들었다가 천천히 내려요. 몸무게는 엄지발가락과 둘째 발가락 쪽에 실어요. 종아리 근육이 일하고, 달리기와 점프에서 바닥을 박차는 힘이 돼요.',
+      checks: ['몸무게는 엄지발가락 쪽에', '발목이 바깥으로 꺾이지 않게', '위에서 1초 멈추기', '내릴 때도 천천히'], p: t => ({ t, roll: 0 }) },
+    roll: { name: '발목이 바깥으로 꺾임', danger: [['ankle', [1, -1]]], view: 'front', desc: '발뒤꿈치를 들 때 몸무게가 새끼발가락 쪽으로 쏠리면서 발목이 바깥으로 꺾여요.',
+      why: '발목이 바깥으로 꺾인 채 몸무게를 실으면 발목 바깥쪽 인대가 늘어나요. 운동하다 가장 흔히 다치는 발목 염좌가 이렇게 생겨요.', fix: ['엄지발가락으로 바닥을 누르기', '처음에는 벽을 짚고 하기', '높이보다 곧게 드는 것이 먼저'], p: t => ({ t, roll: 1 }) },
+  },
+  spec(q) { const t = q.t, heel = 38 * t, feet = sym(s => { const f = footStand(s * .12, 0, heel, s); const r = .045 * q.roll * t; f.ankle.x += s * r; f.heel.x += s * r * 1.4; f.toe.x -= s * r * .3; return f; });
+    return { feet, hip: chainUp(feet[1].ankle, 0, 0), low: 0, up: 0, head: 0, kneePole: sym(s => V(s * .15, 0, 1)), arms: { mode: 'angle', flex: 6, abd: 8, elbow: 6 }, q }; },
+  act(v, P, t) { return { calf: .2 + .75 * t, quad: .2, glute: .15, abs: .25 }; },
+  readouts: [['발뒤꿈치 높이', P => Math.max(0, (P.side[1].heel.y - .03) * 100), ' cm']],
+  notes: { calf: { good: '발뒤꿈치를 들 때 종아리 근육(비복근·가자미근)이 짧아지며 일해요.', roll: '종아리는 일하지만 발목이 꺾여서 다치기 쉬워요.' } } };
+
+function incline(ySh, sag, handY, handZ, ankZ) { const ank = V(0, .13, ankZ), Lb = 1.38, b = Math.asin(clamp((ySh - ank.y) / Lb, -1, 1)), dB = V(0, Math.sin(b), Math.cos(b));
+  const neckT = ank.clone().addScaledVector(dB, Lb + .05), hip = ank.clone().addScaledVector(dB, L.shank + L.thigh).add(V(0, -.11 * sag, 0)), tv = neckT.clone().sub(hip), ang = Math.atan2(tv.z, tv.y) / D;
+  return { feet: sym(s => ({ toe: V(s * .11, .02, ankZ + .09), ankle: V(s * .1, .13, ankZ), heel: V(s * .1, .18, ankZ - .03) })), hip, low: ang - 9 * sag, up: ang + 6 * sag, head: ang - 20, kneePole: sym(() => V(0, -1, 0)),
+    arms: { mode: 'ik', wr: sym(s => V(s * .2, handY, handZ)), pole: sym(s => V(s * .45, .5, -1)) } }; }
+const INCLINE = { name: '경사 푸시업', sceneLabel: '경사 푸시업', env: 'gym', props: ['jbox'], range: ['위', '아래'], cam: { y: .55, z: 0, dist: 3.3 }, defaultView: 'side',
+  muscles: ['chest', 'tri', 'delt', 'abs', 'glute'],
+  variants: {
+    good: { name: '손은 뜀틀에, 몸은 일직선', desc: '뜀틀이나 튼튼한 의자에 손을 어깨너비로 짚고 발을 뒤로 빼요. 몸이 비스듬히 서 있어서 바닥 푸시업보다 쉬워요. 바닥 푸시업이 아직 어려운 학생이 바른 자세를 먼저 익히는 단계예요.',
+      checks: ['손은 어깨너비로 뜀틀 가장자리에', '머리부터 발뒤꿈치까지 일직선', '가슴이 뜀틀 가장자리에 닿을 만큼 내려가기', '뜀틀이 밀리지 않게 벽에 붙여 두기'], p: t => ({ t, sag: 0 }) },
+    sag: { name: '허리가 처짐', danger: [['back', [0]]], desc: '배에 힘이 빠져 엉덩이가 아래로 처져요.', why: '쉬운 단계라도 허리가 처지면 허리 뒤쪽이 눌려요. 여기서 몸을 일직선으로 버티는 힘을 길러야 바닥 푸시업으로 넘어갈 수 있어요.', fix: ['배와 엉덩이에 힘 주기', '발을 조금 앞으로 당겨 더 쉽게'], p: t => ({ t, sag: 1 }) },
+  },
+  spec(q) { return { ...incline(.97 - .3 * q.t, q.sag, .43, .56, -.52), q }; },
+  act(v, P, t) { const A = { chest: .25 + .5 * t, tri: .25 + .5 * t, delt: .25 + .35 * t, abs: .4, glute: .25 }; if (v === 'sag') { A.abs = .15; A.glute = .1; A.erector = .35; } return A; },
+  readouts: [['팔꿈치', elbowOf(1)], ['몸 일직선', lineOf]],
+  notes: { chest: { good: '몸이 비스듬해서 바닥 푸시업보다 들어 올리는 몸무게가 적어요. 벽 → 뜀틀 → 무릎 → 바닥 순서로 단계를 올려요.' } } };
+
+const PIKEPU = { name: '파이크 푸시업', sceneLabel: '파이크 푸시업', env: 'gym', range: ['위', '아래'], cam: { y: .45, z: 0, dist: 3.2 }, defaultView: 'side',
+  muscles: ['delt', 'tri', 'chest', 'abs', 'ham'],
+  variants: {
+    good: { name: '엉덩이를 높이, 머리는 손 앞으로', desc: '엉덩이를 높이 들어 몸을 ㅅ자로 만들고, 팔꿈치를 굽혀 머리를 두 손 앞 바닥 쪽으로 내려요. 몸무게가 어깨 위로 실려서 어깨(삼각근)를 키우는 푸시업이에요.',
+      checks: ['엉덩이는 높이, 다리는 쭉', '머리는 두 손 앞쪽으로', '팔꿈치는 뒤쪽으로 굽히기', '정수리가 바닥에 닿기 전에 멈추기'], p: t => ({ t, flare: 0 }) },
+    flare: { name: '팔꿈치가 옆으로 벌어짐', danger: [['shoulder', [1, -1]]], view: 'front', desc: '팔꿈치가 옆으로 활짝 벌어진 채 내려가요.', why: '몸무게가 어깨 위에 바로 실리는 동작이라, 팔꿈치가 벌어지면 어깨 관절이 끼이는 힘을 크게 받아요.', fix: ['팔꿈치를 뒤쪽으로', '손을 어깨너비로', '어려우면 무릎을 굽혀 엉덩이 낮추기'], p: t => ({ t, flare: 1 }) },
+  },
+  spec(q) { const t = q.t, hip = V(0, .95 - .1 * t, -.2 + .15 * t), ang = 150 + 5 * t;
+    const feet = sym(s => ({ toe: V(s * .11, .02, -.39), ankle: V(s * .1, .13, -.48), heel: V(s * .1, .17, -.51) }));
+    return { feet, hip, low: ang, up: ang, head: ang + 8, kneePole: sym(() => V(0, 0, -1)),
+      arms: { mode: 'ik', wr: sym(s => V(s * (.2 + .06 * q.flare), .035, .25)), pole: sym(s => q.flare ? V(s * 1.5, .5, 0) : V(s * .35, .3, -1)) }, q }; },
+  act(v, P, t) { const A = { delt: .35 + .6 * t, tri: .3 + .55 * t, chest: .2 + .25 * t, abs: .4, ham: .25 }; if (v === 'flare') A.delt = .4 + .6 * t; return A; },
+  readouts: [['팔꿈치', elbowOf(1)], ['머리 높이', P => P.head.y * 100, ' cm']],
+  notes: { delt: { good: '몸무게가 어깨 바로 위에 실려서 삼각근이 가장 많이 일해요. 기본 푸시업과 숫자를 비교해 보세요.', flare: '팔꿈치가 벌어지면 어깨 관절 앞쪽에 부담이 몰려요.' } } };
+
+const TAP = { name: '숄더 탭', sceneLabel: '숄더 탭', env: 'gym', cycle: 'loop', period: 2.6, range: ['오른손', '왼손'], cam: { y: .35, z: -.1, dist: 3.1 }, defaultView: 'diag',
+  muscles: ['abs', 'delt', 'chest', 'tri', 'glute'],
+  variants: {
+    good: { name: '엉덩이는 그대로, 손만', desc: '팔을 편 플랭크(푸시업 위 자세)에서 한 손씩 번갈아 반대쪽 어깨를 톡 쳐요. 손이 떨어지는 순간 몸이 돌아가려고 하는데, 배에 힘을 줘서 엉덩이가 흔들리지 않게 버텨요.',
+      checks: ['발은 어깨보다 조금 넓게', '엉덩이는 좌우로 흔들리지 않게', '천천히 번갈아 치기', '몸은 머리부터 발까지 일직선'], p: t => ({ t, sway: 0 }) },
+    sway: { name: '엉덩이가 좌우로 흔들림', desc: '손을 들 때마다 엉덩이가 손을 든 쪽으로 크게 흔들려요.', why: '다치는 자세는 아니지만, 엉덩이가 흔들리면 복부가 버티는 일을 놓쳐서 운동 효과가 줄어요. 숄더 탭의 목표는 "흔들리지 않기"예요.', fix: ['발을 더 넓게 벌리기', '더 천천히 치기', '배와 엉덩이에 힘 주기'], p: t => ({ t, sway: 1 }) },
+  },
+  spec(q) { const B = plank(.58, 0, 0), ph = q.t < .5 ? 1 : -1, k = Math.sin(Math.PI * ((q.t * 2) % 1)), hip = B.hip.clone(); hip.x = ph * .09 * q.sway * k;
+    const sh = B.sh, wr = sym(s => s === ph ? V(s * .19, .035, .34).lerp(V(-s * .14, sh.y - .02, sh.z - .02), k) : V(s * .19, .035, .34));
+    return { feet: sym(s => ({ toe: V(s * (.2 - .08 * q.sway), .02, -.9), ankle: V(s * (.19 - .08 * q.sway), .13, -.99), heel: V(s * (.19 - .08 * q.sway), .18, -1.02) })), hip, low: B.ang, up: B.ang, head: B.ang - 25, kneePole: sym(() => V(0, -1, 0)),
+      arms: { mode: 'ik', wr, pole: sym(s => V(s * .6, .4, -1)) }, q, k }; },
+  act(v, P) { const k = P.q.k ?? 0; return v === 'sway' ? { abs: .35, delt: .5 + .2 * k, chest: .3, tri: .35, glute: .2 } : { abs: .55 + .3 * k, delt: .5 + .25 * k, chest: .3, tri: .35, glute: .4 }; },
+  readouts: [['엉덩이 흔들림', P => Math.abs(P.hipC.x) * 100, ' cm']],
+  notes: { abs: { good: '한 손이 떨어지면 몸이 그쪽으로 돌아가려고 해요. 복부가 그걸 막느라 손을 들 때마다 더 세게 일해요.', sway: '엉덩이가 흔들리면 복부가 버티지 않고 몸이 돌아간 거예요.' } } };
+
+const BEAR = { name: '베어 크롤', sceneLabel: '베어 크롤', env: 'gym', cycle: 'loop', period: 1.8, range: ['한 걸음', '한 걸음'], cam: { y: .35, z: 0, dist: 3.1 }, defaultView: 'diag',
+  muscles: ['abs', 'delt', 'quad', 'glute', 'tri'],
+  variants: {
+    good: { name: '무릎은 바닥 바로 위, 등은 평평하게', desc: '네 발 자세에서 무릎을 바닥에서 한 뼘쯤 띄우고, 오른손과 왼발, 왼손과 오른발을 같이 움직이며 곰처럼 기어가요. 등 위에 물컵이 있다고 생각하고 등을 평평하게 지켜요.',
+      checks: ['무릎은 바닥에서 한 뼘', '등은 책상처럼 평평하게', '반대쪽 손과 발을 같이', '작은 걸음으로 천천히'], p: t => ({ t, high: 0 }) },
+    high: { name: '엉덩이가 높이 들림', desc: '다리를 쭉 펴서 엉덩이가 높이 솟은 채 기어가요.', why: '다치는 자세는 아니지만, 엉덩이가 들리면 몸무게가 팔로 쏠리고 복부가 버티는 일을 덜 해요. 무릎이 바닥 가까이 있어야 몸통 운동이 돼요.', fix: ['무릎을 굽혀 바닥 가까이', '엉덩이를 어깨 높이로', '걸음을 작게'], p: t => ({ t, high: 1 }) },
+  },
+  spec(q) { const ph = 2 * Math.PI * q.t, hi = q.high, hip = V(0, .55 + .3 * hi, -.27 + .1 * hi), N = V(0, .58, .3), tv = N.clone().sub(hip), ang = Math.atan2(tv.z, tv.y) / D;
+    const st = s => .09 * Math.sin(ph + (s > 0 ? 0 : Math.PI)), lf = s => .05 * Math.max(0, Math.cos(ph + (s > 0 ? 0 : Math.PI)));
+    const feet = sym(s => { const z = -.62 + .1 * hi + st(-s), y = lf(-s); return { toe: V(s * .12, .02 + y, z + .1), ankle: V(s * .11, .13 + y, z), heel: V(s * .11, .18 + y, z - .03) }; });
+    return { feet, hip, low: ang, up: ang, head: ang - 15, kneePole: sym(s => V(s * .15, -1, .4)),
+      arms: { mode: 'ik', wr: sym(s => V(s * .19, .035 + lf(s), .32 + st(s))), pole: sym(s => V(s * .3, -.4, -1)) }, q }; },
+  act(v) { return v === 'high' ? { abs: .3, delt: .65, quad: .35, glute: .25, tri: .45 } : { abs: .65, delt: .55, quad: .55, glute: .35, tri: .4 }; },
+  readouts: [['무릎 높이', P => P.side[1].knee.y * 100, ' cm']],
+  notes: { abs: { good: '무릎을 띄운 채 움직이는 동안 복부가 몸통을 평평하게 잡아 줘요. 움직이는 플랭크예요.', high: '엉덩이를 들면 복부가 쉬고 어깨만 일해요.' }, quad: { good: '무릎을 굽혀 띄우고 있느라 허벅지 앞도 계속 버텨요.' } } };
+
+const CRUNCH = { name: '윗몸 말아올리기', sceneLabel: '윗몸 말아올리기', env: 'gym', range: ['누운 자세', '말아 올리기'], cam: { y: .3, z: .1, dist: 2.9 }, defaultView: 'side',
+  muscles: ['abs', 'erector', 'quad', 'delt'],
+  variants: {
+    good: { name: '배꼽을 보며 등을 둥글게', desc: '누워서 무릎을 세우고 발바닥을 바닥에 붙여요. 배에 힘을 주며 머리와 어깨, 등 윗부분을 둥글게 말아 올려 손끝이 무릎 쪽으로 미끄러지게 해요. 학교 체력 평가(PAPS)의 윗몸 말아올리기와 같은 동작이에요.',
+      checks: ['무릎은 세우고 발바닥은 바닥에', '턱과 가슴 사이에 주먹 하나', '배꼽을 보며 등을 둥글게 말기', '허리는 바닥에 붙인 채'], p: t => ({ t, neck: 0 }) },
+    neck: { name: '손으로 목을 당김', danger: [['neck', [0]]], desc: '깍지 낀 손을 머리 뒤에 대고, 손으로 머리를 끌어당기며 올라와요.', why: '배가 아니라 팔 힘으로 머리를 당기면 목이 앞으로 확 꺾여요. 목이 아프고, 정작 배 근육은 덜 일해요.', fix: ['손은 가슴에 모으거나 허벅지 위로', '턱 아래 주먹 하나 공간 지키기', '배에 힘을 주는 만큼만 올라오기'], p: t => ({ t, neck: 1 }) },
+  },
+  spec(q) { const t = q.t, hip = V(0, .12, 0), feet = sym(s => footStand(s * .12, .5)), up = -90 + 38 * t, low = -86 + 6 * t;
+    const arms = q.neck ? { mode: 'ik', wr: sym(s => V(s * .04, .02, 0)), pole: sym(s => V(s, .3, 0)) } : { mode: 'angle', flex: [8 + 40 * t, 8 + 40 * t], abd: 6, elbow: 0 };
+    const S = { feet, hip, low, up, head: q.neck ? up + 30 + 40 * t : up + 20 * t, kneePole: sym(s => V(s * .1, 1, .3)), arms, q };
+    if (q.neck) { const B = build({ ...S, arms: { mode: 'angle', flex: 0, abd: 0, elbow: 0 } }); S.arms = { mode: 'ik', wr: sym(s => B.head.clone().add(V(s * .07, -.05, -.06))), pole: sym(s => V(s, .5, .3)) }; }
+    return S; },
+  act(v, P, t) { return v === 'neck' ? { abs: .2 + .35 * t, erector: .1, quad: .15, delt: .35 } : { abs: .25 + .7 * t, erector: .1, quad: .15, delt: .15 }; },
+  readouts: [['어깨 들린 높이', P => Math.max(0, (P.neck.y - .14) * 100), ' cm']],
+  notes: { abs: { good: '등을 둥글게 말아 올릴 때 복직근이 짧아지며 일해요. 플랭크(버티기)와 다른, 몸통을 "말아 올리는" 힘이에요.', neck: '팔로 머리를 당기면 배 근육 숫자가 절반쯤으로 떨어져요.' } } };
+
+MOVES.squat.scenes.push(['calf', '응용', CALF]);
+MOVES.pushup.scenes.push(['incline', '응용', INCLINE], ['pike', '응용', PIKEPU]);
+MOVES.plank.scenes.push(['crunch', '응용', CRUNCH], ['tap', '응용', TAP], ['bear', '응용', BEAR]);
+// 운동 모음: 몸 부위와 난이도(★)로 고르기
+const EXMAP = { 하체: [['squat:calf', 1], ['squat:base', 2], ['squat:goblet', 2], ['squat:wide', 2], ['squat:wall', 2], ['lunge:base', 2], ['lunge:reverse', 2], ['lunge:side', 2], ['hinge:base', 2], ['squat:jump', 3], ['squat:boxjump', 3], ['lunge:bulgarian', 3], ['hinge:swing', 3]],
+  상체: [['pushup:wallpu', 1], ['pushup:incline', 1], ['pushup:kneepu', 2], ['pull:base', 2], ['pushup:base', 3], ['pushup:diamond', 4], ['pushup:pike', 4], ['pushup:clap', 5]],
+  몸통: [['plank:crunch', 1], ['plank:kneeplank', 1], ['plank:base', 2], ['plank:birddog', 2], ['plank:tap', 2], ['plank:bear', 2], ['plank:carry', 2], ['plank:legraise', 3], ['plank:climber', 3]],
+  전신: [['squat:thruster', 3], ['squat:wallball', 3], ['pushup:burpee', 3], ['lunge:getup', 4]] };
+
+// ---------- 당기기 더하기: 덤벨 컬 · 로잉 머신 · 조정 ----------
+const CURL = { name: '덤벨 컬', sceneLabel: '덤벨 컬', env: 'gym', range: ['팔 펴기', '팔 굽히기'], cam: { y: .95, z: 0, dist: 3.6 }, defaultView: 'side',
+  muscles: ['bi', 'delt', 'abs', 'erector'],
+  variants: {
+    good: { name: '팔꿈치는 옆구리에 고정', desc: '덤벨을 들고 바르게 서서, 팔꿈치를 옆구리에 붙인 채 아래팔만 굽혀 덤벨을 어깨 쪽으로 끌어올려요. 천천히 내려요. 팔 앞쪽 근육(이두근)이 당기는 힘을 기르는 가장 쉬운 당기기 운동이에요.',
+      checks: ['팔꿈치는 옆구리에 붙인 채', '몸통은 흔들지 않기', '올릴 때 2초, 내릴 때 2초', '손목은 곧게'], p: t => ({ t, swing: 0 }) },
+    swing: { name: '몸을 뒤로 젖혀 반동', danger: [['back', [0]]], desc: '무거운 덤벨을 올리려고 허리를 뒤로 젖히며 반동을 써요.',
+      why: '반동을 쓰면 이두근 대신 허리가 덤벨을 던져 올려요. 허리가 뒤로 꺾이며 다치기 쉽고 팔 운동 효과도 줄어요.', fix: ['덤벨 무게를 줄이기', '배에 힘을 주고 몸통 고정', '팔꿈치를 앞으로 내밀지 않기'], p: t => ({ t, swing: 1 }) },
+  },
+  spec(q) { const t = q.t, S = standK(), lean = -16 * q.swing * ss(.2, .7, t); S.low = lean * .4; S.up = lean; S.head = 0; S.dumb = 6;
+    S.arms = { mode: 'angle', flex: 3 + 28 * q.swing * ss(.3, .8, t), abd: 7, elbow: 135 * t }; return { ...S, q }; },
+  act: (v, P, t) => v === 'swing' ? { bi: .4 + .4 * t, delt: .35, abs: .2, erector: .45 + .35 * t } : { bi: .3 + .65 * t, delt: .2, abs: .35, erector: .2 },
+  readouts: [['팔꿈치', P => ang3(P.side[1].sh, P.side[1].el, P.side[1].wr)]],
+  notes: { bi: { good: '팔꿈치를 굽히며 덤벨을 끌어올릴 때 이두근이 짧아지며 일해요. 당기기 동작의 마지막을 맡는 근육이에요.' }, erector: { swing: '허리가 반동을 만드느라 척추세움근에 부담이 몰려요.' } } };
+
+function rowPhase(u, early) { // 로잉: 다리로 밀기 → 몸 젖히기 → 팔로 당기기, 돌아올 때는 거꾸로
+  const leg = u < .45 ? ss(0, .25, u) : 1 - ss(.65, .95, u), lean = u < .45 ? ss(.15, .32, u) : 1 - ss(.55, .72, u),
+    arm = early ? (u < .45 ? ss(0, .22, u) : 1 - ss(.45, .6, u)) : (u < .45 ? ss(.28, .45, u) : 1 - ss(.45, .6, u));
+  return { leg, lean, arm, name: u < .45 ? (u < .25 ? '① 다리로 밀기' : u < .32 ? '② 몸 젖히기' : '③ 팔로 당기기') : '돌아오기 (팔 → 몸 → 다리)' }; }
+function rowSpec(q, y0 = 0) { const P0 = rowPhase(q.t, q.early), zH = -.08 - .44 * P0.leg, lean = 30 - 46 * P0.lean, round = 26 * (q.round || 0) * (1 - P0.lean);
+  const feet = sym(s => ({ ankle: V(s * .11, y0 + .22, .34), toe: V(s * .11, y0 + .34, .44), heel: V(s * .11, y0 + .12, .3) })), hip = V(0, y0 + .4, zH);
+  const shZ = zH + Math.sin(lean * D) * .52, shY = hip.y + Math.cos(lean * D) * .52, reach = V(0, y0 + .62, .78), chest = V(0, shY - .2, shZ + .14);
+  const hand = reach.clone().lerp(chest, P0.arm);
+  return { feet, hip, low: lean - round * .6, up: lean + round, head: lean * .5, kneePole: sym(s => V(s * .15, 1, .25)),
+    arms: { mode: 'ik', wr: sym(s => V(s * .2, hand.y, hand.z)), pole: sym(s => V(s * .8, -.2, -1)) }, q, ph: P0 }; }
+const rowAct = (v, P) => { const { leg, lean, arm } = P.ph, k = P.q.t < .45 ? 1 : .35;
+  return { quad: .2 + .7 * k * (1 - leg * .6), glute: .2 + .6 * k * (leg > .2 && leg < .95 ? 1 : .4), ham: .2 + .4 * k * lean, erector: v === 'round' ? .8 : .3 + .3 * k * lean, abs: .35 + .2 * lean, lat: .15 + .75 * k * arm, bi: .1 + .6 * k * arm, trap: .15 + .6 * k * arm }; };
+const ERG = { name: '로잉 머신', sceneLabel: '로잉 머신 (에르그)', env: 'gym', props: ['erg'], cycle: 'loop', period: 2.8, range: ['시작', '한 번'], cam: { y: .55, z: .05, dist: 4.4 }, defaultView: 'side', dangerShow: () => 1,
+  muscles: ['quad', 'glute', 'lat', 'bi', 'trap', 'erector'],
+  variants: {
+    good: { name: '다리 → 몸 → 팔 순서로', desc: '크로스핏과 조정 선수가 쓰는 로잉 머신이에요. 손잡이를 잡고 ① 다리로 발판을 밀고, ② 몸을 살짝 뒤로 젖히고, ③ 마지막에 팔로 손잡이를 배꼽 쪽으로 당겨요. 돌아올 때는 팔 → 몸 → 다리 순서로 거꾸로 해요. 힘의 대부분은 다리에서 나와요.',
+      checks: ['다리 → 몸 → 팔 순서', '돌아올 때는 팔 → 몸 → 다리', '등은 곧게', '손잡이는 배꼽 높이로'], p: t => ({ t }) },
+    early: { name: '팔부터 당김', desc: '다리를 밀기도 전에 팔부터 손잡이를 당겨요.',
+      why: '다치는 자세는 아니지만, 큰 다리 힘을 쓰지 못하고 작은 팔 근육으로만 당기게 돼서 금방 지쳐요. 다리로 먼저 밀어야 힘이 팔까지 이어져요.', fix: ['팔은 쭉 편 채 다리부터 밀기', '다리를 다 편 뒤에 팔 당기기'], p: t => ({ t, early: 1 }) },
+    round: { name: '등이 굽음', danger: [['back', [0]]], desc: '앞으로 갈 때 등을 둥글게 말아 손잡이를 멀리 잡아요.',
+      why: '굽은 등으로 다리를 세게 밀면 그 힘이 허리로 몰려서 허리를 다치기 쉬워요.', fix: ['가슴을 펴고 엉덩이부터 앞으로', '앞으로는 정강이가 수직이 될 때까지만'], p: t => ({ t, round: 1 }) },
+  },
+  spec: q => rowSpec(q), act: rowAct, readouts: [['단계', P => P.ph.name]],
+  frame: (t, v, P) => { if (!P) return; ERG3.seat.position.set(0, .3, P.hipC.z); const h = P.side[1].wr.clone().add(P.side[-1].wr).multiplyScalar(.5); ERG3.handle.position.copy(h); ERG3.chain.place(h, V(0, .5, .95)); },
+  notes: { quad: { good: '① 다리로 발판을 밀 때 대퇴사두근이 가장 크게 일해요. 다리로 밀고 팔로 당기는, 밀기와 당기기가 합쳐진 운동이에요.' }, lat: { good: '③ 마지막에 팔로 당길 때 등(광배근)과 이두근이 일해요.' } } };
+const BOAT = { ...ERG, name: '조정 (노 젓기)', sceneLabel: '조정·카누: 노 젓기', env: 'pool', props: ['boat'], cam: { y: 1.45, z: 0, dist: 5.2 },
+  variants: { good: { name: '다리로 밀고 팔로 당기기', desc: '조정 선수는 배 안의 미끄러지는 자리에 앉아, 로잉 머신과 똑같이 다리 → 몸 → 팔 순서로 노를 당겨 배를 앞으로 보내요. 노 끝이 물을 뒤로 밀어서 배가 앞으로 나가요.', checks: ['다리 → 몸 → 팔 순서', '노는 물속에서 당기고, 물 밖에서 돌아오기'], p: t => ({ t }) },
+    early: ERG.variants.early },
+  spec: q => rowSpec(q, .92),
+  frame: (t, v, P) => { if (!P) return; BOAT3.seat.position.set(0, 1.22, P.hipC.z); const h = P.side[1].wr.clone().add(P.side[-1].wr).multiplyScalar(.5), u = t, inWater = u < .45;
+    for (const s of [1, -1]) { const o = BOAT3.oars[s], pin = V(s * .75, 1.42, .1), grip = V(s * .12, h.y, h.z); const dir = pin.clone().sub(grip).normalize(), tip = pin.clone().addScaledVector(dir, 1.6); tip.y = inWater ? 1.05 : 1.3; o.place(grip, tip); BOAT3.blades[s].position.copy(tip); } },
+  notes: { quad: { good: '조정의 힘은 대부분 다리에서 나와요. 다리로 밀고 팔로 당겨 마무리해요.' } } };
+MOVES.pull.scenes.splice(1, 0, ['curl', '응용', CURL], ['erg', '응용', ERG], ['boat', '스포츠', BOAT]);
+EXMAP.상체.splice(0, 0, ['pull:curl', 1]); EXMAP.전신.splice(0, 0, ['pull:erg', 2]);
+// 밀기·당기기를 상체(팔)와 하체(다리)로 나누어 보기
+const PUSHPULL = { pushup: { up: '팔로 밀기 (상체)', down: '다리로 밀기 (하체)', downNote: '다리로 바닥을 밀어 몸을 올리는 동작도 밀기예요. 앉았다 일어서기, 한 발로 딛고 일어서기, 점프가 모두 하체 밀기예요.', links: [['squat', 'base'], ['lunge', 'base'], ['squat', 'jump'], ['squat', 'boxjump'], ['pull', 'erg']] },
+  pull: { up: '팔로 당기기 (상체)', down: '엉덩이·다리로 당기기 (하체)', downNote: '바닥의 물건을 엉덩이와 허벅지 뒤 힘으로 끌어올리는 동작이 하체 당기기예요. 숙였다가 엉덩이를 앞으로 밀며 일어서요.', links: [['hinge', 'base'], ['hinge', 'swing']] } };
 let USES_CACHE = null;
 function muscleUses(id) {
   if (!USES_CACHE) { USES_CACHE = [];
@@ -2377,7 +2946,7 @@ const MUSCLES = {
 
 // ---------- 장면 ----------
 const stage = document.getElementById('stage'), canvas = document.getElementById('c');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -2476,6 +3045,24 @@ const DOOR_PIVOT = new THREE.Group(); DOOR_PIVOT.position.set(.5, 0, .62); PROPS
   boxAt(PROPS.bench, .5, .05, .42, 0, .45, -.68, wood);
   for (const [x, z] of [[.21, -.5], [-.21, -.5], [.21, -.86], [-.21, -.86]]) cylAt(PROPS.bench, .015, .43, x, .215, z, leg); }
 for (const k in PROPS) scene.add(PROPS[k]);
+// 로잉 머신과 조정 배
+const ERG3 = (() => { const g = PROPS.erg = new THREE.Group(); g.visible = false; scene.add(g); const dk = std(0x343a40, { metalness: .3 }), lt = std(0xadb5bd, { metalness: .5 });
+  const rail = new THREE.Mesh(new THREE.BoxGeometry(.12, .06, 2.2), lt); rail.position.set(0, .22, -.25); g.add(rail);
+  for (const z of [-1.3, .8]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(.5, .2, .1), dk); leg.position.set(0, .1, z); g.add(leg); }
+  const fw = new THREE.Mesh(new THREE.CylinderGeometry(.3, .3, .2, 32), dk); fw.rotation.z = Math.PI / 2; fw.position.set(0, .5, 1.05); g.add(fw);
+  for (const s of [1, -1]) { const fp = new THREE.Mesh(new THREE.BoxGeometry(.14, .26, .03), dk); fp.position.set(s * .11, .26, .38); fp.rotation.x = -.6; g.add(fp); }
+  const seat = new THREE.Mesh(new THREE.BoxGeometry(.32, .06, .3), std(0x212529)); g.add(seat);
+  const handle = new THREE.Mesh(new THREE.CylinderGeometry(.02, .02, .5, 10), std(0x212529)); handle.rotation.z = Math.PI / 2; g.add(handle);
+  const chain = new THREE.Mesh(new THREE.CylinderGeometry(.006, .006, 1, 6), lt); chain.place = (a, b) => { const d = b.clone().sub(a), L = d.length(); chain.position.copy(a).addScaledVector(d, .5); chain.scale.set(1, L, 1); chain.quaternion.setFromUnitVectors(V(0, 1, 0), d.normalize()); }; g.add(chain);
+  return { seat, handle, chain }; })();
+const BOAT3 = (() => { const g = PROPS.boat = new THREE.Group(); g.visible = false; scene.add(g); const hull = new THREE.Mesh(new THREE.CylinderGeometry(.32, .32, 4.5, 24, 1, false, 0, Math.PI), std(0xf1f3f5, { side: THREE.DoubleSide }));
+  hull.rotation.set(Math.PI / 2, 0, Math.PI); hull.scale.set(1.2, 1, .7); hull.position.set(0, 1.13, -.2); g.add(hull);
+  const seat = new THREE.Mesh(new THREE.BoxGeometry(.3, .05, .28), std(0x495057)); g.add(seat);
+  const oarM = std(0x8d6e63), oars = {}, blades = {};
+  for (const s of [1, -1]) { const rig = new THREE.Mesh(new THREE.CylinderGeometry(.012, .012, .8, 6), std(0xadb5bd)); rig.rotation.z = Math.PI / 2; rig.position.set(s * .4, 1.42, .1); g.add(rig);
+    const o = new THREE.Mesh(new THREE.CylinderGeometry(.018, .018, 1, 8), oarM); o.place = (a, b) => { const d = b.clone().sub(a), L = d.length(); o.position.copy(a).addScaledVector(d, .5); o.scale.set(1, L, 1); o.quaternion.setFromUnitVectors(V(0, 1, 0), d.normalize()); }; g.add(o); oars[s] = o;
+    const bl = new THREE.Mesh(new THREE.BoxGeometry(.04, .14, .38), std(0x1971c2)); g.add(bl); blades[s] = bl; }
+  return { seat, oars, blades }; })();
 // 던지기 장면: 잔디, 포수 미트, 공, 공이 날아간 길
 const TH3 = (() => { const g = PROPS.throwing, DZ = TH.DIST;
   const pl = (w, d, color, y, z) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), std(color, { roughness: 1 })); m.rotation.x = -Math.PI / 2; m.position.set(0, y, z); m.receiveShadow = true; g.add(m); return m; };
@@ -2493,6 +3080,107 @@ const TH3 = (() => { const g = PROPS.throwing, DZ = TH.DIST;
   const tubes = new THREE.Group(); g.add(tubes); const mark = new THREE.Mesh(new THREE.SphereGeometry(.11, 16, 12), new THREE.MeshBasicMaterial({ color: 0xffffff })); g.add(mark);
   return { ball, arrow, ring, tubes, mark, key: '', sims: {} }; })();
 const TH_COL = [0x2f8a4e, 0x1c7ed6, 0xe8590c], TH_CSS = ['#2f8a4e', '#1c7ed6', '#e8590c'];
+
+// ---------- 사람 없이 원리 보기: 3D 물체 ----------
+const xBasic = (c, o = 1) => new THREE.MeshBasicMaterial({ color: c, transparent: o < 1, opacity: o, depthWrite: o === 1 });
+function xBall(c, r = .11) { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 20, 14), std(c, { roughness: .5 })); m.castShadow = true; return m; }
+function xArrow(c, r = .045) { const g = new THREE.Group(), m = std(c), sh = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 1, 10), m), hd = new THREE.Mesh(new THREE.ConeGeometry(r * 2.8, r * 7, 14), m); g.add(sh, hd);
+  g.set = (o, v) => { const L = v.length(); g.visible = L > 1e-3; if (!g.visible) return; const hl = Math.min(r * 7, L * .5); g.position.copy(o); g.quaternion.setFromUnitVectors(V(0, 1, 0), v.clone().normalize()); sh.scale.y = Math.max(.001, L - hl); sh.position.y = (L - hl) / 2; hd.position.y = L - hl / 2; }; return g; }
+function xTube(pts, c, r = .05, o = 1) { const n = Math.max(8, pts.length), m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.length > 1 ? pts : [pts[0], pts[0].clone().add(V(0, 0, .01))]), n, r, 8), xBasic(c, o)); m.userData.tub = n; return m; }
+const xReveal = (m, f) => m.geometry.setDrawRange(0, Math.floor(clamp(f, 0, 1) * m.userData.tub) * 8 * 6);
+function xRod(c, r) { const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 1, 12), std(c)); m.castShadow = true; m.place = (a, b) => { const d = b.clone().sub(a), L = d.length(); m.position.copy(a).addScaledVector(d, .5); m.scale.set(1, Math.max(.001, L), 1); m.quaternion.setFromUnitVectors(V(0, 1, 0), d.normalize()); }; return m; }
+function xField(g, len, wid, step, extra = []) { const grd = new THREE.Mesh(new THREE.PlaneGeometry(wid + 30, len + 30), std(0x4c9a63, { roughness: 1 })); grd.rotation.x = -Math.PI / 2; grd.position.set(0, .004, len / 2); grd.receiveShadow = true; g.add(grd);
+  const labs = []; for (const z of [...Array(Math.floor(len / step) + 1).keys()].map(i => i * step).concat(extra)) { const l = new THREE.Mesh(new THREE.PlaneGeometry(wid, .06), xBasic(XC.chalk, .85)); l.rotation.x = -Math.PI / 2; l.position.set(0, .008, z); g.add(l); labs.push([V(-wid / 2 - .5, 0, z), (Math.round(z * 100) / 100) + 'm']); }
+  return labs; }
+function xZone(g, z) { const lo = .5, hi = 1.2, w = .43, f = new THREE.Mesh(new THREE.PlaneGeometry(w, hi - lo), xBasic(XC.good, .25)); f.position.set(0, (lo + hi) / 2, z); g.add(f);
+  const e = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w, hi - lo, .02)), new THREE.LineBasicMaterial({ color: XC.good })); e.position.copy(f.position); g.add(e);
+  const pl = new THREE.Mesh(new THREE.CircleGeometry(.25, 5), xBasic(XC.chalk)); pl.rotation.x = -Math.PI / 2; pl.position.set(0, .01, z); g.add(pl); }
+for (const k of ['xa1', 'xa2', 'xb1', 'xb2', 'xb3']) { PROPS[k] = new THREE.Group(); PROPS[k].visible = false; scene.add(PROPS[k]); }
+{ // 포물선
+  const g = PROPS.xa1, A = XS.a1 = { labs: xField(g, 25, 5, 5) }, h0 = 1.6; const post = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, h0, 8), xBasic(XC.muted, .7)); post.position.y = h0 / 2; g.add(post);
+  A.ghosts = Array.from({ length: 30 }, () => { const b = xBall(XC.ball, .085); b.material.transparent = true; b.material.opacity = .5; g.add(b); return b; });
+  A.guides = Array.from({ length: 30 }, () => { const l = new THREE.Mesh(new THREE.CylinderGeometry(.012, .012, 1, 6), xBasic(XC.chalk, .5)); g.add(l); return l; });
+  A.b = xBall(XC.ball, .14); A.ax = xArrow(XC.vx); A.ay = xArrow(XC.grav); g.add(A.b, A.ax, A.ay);
+  const v = 15, a = 40; A.Fg = xFlight(v, a, h0); A.Fn = { T: 1.9, at: t => V(0, h0 + v * Math.sin(a * D) * t, v * Math.cos(a * D) * t) };
+  A.pg = xTube(Array.from({ length: 50 }, (_, i) => A.Fg.at(A.Fg.T * i / 49)), XC.ball, .03, .55); A.pn = xTube(Array.from({ length: 50 }, (_, i) => A.Fn.at(A.Fn.T * i / 49)), XC.vx, .03, .55); g.add(A.pg, A.pn); }
+{ // 발사각
+  const g = PROPS.xa2, A = XS.a2 = { labs: xField(g, 30, 7, 5), F: {}, arcs: {}, tubes: {} };
+  for (const a of [15, 30, 45, 60, 75]) { const F = A.F[a] = xFlight(16, a, 0); A.tubes[a] = xTube(F.pts, XC.ball, .07); g.add(A.tubes[a]); const arc = new THREE.Mesh(new THREE.RingGeometry(1.4, 1.52, 32, 1, 0, a * D), xBasic(XC.vx)); arc.rotation.y = -Math.PI / 2; g.add(arc); A.arcs[a] = arc; }
+  A.b = xBall(XC.ball, .2); A.arr = xArrow(XC.vx, .06); A.land = new THREE.Mesh(new THREE.RingGeometry(.35, .5, 32), xBasic(XC.chalk)); A.land.rotation.x = -Math.PI / 2; A.land.position.y = .012; g.add(A.b, A.arr, A.land); }
+{ // 회전판
+  const g = PROPS.xb1, A = XS.b1 = { ang: 0, last: 0 }; A.disk = new THREE.Group(); g.add(A.disk);
+  const plate = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.6, .12, 64), std(0xffffff)); plate.position.y = .06; plate.receiveShadow = true; A.disk.add(plate);
+  for (const r of [.8, 1.6, 2.4]) { const l = new THREE.Mesh(new THREE.TorusGeometry(r, .014, 6, 96), xBasic(XC.muted, .7)); l.rotation.x = Math.PI / 2; l.position.y = .125; A.disk.add(l); }
+  const bar = new THREE.Mesh(new THREE.BoxGeometry(2.5, .06, .1), std(XC.ink)); bar.position.set(1.25, .16, 0); A.disk.add(bar); const post = new THREE.Mesh(new THREE.CylinderGeometry(.12, .12, 1.2, 16), std(XC.ink)); post.position.y = .6; g.add(post);
+  A.rs = [[.8, '몸 가까이', XC.muted, XCS.muted], [1.6, '팔 굽힘', XC.vx, XCS.vx], [2.4, '팔 뻗음', XC.ball, XCS.ball]];
+  A.balls = A.rs.map(([r, , c]) => { const b = xBall(c, r > 2 ? .2 : .15); g.add(b); return b; }); A.arrows = A.rs.map(([, , c]) => { const a = xArrow(c, .04); g.add(a); return a; });
+  A.trails = A.rs.map(([, , c]) => { const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints(Array.from({ length: 40 }, () => V(0, 0, 0))), new THREE.LineBasicMaterial({ color: c, transparent: true, opacity: .8 })); g.add(l); return l; }); }
+{ // 채찍(운동 사슬)
+  const g = PROPS.xb2, A = XS.b2 = { tp: [] }; const post = new THREE.Mesh(new THREE.CylinderGeometry(.14, .18, .9, 16), std(XC.ink)); post.position.y = .45; g.add(post);
+  A.segs = XCHAIN.map(([, c]) => { const r = xRod(c, .11); g.add(r); return r; }); A.joints = XCHAIN.map(([, c]) => { const j = xBall(c, .14); g.add(j); return j; }); A.tip = xBall(XC.ball, .2); g.add(A.tip);
+  A.trail = new THREE.Line(new THREE.BufferGeometry().setFromPoints(Array.from({ length: 50 }, () => V(0, .9, 0))), new THREE.LineBasicMaterial({ color: XC.ball })); g.add(A.trail); }
+{ // 빠른 공 vs 느린 공
+  const g = PROPS.xb3, A = XS.b3 = { labs: xField(g, 20, 4, 6, [18.44]).filter(l => l[1] !== '18m') }; xZone(g, 18.44);
+  const post = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, 1.8, 8), xBasic(XC.muted, .7)); post.position.y = .9; g.add(post);
+  A.set = [[13, '팔로만 47km/h', XC.muted, XCS.muted, -.45], [32, '온몸으로 115km/h', XC.ball, XCS.ball, .45]].map(([v, nm, c, cs, x]) => { const F = xFlight(v, 0, 1.8, 18.44); F.pts.forEach(p => p.x = x); const at = F.at; F.at = t => at(t).setX(x);
+    g.add(xTube(F.pts, c, .02, .5)); const b = xBall(c, .11); g.add(b); const gh = Array.from({ length: 16 }, () => { const m = xBall(c, .08); m.material.transparent = true; m.material.opacity = .5; g.add(m); return m; }); return { v, nm, c, cs, x, F, b, gh }; }); }
+const xGauss = (x, p) => Math.exp(-((x - p) ** 2) / (2 * .045 ** 2)), xErf = x => { const t = 1 / (1 + .3275911 * Math.abs(x)), y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - .284496736) * t + .254829592) * t * Math.exp(-x * x); return x >= 0 ? y : -y; };
+const xCum = (x, p) => .5 * (1 + xErf((x - p) / (.045 * Math.SQRT2)));
+// 매 프레임: 장면마다 움직임 + 읽을거리 + 이름표 + 그래프
+const X_UPDATE = {
+  a1(v, t) { const A = XS.a1, grav = v === 'grav', F = grav ? A.Fg : A.Fn, T = F.T, tt = t * T, sp = 15, an = 40; A.pg.visible = grav; A.pn.visible = !grav; xReveal(grav ? A.pg : A.pn, t);
+    let i = 0; for (let k = 0; k <= tt + 1e-6 && i < 30; k += .1, i++) { const p = F.at(k); A.ghosts[i].visible = true; A.ghosts[i].position.copy(p); A.guides[i].visible = true; A.guides[i].position.set(0, p.y / 2, p.z); A.guides[i].scale.y = Math.max(.001, p.y); }
+    for (; i < 30; i++) { A.ghosts[i].visible = false; A.guides[i].visible = false; }
+    const p = F.at(tt), vz = sp * Math.cos(an * D), vy = sp * Math.sin(an * D) - (grav ? 9.8 * tt : 0), k = .12; A.b.position.copy(p); A.ax.set(p, V(0, 0, vz * k)); A.ay.set(p, V(0, vy * k, 0)); A.tt = tt; A.F = F;
+    return { read: [['시간', tt.toFixed(1) + '초'], ['높이', p.y.toFixed(1) + 'm'], ['거리', p.z.toFixed(1) + 'm']], labels: [...A.labs, [p.clone().add(V(0, .25, vz * k + .3)), '앞으로 (그대로)'], [p.clone().add(V(0, vy * k + (vy >= 0 ? .45 : -.05), 0)), vy >= 0 ? '위로 (점점 느려짐)' : '아래로 (점점 빨라짐)']] }; },
+  a2(v, t) { const A = XS.a2, a = +v.slice(1), F = A.F[a]; for (const k in A.tubes) { const on = +k === a; A.tubes[k].material.color.setHex(on ? XC.ball : XC.muted); A.tubes[k].material.transparent = !on; A.tubes[k].material.opacity = on ? 1 : .35; A.tubes[k].scale.setScalar(1); xReveal(A.tubes[k], on ? t * 1.15 : 1); A.arcs[k].visible = on; }
+    const tt = Math.min(F.T, t * 1.15 * F.T); A.b.position.copy(tt >= F.T ? F.pts[F.pts.length - 1] : F.at(tt)); A.arr.set(V(0, 0, 0), V(0, Math.sin(a * D), Math.cos(a * D)).multiplyScalar(2.6)); A.land.position.z = F.dist; A.land.visible = tt >= F.T; A.a = a;
+    const labs = [...A.labs, [V(0, .6, 1.9), a + '°'], [V(0, F.top + .7, F.pts[Math.floor(F.pts.length / 2)].z), '최고 ' + F.top.toFixed(1) + 'm']]; if (tt >= F.T) labs.push([V(0, .7, F.dist), F.dist.toFixed(1) + 'm']);
+    return { read: [['최고 높이', F.top.toFixed(1) + 'm'], ['날아간 거리', F.dist.toFixed(1) + 'm'], ['걸린 시간', F.T.toFixed(2) + '초']], labels: labs }; },
+  b1(v, t, now) { const A = XS.b1, w = state.def.variants[v].p(0).w, om = w * .32, dt = Math.min(.05, (now - (A.last || now)) / 1000); A.last = now; if (state.playing) A.ang += om * dt; A.disk.rotation.y = -A.ang; A.om = om;
+    const read = [], labels = [[V(0, 1.4, 0), '회전축(몸)']];
+    A.rs.forEach(([r, nm], i) => { const p = V(r * Math.cos(A.ang), .32, r * Math.sin(A.ang)); A.balls[i].position.copy(p); const sp = r * om; A.arrows[i].set(p, V(-Math.sin(A.ang), 0, Math.cos(A.ang)).multiplyScalar(sp * .45));
+      const pos = A.trails[i].geometry.attributes.position; for (let k = 0; k < 40; k++) { const a = A.ang - k * .03; pos.setXYZ(k, r * Math.cos(a), .32, r * Math.sin(a)); } pos.needsUpdate = true; labels.push([p.clone().add(V(0, .45, 0)), nm]); read.push([nm, (sp * 1.4).toFixed(1) + ' m/s']); });
+    return { read, labels }; },
+  b2(v, t) { const A = XS.b2, M = XMODES[v]; if (t < .02) A.tp = []; let p = V(0, .9, 0), ang = 160; const labels = [];
+    XCHAIN.forEach(([nm, , , L], i) => { ang -= M.amp[i] ? 115 * xCum(t, M.peaks[i]) : 0; const a = (ang + i * 10) * D, q = p.clone().add(V(Math.cos(a) * L, 0, -Math.sin(a) * L)); A.segs[i].place(p, q); A.joints[i].position.copy(p); labels.push([p.clone().lerp(q, .5).add(V(0, .25, 0)), nm]); p = q; });
+    A.tip.position.copy(p); A.tp.unshift(p.clone()); if (A.tp.length > 50) A.tp.pop(); const pos = A.trail.geometry.attributes.position; for (let k = 0; k < 50; k++) { const q = A.tp[Math.min(k, A.tp.length - 1)]; pos.setXYZ(k, q.x, q.y, q.z); } pos.needsUpdate = true; A.t = t; A.m = v;
+    return { read: [['손끝 최고 빠르기', M.tip + ' m/s'], ['공 빠르기', Math.round(M.tip * 3.6 * .82) + ' km/h']], labels }; },
+  b3(v, t) { const A = XS.b3, read = [], labels = [...A.labs, [V(0, 1.45, 18.44), '스트라이크 존']], el = t * 1.5;
+    A.set.forEach(s => { const F = s.F, tt = Math.min(F.T, el); let i = 0; for (let k = 0; k <= tt + 1e-6 && i < 16; k += .1, i++) { const p = F.at(k); s.gh[i].visible = p.y >= 0; s.gh[i].position.copy(p); } for (; i < 16; i++) s.gh[i].visible = false;
+      s.b.position.copy(tt >= F.T ? F.pts[F.pts.length - 1] : F.at(tt)); const e = F.pts[F.pts.length - 1]; labels.push([V(s.x, Math.max(e.y, .1) + .55, Math.min(e.z, 14)), s.nm]);
+      read.push([s.nm.split(' ')[0], F.end === 'target' ? `${F.T.toFixed(2)}초 · ${(1.8 - e.y).toFixed(1)}m 떨어짐` : `${F.T.toFixed(2)}초 · ${(18.44 - e.z).toFixed(1)}m 앞에서 땅`]); });
+    return { read, labels }; } };
+function xTxt(x, s, a, b, col, al = 'left', w = 700) { x.font = `${w} 11.5px "IBM Plex Sans KR", sans-serif`; x.fillStyle = col; x.textAlign = al; x.fillText(s, a, b); }
+function xCurve(x, pts, col, w = 2.5) { x.beginPath(); pts.forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b)); x.strokeStyle = col; x.lineWidth = w; x.stroke(); }
+function xDot(x, a, b, r, col) { x.beginPath(); x.arc(a, b, r, 0, 7); x.fillStyle = col; x.fill(); }
+const X_CHART = {
+  a1(x, W, H) { const A = XS.a1, F = A.F, T = F.T, tt = A.tt || 0, half = (W - 12) / 2;
+    [['앞으로 간 거리', t => F.at(t).z, 25, XCS.vx], ['높이', t => F.at(t).y, 13, XCS.grav]].forEach(([nm, fn, mx, col], i) => { const l = 6 + i * half + 10, b = 18, w = half - 18, h = H - 36, X = t => l + t / T * w, Y = v => H - b - clamp(v / mx, 0, 1) * h;
+      x.strokeStyle = XCS.line; x.lineWidth = 1.2; x.beginPath(); x.moveTo(l, 8); x.lineTo(l, H - b); x.lineTo(l + w, H - b); x.stroke();
+      xCurve(x, Array.from({ length: 40 }, (_, k) => { const t = T * k / 39; return [X(t), Y(fn(t))]; }), col); xDot(x, X(tt), Y(fn(tt)), 4.5, XCS.ball); xTxt(x, nm, l + 4, 14, col); xTxt(x, '시간 →', l + w, H - 5, XCS.muted, 'right', 600); }); },
+  a2(x, W, H) { const A = XS.a2, l = 28, b = 20, w = W - l - 10, h = H - b - 24, X = a => l + a / 90 * w, Y = d => H - b - d / 27 * h, dist = a => 256 * Math.sin(2 * a * D) / 9.8;
+    x.strokeStyle = XCS.line; x.lineWidth = 1.2; x.beginPath(); x.moveTo(l, 8); x.lineTo(l, H - b); x.lineTo(W - 8, H - b); x.stroke(); xTxt(x, '날아간 거리', l + 4, 14, XCS.muted, 'left', 600); xTxt(x, '발사각 →', W - 8, H - 5, XCS.muted, 'right', 600);
+    xCurve(x, Array.from({ length: 91 }, (_, a) => [X(a), Y(dist(a))]), XCS.vx); for (const a of [15, 30, 45, 60, 75]) xDot(x, X(a), Y(dist(a)), a === A.a ? 6 : 3.5, a === A.a ? XCS.ball : XCS.muted);
+    xTxt(x, dist(A.a || 45).toFixed(1) + 'm', X(A.a || 45), Y(dist(A.a || 45)) - 9, XCS.ball, 'center'); },
+  b1(x, W, H) { const A = XS.b1, mx = 2.4 * 6 * .32 * 1.4, l = 66, top = 24, rh = (H - top - 6) / 3; xTxt(x, '손끝 빠르기 (m/s)', 8, 15, XCS.muted, 'left', 600);
+    A.rs.forEach(([r, nm, , cs], i) => { const v = r * (A.om || 1) * 1.4, y = top + i * rh; xTxt(x, nm, 8, y + rh * .62, XCS.ink, 'left', 600); x.fillStyle = XCS.line; x.fillRect(l, y + rh * .2, W - l - 44, rh * .55); x.fillStyle = cs; x.fillRect(l, y + rh * .2, (W - l - 44) * clamp(v / mx, 0, 1), rh * .55); xTxt(x, v.toFixed(1), W - 8, y + rh * .62, XCS.ink, 'right', 600); }); },
+  b2(x, W, H) { const A = XS.b2, M = XMODES[A.m || 'seq'], t = A.t || 0, gx = 12, gw = W - 24, gy = H - 16, gH = H - 40;
+    x.strokeStyle = XCS.line; x.lineWidth = 1.5; x.beginPath(); x.moveTo(gx, gy); x.lineTo(gx + gw, gy); x.stroke(); xTxt(x, '시간 →', gx + gw, gy + 13, XCS.muted, 'right', 600); xTxt(x, '도는 빠르기', gx, 14, XCS.muted, 'left', 600);
+    XCHAIN.forEach(([nm, , cs], i) => { if (!M.amp[i]) return; xCurve(x, Array.from({ length: 121 }, (_, k) => [gx + k / 120 * gw, gy - M.amp[i] * xGauss(k / 120, M.peaks[i]) * gH]), cs); xTxt(x, nm, gx + M.peaks[i] * gw, gy - M.amp[i] * gH - 5, cs, 'center'); });
+    x.setLineDash([3, 4]); x.strokeStyle = XCS.ink; x.beginPath(); x.moveTo(gx + t * gw, 20); x.lineTo(gx + t * gw, gy); x.stroke(); x.setLineDash([]); },
+  b3(x, W, H) { const A = XS.b3, rows = A.set.map(s => { const e = s.F.pts[s.F.pts.length - 1]; return [s.nm.split(' ')[0], s.F.T, s.F.end === 'target' ? 1.8 - e.y : 1.8, s.cs]; }), half = (H - 8) / 2;
+    [['포수까지 걸린 시간', 1, 1.5, '초'], ['떨어진 높이', 2, 1.8, 'm']].forEach(([nm, k, mx, u], j) => { const y0 = 4 + j * half; xTxt(x, nm, 8, y0 + 12, XCS.muted, 'left', 600);
+      rows.forEach((r, i) => { const bh = (half - 26) / 2, y = y0 + 18 + i * (bh + 4); x.fillStyle = XCS.line; x.fillRect(64, y, W - 116, bh); x.fillStyle = r[3]; x.fillRect(64, y, (W - 116) * clamp(r[k] / mx, 0, 1), bh); xTxt(x, r[0], 8, y + bh * .85, XCS.ink, 'left', 600); xTxt(x, r[k].toFixed(2) + u + (k === 2 && r[2] >= 1.8 ? '+' : ''), W - 8, y + bh * .85, XCS.ink, 'right', 600); }); }); } };
+let xLast = null;
+function xFrame(M, vk, t) { const box = $('xBox'), cvx = $('xChart'); if (!M.xkey) { if (xLast) { xLast = null; box.hidden = cvx.hidden = true; document.body.classList.remove('nofig'); } return null; }
+  xLast = M.xkey; document.body.classList.add('nofig'); const r = X_UPDATE[M.xkey](vk, t, performance.now());
+  const html = r.read.map(([k, v]) => `<span>${k}<b>${v}</b></span>`).join(''); if (box.innerHTML !== html) box.innerHTML = html; box.hidden = false;
+  const wide = M.xkey === 'b2'; cvx.hidden = false; cvx.className = 'xchart ' + (wide ? 'wide' : 'card'); const rc = cvx.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+  if (rc.width) { if (cvx.width !== Math.round(rc.width * d) || cvx.height !== Math.round(rc.height * d)) { cvx.width = Math.round(rc.width * d); cvx.height = Math.round(rc.height * d); }
+    const x = cvx.getContext('2d'); x.setTransform(d, 0, 0, d, 0, 0); x.clearRect(0, 0, rc.width, rc.height); x.fillStyle = 'rgba(255,255,255,.94)'; x.fillRect(0, 0, rc.width, rc.height); X_CHART[M.xkey](x, rc.width, rc.height); }
+  return r.labels; }
+
 function throwFrame(M, vk, t, P) { const box = $('throwBox'), adj = $('throwAdj'); if (!M.throwing) { if (!box.hidden) { box.hidden = adj.hidden = true; document.body.classList.remove('throwing'); } return; } document.body.classList.add('throwing');
   if (TH3.scene !== state.m + state.sc) { TH3.scene = state.m + state.sc; TH.adj = 0; }
   if (!adj.dataset.on) { adj.dataset.on = 1; adj.querySelectorAll('button').forEach(b => b.onclick = () => { TH.adj = clamp(TH.adj + 2 * +b.dataset.d, -36, 36); }); }
@@ -2747,16 +3435,17 @@ function camFor(k) { const c = state.def.variants[state.v]?.cam || state.def.cam
   const fit = c.fitW ? clamp((c.fitW / 2) / (Math.tan(camera.fov * D / 2) * camera.aspect), 8, 30) : 0; // 가로로 fitW(m)가 다 보이는 거리
   controls.maxDistance = Math.max(7, (fit || c.dist) * 1.5); scene.fog.far = Math.max(PAPER ? 22 : 16, (fit || c.dist) * 2.6); scene.fog.near = Math.max(PAPER ? 9 : 7, (fit || c.dist) * 1.1);
   if (fit) return [tg.clone().addScaledVector((c.dirs?.[k] || VIEWDIR[k]).clone().normalize(), k === 'side' ? fit : fit * .8), tg];
-  return [tg.clone().addScaledVector((c.dirs?.[k] || VIEWDIR[k]).clone().normalize(), c.dist * (PAPER ? (matchMedia('(orientation:portrait)').matches ? 1.08 : .9) : narrow ? 1.02 : 1)), tg]; }
+  return [tg.clone().addScaledVector((c.dirs?.[k] || VIEWDIR[k]).clone().normalize(), c.dist * (PAPER ? (matchMedia('(orientation:portrait)').matches ? (HYBRID ? .78 : 1.08) : (HYBRID ? .82 : .9)) : narrow ? 1.02 : 1)), tg]; }
 function setView(k) { state.view = k; camGoal = camFor(k); document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === k)); }
 const scenesEl = $('scenes'), mqNarrow = matchMedia('(max-width:900px)');
 function focusStage() { // 폰에서는 무엇을 누르든 3D 화면이 보이게
-  if (PAPER || !mqNarrow.matches || document.body.classList.contains('land')) return; const col = $('stagecol'), r = col.getBoundingClientRect(), sc = $('scenes');
+  if (PAPER || READER || !mqNarrow.matches || document.body.classList.contains('land')) return; const col = $('stagecol'), r = col.getBoundingClientRect(), sc = $('scenes');
   if (r.top >= 0 && r.bottom <= innerHeight + 4) return; // 3D가 다 보이면 그대로
   const el = !sc.hidden && !document.body.classList.contains('book') && sc.offsetHeight + col.offsetHeight < innerHeight ? sc : col;
   scrollTo({ top: el.getBoundingClientRect().top + scrollY - 6, behavior: reduce ? 'auto' : 'smooth' }); }
 // 바른 자세 단계별 설명: [동작 단계(0~1), 제목, 설명] — 누르면 3D가 그 단계에서 멈춰요
 const STEPS = {
+  'throw:base': [[.05, '옆으로 서기', '던지는 팔 쪽 어깨가 뒤로 가게, 목표와 옆으로 서요.'], [.22, '발 내딛기', '앞발을 목표 쪽으로 크게 내디뎌요.'], [.27, '몸통 돌리기', '허리와 몸통이 먼저 돌고, 팔꿈치는 어깨 높이로 따라와요.'], [.3, '머리 위에서 놓기', '손이 머리 위를 지날 때 공을 놓아요.'], [.6, '따라가기', '던진 뒤 팔과 몸이 앞으로 자연스럽게 따라가요.']],
   'squat:base': [[0, '준비', '발을 어깨너비로 벌리고 발끝은 살짝 바깥으로 둬요. 가슴을 펴고 배에 힘을 줘요.'], [.45, '내려가기', '엉덩이를 뒤로 빼면서 의자에 앉듯이 내려가요. 무릎은 발끝과 같은 방향으로 굽혀요.'], [1, '가장 낮은 자세', '허벅지가 바닥과 수평이 될 때까지 앉아요. 발 전체로 바닥을 누르고 허리는 곧게 지켜요.'], [.5, '일어서기', '발바닥으로 바닥을 밀면서 엉덩이와 무릎을 함께 펴요. 끝까지 서면 엉덩이에 힘을 줘요.']],
   'lunge:base': [[0, '준비', '골반 너비로 서서 한 발을 크게 앞으로 내디뎌요. 상체는 곧게 세워요.'], [.5, '내려가기', '상체를 세운 채 몸을 수직으로 내려요. 앞으로 쏠리지 않게 해요.'], [1, '가장 낮은 자세', '앞 무릎은 발목 위에, 뒤 무릎은 바닥 가까이에 와요. 두 무릎 모두 약 90°예요.'], [.5, '올라오기', '앞발 뒤꿈치로 바닥을 밀며 올라와요. 앞 무릎이 안으로 모이지 않게 해요.']],
   'pushup:base': [[0, '준비', '손을 어깨 바로 아래에 짚고 머리부터 발까지 일직선을 만들어요. 배와 엉덩이에 힘을 줘요.'], [.5, '내려가기', '팔꿈치를 몸 옆 45° 정도로 굽히며 천천히 내려가요. 몸통은 판자처럼 그대로예요.'], [1, '가장 낮은 자세', '가슴이 바닥 가까이 올 때까지 내려가요. 허리가 처지거나 엉덩이가 들리지 않게 해요.'], [.5, '밀어 올리기', '손바닥으로 바닥을 밀어 팔을 펴요. 몸 전체가 한 덩어리로 올라와요.']],
@@ -2789,7 +3478,7 @@ function setMove(k) {
 }
 function setScene(key) {
   const M = MOVES[state.m], entry = M.scenes?.find(x => x[0] === key), D0 = entry ? entry[2] : M;
-  state.sc = key; state.def = D0; setEnv(D0.env || 'gym'); for (const k in PROPS) PROPS[k].visible = (D0.props || []).includes(k); CHAIR_G.visible = key === 'chair' || !!D0.chair;
+  state.sc = key; state.def = D0; fig.g.visible = !D0.noFig; setEnv(D0.env || 'gym'); for (const k in PROPS) PROPS[k].visible = (D0.props || []).includes(k); CHAIR_G.visible = key === 'chair' || !!D0.chair;
   state.grp = entry ? entry[1] : null; renderScenes(); if (document.querySelector('aside').dataset.p === 'mus') showPane('pose');
   $('tFrom').textContent = D0.range[0]; $('tTo').textContent = D0.range[1]; slider.setAttribute('aria-label', `동작 단계: ${D0.range[0]}에서 ${D0.range[1]}까지`);
   tabs.innerHTML = '';
@@ -2824,7 +3513,7 @@ function setVariant(vk, fromMove) {
   select(state.sel);
 }
 function select(id) {
-  state.sel = id; const [nm, easy, desc] = MUSCLES[id];
+  state.sel = id; if (!MUSCLES[id]) { $('dname').textContent = ''; $('ddesc').textContent = ''; $('dnote').hidden = true; return; } const [nm, easy, desc] = MUSCLES[id];
   for (const k in rows) { rows[k].r.setAttribute('aria-pressed', k === id); rows[k].m?.setAttribute('aria-pressed', k === id); }
   $('dname').innerHTML = `${nm}<small>${easy}</small>`; $('ddesc').textContent = desc;
   const n = $('dnote'), note = state.def.notes?.[id]?.[state.v]; n.hidden = !note; n.textContent = note || '';
@@ -2863,12 +3552,13 @@ function place(el, pos, text) {
 }
 function updateLabels() {
   const used = new Set();
-  if (state.sel && !state.def.noLabel && !PAPER) { const m = fig.muscles.find(x => x.sp.id === state.sel && x.s !== -1); if (m) { place(lbl('sel', ''), m.mesh.position, MUSCLES[state.sel][0]); used.add('sel'); } }
+  if (state.sel && !state.def.noLabel && !PAPER && !READER) { const m = fig.muscles.find(x => x.sp.id === state.sel && x.s !== -1); if (m) { place(lbl('sel', ''), m.mesh.position, MUSCLES[state.sel][0]); used.add('sel'); } }
   for (const d of fig.dangers) { if (!d.mesh.visible || used.has(d.key)) continue; const e = lbl(d.key, 'warn'); place(e, d.mesh.position, DANGERS[d.key]); e.style.opacity = d.mesh.material.opacity / .55; used.add(d.key); }
   const vr = state.def.variants[state.v], multi = vr?.multi || [];
   if (vr?.mainLabel) { place(lbl('who', 'who'), fig.P.head.clone().add(V(0, .22, 0)), vr.mainLabel); used.add('who'); }
   multi.forEach((m, i) => { const f = extras[i]; if (!f.P) return; place(lbl('who' + i, 'who'), f.P.head.clone().add(V(m.x, .22, 0)), m.label); used.add('who' + i);
     for (const d of f.dangers) { if (!d.mesh.visible || used.has(d.key + i)) continue; const e = lbl(d.key + i, 'warn'); place(e, d.mesh.position.clone().add(V(m.x, 0, 0)), DANGERS[d.key]); e.style.opacity = d.mesh.material.opacity / .55; used.add(d.key + i); } });
+  (state.xlabels || []).forEach(([p, text], i) => { place(lbl('x' + i, 'xl'), p, text); used.add('x' + i); });
   for (const k in pool) if (!used.has(k)) pool[k].hidden = true;
 }
 const chipsEl = $('chips');
@@ -2889,8 +3579,8 @@ function updatePanel() {
 }
 
 // ---------- 그리기 ----------
-function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < 560 ? 46 : 36; const mn = document.getElementById('mini'), ox = mn && mn.offsetWidth && !mn.classList.contains('closed') ? (mn.offsetWidth + 10) / 2 : 0; // 근육 패널만큼 인형을 왼쪽으로
-  const oy = PAPER ? Math.min(28, h * .11) : 0, pbr = PAPER && document.getElementById('pb'), fullOn = pbr && pbr.dataset.full === '1', ox2 = !fullOn ? ox : w > h ? (pbr.dataset.fold !== '1' ? ox - w * .2 : ox) : (pbr.dataset.fold !== '1' ? w * .24 : .001); // 전체 화면(가로): 글 카드만큼 인형을 오른쪽으로
+function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < 560 ? 46 : 36; const mn = document.getElementById('mini'), ox = !HYBRID && mn && mn.offsetWidth && !mn.classList.contains('closed') ? (mn.offsetWidth + 10) / 2 : 0; // 근육 패널만큼 인형을 왼쪽으로
+  const oy = PAPER && !HYBRID ? Math.min(28, h * .11) : 0, pbr = PAPER && document.getElementById('pb'), fullOn = pbr && pbr.dataset.full === '1', ox2 = !fullOn ? ox : w > h ? (pbr.dataset.fold !== '1' ? ox - w * .2 : ox) : (pbr.dataset.fold !== '1' ? w * .24 : .001); // 전체 화면(가로): 글 카드만큼 인형을 오른쪽으로
   if (ox2 !== ox) { camera.setViewOffset(w, h, ox2, oy, w, h); camera.updateProjectionMatrix(); return; }
   if (ox || oy) camera.setViewOffset(w, h, ox, oy, w, h); else camera.clearViewOffset(); camera.updateProjectionMatrix(); }
 new ResizeObserver(() => { resize(); if (state.def?.cam?.fitW) camGoal = camFor(state.view); }).observe(canvas); resize();
@@ -2900,11 +3590,11 @@ function loop() {
   if (state.playing) { const loopM = state.def.cycle === 'loop'; state.phase += dt / (state.def.period || 4.4);
     state.t = loopM ? state.phase % 1 : .5 - .5 * Math.cos(state.phase * 2 * Math.PI); slider.value = Math.round(state.t * 1000); }
   if (camGoal) { camera.position.lerp(camGoal[0], .09); controls.target.lerp(camGoal[1], .09); if (camera.position.distanceTo(camGoal[0]) < .02) camGoal = null; }
-  fig.update(state.def, state.v, state.t, time); state.def.frame?.(state.t, state.v, fig.P); archFrame(state.def, state.v, state.t, fig.P); throwFrame(state.def, state.v, state.t, fig.P); state.com = updateCom(state.def, fig.P);
+  fig.update(state.def, state.v, state.t, time); state.def.frame?.(state.t, state.v, fig.P); archFrame(state.def, state.v, state.t, fig.P); throwFrame(state.def, state.v, state.t, fig.P); state.xlabels = xFrame(state.def, state.v, state.t); state.com = updateCom(state.def, fig.P);
   if (state.ghost) ghost.update(state.def, 'good', state.t, time);
   { const multi = state.def.variants[state.v]?.multi || []; extras.forEach((f, i) => { const m = multi[i]; f.g.visible = !!m; if (m) { f.g.position.x = m.x; f.update(m.def, m.v, state.t, time); } });
     fig.g.position.x = 0; if (state.def.livePanel && time - (state.panelAt || 0) > .3) { state.panelAt = time; $('prCard').innerHTML = state.def.panel(state.v, state.t); } }
-  if (BOOK3D) book3dTick(dt); controls.update(); renderer.render(scene, camera);
+  if (BOOK3D) book3dTick(dt); if (READER) window.__rdTick?.(dt); controls.update(); renderer.render(scene, camera);
   updateLabels(); updateChips(); updatePanel();
   requestAnimationFrame(loop);
 }
@@ -2991,7 +3681,7 @@ function book3dGo(i, dir, go) { if (FL) return; const cur = state.book; i = clam
   FL = { dir, to: i, p: 0, swapped: false, go }; }
 setMove('squat'); { const g = camFor('diag'); camera.position.copy(g[0]); controls.target.copy(g[1]); camGoal = null; }
 syncPlay(); slider.value = Math.round(state.t * 1000);
-$('load').remove(); window.__state = state; window.__setMove = setMove; window.__setScene = setScene; window.__setVariant = setVariant; window.__ready = true;
+$("load").remove(); window.__state = state; window.__MOVES = MOVES; window.__build = build; window.__setMove = setMove; window.__setScene = setScene; window.__setVariant = setVariant; window.__ready = true;
 // ---------- 책 모드 ----------
 const BOOK = [
   { t: '기본 움직임', d: '움직임마다 기본 · 응용 · 일상에서 · 스포츠에서', ch: ['squat', 'lunge', 'pushup', 'pull', 'throw', 'hinge', 'plank'] },
@@ -3057,7 +3747,7 @@ document.addEventListener('keydown', e => { if (state.book == null || !$('cover'
   if (e.key === 'ArrowRight' || e.key === 'PageDown') goPage(state.book + 1, 1); else if (e.key === 'ArrowLeft' || e.key === 'PageUp') goPage(state.book - 1, -1); });
 // 가로 화면: 왼쪽 3D, 오른쪽 설명, 화면 스크롤 없음
 const mqLand = matchMedia('(orientation:landscape) and (max-height:560px)');
-function syncLand() { const on = mqLand.matches && !BOOK3D && !PAPER; document.body.classList.toggle('land', on); document.documentElement.classList.toggle('land', on); if (on) scrollTo(0, 0); resize(); }
+function syncLand() { const on = mqLand.matches && !BOOK3D && !PAPER && !READER; document.body.classList.toggle('land', on); document.documentElement.classList.toggle('land', on); if (on) scrollTo(0, 0); resize(); }
 mqLand.addEventListener('change', syncLand); syncLand();
 $('landBtn').onclick = async () => { const b = $('landBtn'); try { await document.documentElement.requestFullscreen(); await screen.orientation.lock('landscape'); }
   catch (e) { b.textContent = '폰을 가로로 돌려 주세요'; setTimeout(() => b.textContent = '↻ 가로로 크게 보기', 3500); } };
@@ -3106,14 +3796,15 @@ if (PAPER) {
     $('nvTitle').textContent = p ? (p.d.sceneLabel || p.d.name) : ''; $('stage').style.setProperty('--sbh', $('sbar').offsetHeight + 'px'); }
   $('pgFlow').append($('vcard'), $('prCard'), $('bodyCard'), $('labCard'), $('tryCard'), $('dname').closest('section'), $('mlist').closest('section'));
   $('miniT').textContent = '주로 쓰는 근육'; $('miniT').onclick = null;
-  $('stage').insertAdjacentHTML('beforeend', '<a class="st-cam" id="stCam" target="_blank" rel="noopener" hidden>📷<span> 평가</span></a>');
+  $('stage').insertAdjacentHTML('beforeend', '<a class="st-cam" id="stCam" target="_blank" rel="noopener" hidden>📷<span> 평가</span></a><a class="st-cam st-lab" id="stLab" target="_blank" rel="noopener" hidden>🧪<span> 실험실</span></a>');
   const mqPort = matchMedia('(orientation:portrait)'), GAP = 32; let cur = 0, started = false, tocMove = 'squat', tp = 0, tpN = 1, lastKey = '';
   const idxOf = (m, sc) => SEQ.findIndex(p => p.m === m && p.sc === sc), firstOf = m => SEQ.findIndex(p => p.m === m);
-  function flow() { const fl = $('pgFlow'); if (root.dataset.full === '1' && root.dataset.fold === '1') { $('pbPg').textContent = ''; $('pbNext').textContent = '다음 장면 ›'; tp = 0; tpN = 1; return; } $('stage').style.setProperty('--sbh', $('sbar').offsetHeight + 'px'); $('nvYt').hidden = $('vyt').hidden || !$('pbToc').hidden; $('nvYt').href = $('vyt').href; { const c = $('stCam'), on = !$('tryCard').hidden; c.hidden = !on; if (on) { const u = new URL(document.querySelector('#tryCard .trylinks a').href); u.searchParams.delete('mode'); c.href = u.href; } } if ($('pbBook').hidden) return; const key = state.m + state.sc + state.v; if (key !== lastKey) { lastKey = key; tp = 0; sbarSync(); }
-    const W = fl.clientWidth; if (!W) return; fl.style.columnWidth = W + 'px'; tpN = Math.max(1, Math.round((fl.scrollWidth + GAP) / (W + GAP))); tp = Math.min(tp, tpN - 1);
-    fl.style.transform = `translateX(${-tp * (W + GAP)}px)`; $('pbPg').textContent = tpN > 1 ? `${tp + 1} / ${tpN}쪽` : '';
-    $('pbPrev').disabled = cur === 0 && tp === 0; $('pbNext').disabled = cur === SEQ.length - 1 && tp === tpN - 1;
-    $('pbNext').textContent = tp < tpN - 1 ? '다음 쪽 ›' : '다음 장면 ›'; $('pbPrev').textContent = mqPort.matches ? (tp > 0 ? '‹ 앞 쪽' : '‹ 이전 장면') : '‹'; }
+  function flow() { const fl = $('pgFlow'); $('stage').style.setProperty('--sbh', $('sbar').offsetHeight + 'px'); $('nvYt').hidden = $('vyt').hidden || !$('pbToc').hidden; $('nvYt').href = $('vyt').href; { const c = $('stCam'), on = !$('tryCard').hidden; c.hidden = !on; if (on) { const u = new URL(document.querySelector('#tryCard .trylinks a').href); u.searchParams.delete('mode'); c.href = u.href; } } if ($('pbBook').hidden) return; const key = state.m + state.sc + state.v; if (key !== lastKey) { lastKey = key; tp = 0; sbarSync(); fl.scrollTop = 0; }
+    tp = 0; tpN = 1; fl.style.transform = ''; $('pbPg').textContent = `${cur + 1} / ${SEQ.length}`; $('pbPrev').disabled = cur === 0; $('pbNext').disabled = cur === SEQ.length - 1;
+    $('pbNext').textContent = '다음 장면 ›'; $('pbPrev').textContent = mqPort.matches ? '‹ 이전 장면' : '‹';
+    $('pgText').classList.toggle('more', fl.scrollHeight - fl.scrollTop - fl.clientHeight > 12);
+    { const lab = $('stLab'), on = !$('labCard').hidden; lab.hidden = !on; if (on) lab.href = document.querySelector('#labCard a').href; } }
+  $('pgFlow').addEventListener('scroll', () => $('pgText').classList.toggle('more', $('pgFlow').scrollHeight - $('pgFlow').scrollTop - $('pgFlow').clientHeight > 12));
   setInterval(flow, 350);
   function sync() { const p = SEQ[cur], M = MOVES[p.m], sc = M.scenes || []; $('selM').value = p.m; const framed = MV.includes(p.m);
     $('nvFrame').hidden = !framed; $('selSw').hidden = p.m === 'body';
@@ -3123,29 +3814,56 @@ if (PAPER) {
     if (MV.includes(p.m) || p.m === 'fitness' || p.m === 'train') tocMove = p.m; tp = 0; flow(); }
   function show(i) { cur = clamp(i, 0, SEQ.length - 1); started = true; const p = SEQ[cur];
     if (state.m !== p.m) setMove(p.m); if (state.sc !== p.sc) setScene(p.sc);
-    $('pbToc').hidden = true; $('pbBook').hidden = false; root.dataset.toc = ''; sync(); resize(); }
+    $('pbToc').hidden = true; $('pbBook').hidden = false; root.dataset.toc = ''; sync(); if ($('nvTitle')) $('nvTitle').textContent = p.d.sceneLabel || p.d.name; resize(); }
   $('pbNext').onclick = () => { if (tp < tpN - 1) { tp++; flow(); } else if (cur < SEQ.length - 1) show(cur + 1); };
   $('pbPrev').onclick = () => { if (tp > 0) { tp--; flow(); } else if (cur > 0) show(cur - 1); };
   $('selM').onchange = e => show(firstOf(e.target.value));
   $('selS').onchange = e => show(idxOf(SEQ[cur].m, e.target.value));
-  window.__pbMus = () => { const d = $('dname').closest('section'), W = $('pgFlow').clientWidth; tp = Math.round(d.offsetLeft / (W + GAP)); flow(); };
+  window.__pbMus = () => { const d = $('dname').closest('section'); $('pgFlow').scrollTo({ top: d.offsetTop - $('pgFlow').offsetTop, behavior: reduce ? 'auto' : 'smooth' }); };
   window.__pbGoScene = (m, sc) => { const i = idxOf(m, sc); if (i >= 0) show(i); };
   // 차례
-  function chapter(m) { const M = MOVES[m], sc = M.scenes || [], framed = MV.includes(m);
-    const row = x => { const i = idxOf(m, x[0]); return `<button type="button" class="toc-row" data-i="${i}"><span>${x[2].sceneLabel || x[2].name}</span><i></i><b>${i + 1}</b></button>`; };
-    const body = framed ? FRAME.map(([g, lb]) => { const xs = sc.filter(x => x[1] === g); return `<div class="toc-grp"><h3 style="--gc:${GROUP_COLOR[g]}">${lb}</h3>${xs.length ? xs.map(row).join('') : '<p class="toc-none">준비 중</p>'}</div>`; }).join('') : `<div class="toc-grp">${sc.map(row).join('')}</div>`;
-    return `<button type="button" class="toc-back" id="tocBack">‹ 차례</button><span class="ribbon">${framed ? '운동 ' + (MV.indexOf(m) + 1) : '더 배우기'}</span><h1><span>${M.name}</span></h1><p class="toc-desc">${M.pattern || ''}</p><div class="toc-ch">${body}</div>`; }
-  function openToc(m) { const view = m ? 'ch' : 'list'; if (m) tocMove = m;
-    const cnt = k => FRAME.map(([g, lb]) => `${lb.replace('에서', '')} ${MOVES[k].scenes.filter(x => x[1] === g).length}`).join(' · ');
-    $('pbToc').innerHTML = `<section class="pg pg-l toc-l"><span class="ribbon">차례</span><h1><span>3D 체육 교과서</span></h1><p class="toc-desc">움직임을 고르면 기본 · 응용 · 일상에서 · 스포츠에서 장면이 나와요.</p>
-        <div class="toc-moves">${MV.map((k, n) => `<button type="button" class="toc-mv" data-m="${k}" aria-pressed="${k === tocMove}"><small>운동 ${n + 1}</small><b>${MOVES[k].name}</b><span>${cnt(k)}</span></button>`).join('')}</div>
-        <div class="toc-extra"><button type="button" class="toc-mv x1" data-m="fitness"><b>💓 체력 요소</b><span>체력의 5가지 영역</span></button><button type="button" class="toc-mv x2" data-m="train"><b>🏋️ 트레이닝 원리</b><span>효과적인 운동 방법</span></button><button type="button" class="toc-mv x3" data-m="body"><b>🧍 몸 지도</b><span>근육으로 운동 찾기</span></button></div>
+  let tocCat = '기본', tocMode = 'move', tocMv = 'squat'; try { tocMode = localStorage.getItem('toc-mode') || 'move'; } catch (e) { }
+  const VERB = { squat: ['앉기', '스쿼트'], lunge: ['한 발 딛기', '런지'], hinge: ['숙이기', '힙힌지'], pushup: ['밀기', '푸시업'], pull: ['당기기', '로우·컬'], plank: ['버티기', '플랭크'], throw: ['던지기', '공 던지기'] };
+  const MVO = ['squat', 'lunge', 'hinge', 'pushup', 'pull', 'plank', 'throw'];
+  const MODES = [['move', '동작별'], ['frame', '묶음별'], ['part', '부위별'], ['level', '난이도별']];
+  const PART_N = { 하체: '하체', 상체: '상체', 몸통: '코어', 전신: '전신' };
+  function openToc(cat) { if (cat) tocCat = cat; const CATD = { 기본: '움직임마다 가장 기본이 되는 동작', 원리: '동작에 숨어 있는 과학 원리', 응용: '기본 동작을 바꾸거나 도구를 더한 동작', 일상: '생활 속에서 같은 움직임이 쓰이는 장면', 스포츠: '경기에서 같은 움직임이 쓰이는 장면' };
+    const n = g => SEQ.filter(p => p.g === g).length, lbOf = g => FRAME.find(fr => fr[0] === g)[1], idx = (m, sc) => SEQ.findIndex(p => p.m === m && p.sc === sc), nm = p => p.d.sceneLabel || p.d.name;
+    const row = p => `<button type="button" class="toc-row" data-i="${SEQ.indexOf(p)}"><span>${nm(p)}</span><i></i><b>›</b></button>`;
+    const star = k => '★'.repeat(k) + '<i>' + '★'.repeat(5 - k) + '</i>';
+    const exRow = ([key, k], sub) => { const [m, sc] = key.split(':'), i = idx(m, sc); if (i < 0) return ''; return `<button type="button" class="toc-row ex" data-i="${i}"><span>${nm(SEQ[i])}<small>${sub}</small></span><em>${star(k)}</em></button>`; };
+    const partOf = {}; for (const [pt, xs] of Object.entries(EXMAP)) for (const [key] of xs) partOf[key] = PART_N[pt];
+    const modeBar = `<div class="toc-modes" role="tablist" aria-label="분류 기준">${MODES.map(([k, lb]) => `<button type="button" role="tab" data-mode="${k}" aria-selected="${k === tocMode}">${lb}</button>`).join('')}</div>`;
+    let left = '', right = '';
+    if (tocMode === 'move') {
+      left = `<div class="toc-base">${MVO.map(k => `<button type="button" class="toc-mv" data-mv="${k}" aria-pressed="${k === tocMv}"><b>${VERB[k][0]}</b><span>${VERB[k][1]}</span></button>`).join('')}</div>`;
+      const xs = g => SEQ.filter(p => p.m === tocMv && p.g === g), uses = g => xs(g).map(p => `<button type="button" class="toc-chip" data-i="${SEQ.indexOf(p)}">${nm(p)}</button>`).join('');
+      right = `<span class="ribbon">${VERB[tocMv][0]}</span><p class="toc-desc">${MOVES[tocMv].pattern || ''}</p><div class="toc-ch">
+        ${PUSHPULL[tocMv] ? `<p class="toc-sub">${PUSHPULL[tocMv].up}</p>` : ''}${['기본', '원리', '응용'].filter(g => xs(g).length).map(g => `<div class="toc-grp"><h3 style="--gc:${GROUP_COLOR[g] || '#7048e8'}">${lbOf(g)}</h3>${xs(g).map(row).join('')}</div>`).join('')}
+        ${PUSHPULL[tocMv] ? `<p class="toc-sub">${PUSHPULL[tocMv].down}</p><div class="toc-use"><p>${PUSHPULL[tocMv].downNote}</p><div class="toc-chips">${PUSHPULL[tocMv].links.map(([m, sc]) => { const i = idx(m, sc); return i < 0 ? '' : `<button type="button" class="toc-chip" data-i="${i}">${nm(SEQ[i])}</button>`; }).join('')}</div></div>` : ''}
+        ${['일상', '스포츠'].filter(g => xs(g).length).map(g => `<div class="toc-use"><h3 style="--gc:${GROUP_COLOR[g]}">${g === '일상' ? '일상에서는' : '스포츠에서는'}</h3><p>${VERB[tocMv][0]} 동작은 ${g === '일상' ? '생활 속' : '경기 속'} 이런 장면에서 쓰여요.</p><div class="toc-chips">${uses(g)}</div></div>`).join('')}</div>`;
+    } else if (tocMode === 'frame') {
+      left = `<div class="toc-cats" role="tablist" aria-label="기본, 원리, 응용, 일상에서, 스포츠에서">${FRAME.map(([g, lb]) => `<button type="button" role="tab" data-cat="${g}" aria-selected="${g === tocCat}" style="--gc:${GROUP_COLOR[g] || '#7048e8'}"><b>${lb.replace('에서', '')}</b><small>${n(g)}</small></button>`).join('')}</div>`;
+      right = `<span class="ribbon" style="background:${GROUP_COLOR[tocCat] || '#7048e8'}">${lbOf(tocCat)}</span><p class="toc-desc">${CATD[tocCat]}</p><div class="toc-ch">${MV.map(k => { const ys = SEQ.filter(p => p.m === k && p.g === tocCat); return ys.length ? `<div class="toc-grp"><h3 style="--gc:${GROUP_COLOR[tocCat] || '#7048e8'}">${MOVES[k].name}</h3>${ys.map(row).join('')}</div>` : ''; }).join('')}</div>`;
+    } else if (tocMode === 'part') {
+      left = `<p class="toc-desc">학교에서 맨몸이나 뜀틀로 할 수 있는 운동을 몸 부위별로, 쉬운 것부터 모았어요.</p>`;
+      right = `<span class="ribbon">몸 부위별</span><div class="toc-ch">${Object.entries(EXMAP).map(([pt, xs]) => `<div class="toc-grp"><h3 style="--gc:#14284b">${PART_N[pt]}</h3>${[...xs].sort((a, b) => a[1] - b[1]).map(x => exRow(x, VERB[x[0].split(':')[0]]?.[0] || '')).join('')}</div>`).join('')}</div>`;
+    } else {
+      const all = Object.values(EXMAP).flat(); left = `<p class="toc-desc">★ 하나부터 차례로 올라가요. 지금 쉽게 되는 단계 바로 위를 골라 보세요.</p>`;
+      right = `<span class="ribbon">난이도별</span><div class="toc-ch">${[1, 2, 3, 4, 5].map(k => { const ys = all.filter(x => x[1] === k); return ys.length ? `<div class="toc-grp"><h3 class="lv">${'★'.repeat(k)}</h3>${ys.map(x => exRow(x, partOf[x[0]])).join('')}</div>` : ''; }).join('')}</div>`;
+    }
+    $('pbToc').innerHTML = `<section class="pg pg-l toc-l"><div class="toc-head"><h1><span>3D 체육 교과서</span></h1></div><p class="toc-lab">분류 기준</p>${modeBar}${left}
+        <div class="toc-extra"><button type="button" class="toc-mv x1" data-m="fitness"><b>💓 체력 요소</b><span>체력의 5가지 영역</span></button><button type="button" class="toc-mv x2" data-m="train"><b>🏋️ 훈련 원리</b><span>효과적인 운동 방법</span></button><button type="button" class="toc-mv x3" data-m="body"><b>🧍 몸 지도</b><span>근육으로 운동 찾기</span></button></div>
         ${started ? '<button type="button" class="toc-resume" id="tocResume">보던 장면으로 돌아가기 ›</button>' : ''}</section>
-      <section class="pg pg-r toc-r">${chapter(tocMove)}</section>`;
-    $('pbToc').dataset.view = view; $('pbToc').hidden = false; $('pbBook').hidden = true; root.dataset.toc = '1';
-    $('pbToc').querySelectorAll('.toc-mv').forEach(b => b.onclick = () => b.dataset.m === 'body' ? show(firstOf('body')) : openToc(b.dataset.m));
-    $('pbToc').querySelectorAll('.toc-row').forEach(b => b.onclick = () => show(+b.dataset.i));
-    $('tocBack').onclick = () => openToc(null); if ($('tocResume')) $('tocResume').onclick = () => show(cur); }
+      <section class="pg pg-r toc-r">${right}</section>`;
+    $('pbToc').dataset.view = 'home'; $('pbToc').hidden = false; $('pbBook').hidden = true; root.dataset.toc = '1'; if ($('nvTitle')) $('nvTitle').textContent = '차례';
+    $('pbToc').querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { tocMode = b.dataset.mode; try { localStorage.setItem('toc-mode', tocMode); } catch (e) { } openToc(null); });
+    $('pbToc').querySelectorAll('[data-mv]').forEach(b => b.onclick = () => { tocMv = b.dataset.mv; openToc(null); if (mqPort.matches) $('pbToc').querySelector('.toc-r')?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); });
+    $('pbToc').querySelectorAll('[data-cat]').forEach(b => b.onclick = () => openToc(b.dataset.cat));
+    const go2 = i => window.__hyGo && SEQ[i].m !== 'body' ? window.__hyGo(SEQ[i].m, SEQ[i].sc) : show(i);
+    $('pbToc').querySelectorAll('[data-m]').forEach(b => b.onclick = () => go2(firstOf(b.dataset.m)));
+    $('pbToc').querySelectorAll('[data-i]').forEach(b => b.onclick = () => go2(+b.dataset.i));
+    if ($('tocResume')) $('tocResume').onclick = () => window.__hyBack ? window.__hyBack() : show(cur); }
   $('pbHome').onclick = () => openToc(null);
   // 세로 화면: 작은 쪽을 누르면 그쪽이 크게 (3D 크게 ↔ 글 크게)
   $('stage').insertAdjacentHTML('beforeend', '<button type="button" class="fcover st-cover" id="stCover" aria-label="3D 화면 크게 보기"><span>눌러서 3D 크게</span></button>');
@@ -3162,8 +3880,119 @@ if (PAPER) {
     const hide = () => { $('rotTip')?.remove(); try { sessionStorage.setItem('rot-tip', '1'); } catch (e) { } }; $('rotTip').onclick = hide; setTimeout(hide, 7000); mqPort.addEventListener('change', hide); } }
   mqPort.addEventListener('change', () => { resize(); setView(state.view); flow(); });
   document.addEventListener('keydown', e => { if (!$('pbToc').hidden || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return; if (e.key === 'ArrowRight' || e.key === 'PageDown') $('pbNext').click(); else if (e.key === 'ArrowLeft' || e.key === 'PageUp') $('pbPrev').click(); });
-  window.__pbShow = show; sync(); openToc(null);
+  window.__pbShow = show; window.__pbToc = openToc; sync(); openToc(null);
 }
+// ---------- 글로 읽는 교과서 (READER): 본문을 읽다가 그림을 누르면 3D가 열림 ----------
+if (READER) {
+  document.body.classList.add('reader'); document.documentElement.classList.add('reader');
+  const CH = [['squat', '움직임'], ['lunge', '움직임'], ['pushup', '움직임'], ['pull', '움직임'], ['throw', '움직임'], ['hinge', '움직임'], ['plank', '움직임'], ['fitness', '이론'], ['train', '이론']];
+  const esc = x => String(x ?? '');
+  const root = document.createElement('div'); root.className = 'rd'; root.id = 'rd';
+  root.innerHTML = `<header class="rd-top">${HYBRID ? '<button type="button" class="rd-toc-btn" id="rdToc" aria-label="차례">☰ 차례</button>' : ''}<span class="rd-logo">3D 체육 교과서</span><label class="rd-sel"><select id="rdCh" aria-label="단원 고르기">${CH.map(([k, g], i) => `<option value="${k}">${i + 1}. ${MOVES[k].name}</option>`).join('')}<option value="ex">💪 운동 모음</option></select></label></header>
+    <div class="rd-body"><article class="rd-page" id="rdPage"></article>
+      <aside class="rd-fig" id="rdFig" aria-label="3D 그림"><div class="rd-fighead"><b id="rdFigT">그림을 누르면 여기에 3D가 나와요</b><a class="rd-act yt" id="rdYt" target="_blank" rel="noopener">▶ 영상</a><a class="rd-act cam" id="rdCam" target="_blank" rel="noopener" hidden>📷 평가</a><a class="rd-act lab" id="rdLab" target="_blank" rel="noopener" hidden>🧪 실험실</a><button type="button" class="rd-x" id="rdX" aria-label="3D 닫기">✕</button></div><div class="rd-tabs" id="rdTabs"></div><div class="rd-stage" id="rdStage"></div></aside></div>`;
+  document.body.prepend(root);
+  if (!HYBRID) $('rdStage').append($('stage'));
+  let figNo = 0;
+  const ytQ = (m, d) => d.neutral ? `${d.name} ${MOVES[m].name}` : `${(d.sceneLabel || d.name).replace(/[①②③④]/g, '')} 바른 자세`;
+  const ytUrl = (m, d) => 'https://www.youtube.com/results?search_query=' + encodeURIComponent(ytQ(m, d));
+  const camUrl = m => { const u = new URL(document.querySelector('#tryCard .trylinks a').href); u.searchParams.set('ex', m); u.searchParams.delete('mode'); return u.href; };
+  const labUrl = () => document.querySelector('#labCard a').href;
+  const figB = (m, sc, v, label, kind) => { figNo++; return `<button type="button" class="rd-figbtn ${kind || ''}" data-m="${m}" data-sc="${sc}" data-v="${v}"><span class="rd-fignum">그림 ${figNo}</span><span class="rd-figname">${label}</span><span class="rd-figgo">3D로 보기 ›</span></button>`; };
+  function scenePart(m, sc, d, n) { const vs = Object.entries(d.variants), good = d.variants.good ? 'good' : vs[0][0], gv = d.variants[good], steps = STEPS[m + ':' + sc];
+    let h = `<section class="rd-sec" id="sec-${m}-${sc}"><h2><span class="rd-no">${n}</span><span class="rd-h2t">${esc(d.sceneLabel || d.name)}</span><a class="rd-ytl" href="${ytUrl(m, d)}" target="_blank" rel="noopener">▶ 영상</a></h2>`;
+    if (d.neutral) {
+      if (d.panel) { const tmp = document.createElement('div'); tmp.innerHTML = d.panel(good, 0); const key = tmp.querySelector('.key'); if (key) h += `<p class="rd-def"><b>뜻</b> ${key.textContent}</p>`; }
+      vs.forEach(([k, v]) => { h += `<h3>${esc(v.name)}</h3><p>${esc(v.desc)}</p>`; if (v.why) h += `<p class="rd-why"><b>왜?</b> ${esc(v.why)}</p>`; h += figB(m, sc, k, v.name, v.warn ? 'bad' : ''); });
+      return h + '</section>'; }
+    h += `<p>${esc(gv.desc)}</p>` + figB(m, sc, good, `${d.sceneLabel || d.name} · 바른 자세`, 'good');
+    if (steps) h += `<h3>따라 해 보기 <small>누르면 3D가 그 단계에서 멈춰요</small></h3><ol class="rd-steps">${steps.map(([t, ti, tx], j) => `<li><button type="button" class="rd-step" data-m="${m}" data-sc="${sc}" data-v="${good}" data-t="${t}"><span class="sn">${j + 1}</span><span><b>${ti}</b> ${tx}</span></button></li>`).join('')}</ol>`;
+    if (gv.checks?.length) h += `<div class="rd-box ok"><b>✓ 자세 확인하기</b><ul>${gv.checks.map(c => `<li>${c}</li>`).join('')}</ul></div>`;
+    const bad = vs.filter(([k, v]) => k !== good);
+    if (bad.length) { h += `<h3>${bad.every(([, v]) => !v.ok) ? '이런 자세는 조심해요' : '비교해 보기'}</h3>`;
+      bad.forEach(([k, v]) => { h += `<div class="rd-box ${v.ok ? 'cmp' : 'bad'}"><b>${v.ok ? '' : '⚠ '}${esc(v.name)}</b><p>${esc(v.desc)}</p>${v.why ? `<p><b>왜 문제일까?</b> ${esc(v.why)}</p>` : ''}${v.fix ? `<p><b>이렇게 고쳐요</b> ${v.fix.join(' · ')}</p>` : ''}${figB(m, sc, k, v.name, v.ok ? '' : 'bad')}</div>`; }); }
+    return h + '</section>'; }
+  function renderEx() { const star = n => '★'.repeat(n) + '<i>' + '★'.repeat(5 - n) + '</i>';
+    let h = `<p class="rd-kick">운동 모음</p><h1>💪 운동 모음</h1><p class="rd-lead">학교에서 맨몸이나 뜀틀로 할 수 있는 운동을 몸 부위와 난이도(★)로 모았어요. 쉬운 것부터 해 보세요.</p>`;
+    for (const [part, xs] of Object.entries(EXMAP)) { h += `<p class="rd-grp">${part}</p><div class="rd-exl">` + xs.map(([key, n]) => { const [m, sc] = key.split(':'), e = (MOVES[m].scenes || []).find(x => x[0] === sc); if (!e) return '';
+        return `<button type="button" class="rd-ex" data-m="${m}" data-sc="${sc}"><span><b>${esc(e[2].sceneLabel || e[2].name)}</b><small>${MOVES[m].name}</small></span><em>${star(n)}</em></button>`; }).join('') + '</div>'; }
+    $('rdPage').innerHTML = h; $('rdPage').scrollTop = 0; $('rdCh').value = 'ex';
+    $('rdPage').querySelectorAll('.rd-ex').forEach(b => b.onclick = () => { render(b.dataset.m); const t = $(`sec-${b.dataset.m}-${b.dataset.sc}`); if (t) { $('rdPage').scrollTop = t.offsetTop - 8; const fb = t.querySelector('.rd-figbtn'); if (fb) open3D(fb); } }); }
+  function render(m) { if (m === 'ex') return renderEx(); const M = MOVES[m], sc = M.scenes || [['base', '기본', M]], ci = CH.findIndex(c => c[0] === m); figNo = 0;
+    const framed = sc.some(x => FRAME.some(fr => fr[0] === x[1]));
+    let h = `<p class="rd-kick">${ci + 1}단원 · ${CH[ci][1]}</p><h1>${esc(M.name)}</h1><p class="rd-lead">${esc(M.pattern || '')}</p>`;
+    if (m === 'squat' || m === 'pushup') h += `<a class="rd-cta cam" href="${camUrl(m)}" target="_blank" rel="noopener"><b>📷 카메라로 내 ${M.name} 자세 평가</b><span>폰 카메라가 자세를 보고 바로 알려 줘요 ›</span></a>`;
+    if (m === 'train') h += `<a class="rd-cta lab" href="${labUrl()}" target="_blank" rel="noopener"><b>🧪 실험실: 내가 고른 무게로 근육 키우기</b><span>다섯 가지 원리를 직접 해 보고 퀴즈로 정리해요 ›</span></a>`;
+    const groups = framed ? FRAME.map(([g, lb]) => [lb, sc.filter(x => x[1] === g)]).filter(([, xs]) => xs.length) : [['', sc]];
+    h += `<nav class="rd-toc">${groups.map(([lb, xs]) => `${lb ? `<b>${lb}</b>` : ''}${xs.map(([k, , d]) => `<a href="#sec-${m}-${k}">${esc(d.sceneLabel || d.name)}</a>`).join('')}`).join('')}</nav>`;
+    let n = 0; groups.forEach(([lb, xs]) => { if (lb) h += `<p class="rd-grp">${lb}</p>`; xs.forEach(([k, , d]) => { n++; h += scenePart(m, k, d, `${ci + 1}-${n}`); }); });
+    if (M.quiz) h += `<section class="rd-sec rd-quiz"><h2><span class="rd-no">✓</span><span class="rd-h2t">확인 문제</span></h2>${M.quiz.map(([q, o, a, fb], qi) => `<div class="rd-q" data-a="${a}" data-fb="${fb}"><p><b>${qi + 1}.</b> ${q}</p>${[0, 1, 2].map(k => (k + qi) % 3).map(k => `<button type="button" data-k="${k}">${o[k]}</button>`).join('')}<p class="rd-qfb"></p></div>`).join('')}</section>`;
+    const nx = CH[ci + 1]; if (nx) h += `<button type="button" class="rd-next" data-ch="${nx[0]}">다음 단원: ${MOVES[nx[0]].name} ›</button>`;
+    $('rdPage').innerHTML = h; $('rdPage').scrollTop = 0; $('rdCh').value = m;
+    $('rdPage').querySelectorAll('.rd-figbtn').forEach(b => b.onclick = () => { lastY = $('rdPage').scrollTop; open3D(b); });
+    $('rdPage').querySelectorAll('.rd-step').forEach(b => b.onclick = () => { const fb = b.closest('.rd-sec').querySelector('.rd-figbtn'); lastY = $('rdPage').scrollTop; show3D(b.dataset.m, b.dataset.sc, b.dataset.v, mqPop.matches ? b : fb, true);
+      state.playing = false; state.t = +b.dataset.t; syncPlay(); slider.value = Math.round(state.t * 1000); $('rdPage').querySelectorAll('.rd-step').forEach(x => x.setAttribute('aria-pressed', x === b)); });
+    $('rdPage').querySelectorAll('.rd-next').forEach(b => b.onclick = () => render(b.dataset.ch));
+    $('rdPage').querySelectorAll('.rd-q').forEach(q => q.querySelectorAll('button').forEach(b => b.onclick = () => { const ok = b.dataset.k === q.dataset.a; q.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong')); b.classList.add(ok ? 'right' : 'wrong'); if (!ok) q.querySelector(`[data-k="${q.dataset.a}"]`).classList.add('right'); q.querySelector('.rd-qfb').textContent = (ok ? '맞아요! ' : '다시 생각해 봐요. ') + q.dataset.fb; }));
+    $('rdPage').querySelectorAll('.rd-toc a').forEach(a => a.onclick = e => { e.preventDefault(); const t = $(a.getAttribute('href').slice(1)); $('rdPage').scrollTo({ top: t.offsetTop - 8, behavior: reduce ? 'auto' : 'smooth' }); });
+    const first = $('rdPage').querySelector('.rd-figbtn'); if (first) show3D(first.dataset.m, first.dataset.sc, first.dataset.v, first, false); }
+  function show3D(m, sc, v, btn, openIt) { if (state.m !== m) setMove(m); if (state.sc !== sc) setScene(sc); setVariant(v);
+    const d = state.def; $('rdFigT').textContent = `${btn.querySelector('.rd-fignum')?.textContent || '따라 해 보기'} · ${d.sceneLabel || d.name}`;
+    $('rdTabs').innerHTML = Object.entries(d.variants).map(([k, x]) => `<button type="button" data-v="${k}" class="${(d.neutral ? x.warn : k !== 'good' && !x.ok) ? 'bad' : ''}" aria-pressed="${k === v}">${esc(x.short || x.name.split(' → ')[0])}</button>`).join('');
+    $('rdTabs').querySelectorAll('button').forEach(b => b.onclick = () => { setVariant(b.dataset.v); $('rdTabs').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); });
+    $('rdPage').querySelectorAll('.rd-figbtn').forEach(x => x.classList.toggle('on', x === btn));
+    $('rdYt').href = ytUrl(m, d); const cam = m === 'squat' || m === 'pushup'; $('rdCam').hidden = !cam; if (cam) $('rdCam').href = camUrl(m); $('rdLab').hidden = m !== 'train'; if (m === 'train') $('rdLab').href = labUrl();
+    if (openIt) root.dataset.open = '1'; setTimeout(resize, 30); setTimeout(resize, 300); }
+  function open3D(b) { show3D(b.dataset.m, b.dataset.sc, b.dataset.v, b, true); }
+  // ---- 팝업: 폰 세로에서는 그림을 누르면 3D가 글 위로 일어서며 튀어나옴
+  const mqPop = matchMedia('(max-width:899px) and (orientation:portrait)'); let popOn = false, popK = 0, popTo = 0, popBtn = null;
+  const base = new THREE.Mesh(new THREE.CircleGeometry(.8, 48), new THREE.MeshStandardMaterial({ color: 0xf4ecd8, roughness: .95 })); base.rotation.x = -Math.PI / 2; base.position.y = .002; base.receiveShadow = true; base.visible = false; scene.add(base);
+  const look = on => { base.visible = on; if (on) { for (const e in ENVS) ENVS[e].visible = false; scene.background = null; scene.fog.near = 60; scene.fog.far = 90; } };
+  const _setEnv = setEnv; setEnv = k => { if (!scene.background) scene.background = new THREE.Color(); _setEnv(k); look(popOn); };
+  const figs = () => [fig, ghost, ...extras];
+  window.__rdTick = dt => { if (popK === popTo) return; popK = popTo > popK ? Math.min(popTo, popK + dt / .55) : Math.max(popTo, popK - dt / .3);
+    const x = popK, e = popTo ? 1 + 2.2 * Math.pow(x - 1, 3) + 1.2 * Math.pow(x - 1, 2) : x * x; for (const g of figs()) g.g.scale.set(1, Math.max(.001, e), 1);
+    if (popK === 0 && !popTo) finishClose(); };
+  function placePop(btn) { const fg = $('rdFig'), pg = $('rdPage'), top = pg.getBoundingClientRect().top;
+    let r = btn.getBoundingClientRect(); const want = innerHeight * .86; if (r.top < top + 420 || r.top > want) { pg.scrollTop += r.top - want; r = btn.getBoundingClientRect(); } lastY = pg.scrollTop;
+    let H = Math.min(580, r.top - top - 8); if (H < 400) { H = Math.min(580, innerHeight * .72); fg.style.top = (top + 6) + 'px'; } else fg.style.top = (r.top + 14 - H) + 'px'; fg.style.height = H + 'px'; }
+  function openPop(btn) { popBtn = btn; popOn = true; look(true); const fg = $('rdFig'); fg.classList.add('pop'); fg.classList.remove('closing'); placePop(btn);
+    popK = 0; popTo = 1; for (const g of figs()) g.g.scale.set(1, .001, 1); fg.style.animation = 'none'; void fg.offsetWidth; fg.style.animation = ''; }
+  function closePop() { if (!popOn) { root.dataset.open = ''; return; } $('rdFig').classList.add('closing'); popTo = 0; if (reduce) { popK = 0; finishClose(); } }
+  function finishClose() { if (!popOn) return; popOn = false; root.dataset.open = ''; const fg = $('rdFig'); fg.classList.remove('pop', 'closing'); fg.style.top = fg.style.height = '';
+    for (const g of figs()) g.g.scale.set(1, 1, 1); look(false); setEnv(state.def.env || 'gym'); setView(state.view); setTimeout(resize, 30); }
+  const _show3D = show3D; show3D = (m, sc, v, btn, openIt) => { _show3D(m, sc, v, btn, openIt); if (openIt && mqPop.matches) { openPop(btn); setTimeout(resize, 30); } };
+  $('rdPage').addEventListener('pointerdown', e => { if (popOn && !e.target.closest('.rd-figbtn,.rd-step')) closePop(); });
+  let lastY = 0; $('rdPage').addEventListener('scroll', () => { if (popOn && Math.abs($('rdPage').scrollTop - lastY) > 60) closePop(); }); $('rdPage').addEventListener('scroll', () => { if (!popOn) lastY = $('rdPage').scrollTop; });
+  const _open = open3D; open3D = b => { lastY = $('rdPage').scrollTop; _open(b); setTimeout(() => { lastY = $('rdPage').scrollTop; }, 50); };
+  mqPop.addEventListener('change', () => { if (popOn) { popTo = 0; popK = 0; finishClose(); } });
+  $('rdX').onclick = () => closePop();
+  $('rdCh').onchange = e => render(e.target.value);
+  if (HYBRID) {
+    document.body.classList.add('hybrid'); root.hidden = true; let curCh = null;
+    const _render = render; render = m => { curCh = m; _render(m); };
+    const pb = $('pb');
+    // 장면 화면 맨 위: 글로 돌아가기 + 보기 방식(3D+글 · 글 · 3D)
+    $('pbHome').insertAdjacentHTML('afterend', '<button type="button" class="nv-read" id="pbRead">📖 글로</button>');
+    $('nvYt').insertAdjacentHTML('afterend', '<div class="nv-view" id="nvView" role="group" aria-label="보기 방식"><button type="button" data-vw="both" aria-pressed="true">3D+글</button><button type="button" data-vw="text" aria-pressed="false">글만</button><button type="button" data-vw="3d" aria-pressed="false">3D만</button></div>');
+    const setVw = w => { pb.dataset.vw = w; $('nvView').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.vw === w)); setTimeout(() => { resize(); setView(state.view); }, 60); };
+    $('nvView').querySelectorAll('button').forEach(b => b.onclick = () => setVw(b.dataset.vw)); pb.dataset.vw = 'both';
+    const scrollToSec = (m, sc) => { const t = $(`sec-${m}-${sc}`); if (t) $('rdPage').scrollTop = t.offsetTop - 8; };
+    const hyOpen = (m, sc, v, t) => { root.hidden = true; window.__pbGoScene(m, sc); setVariant(v); setVw(pb.dataset.vw === 'text' ? 'both' : pb.dataset.vw);
+      if (t != null) { state.playing = false; state.t = t; syncPlay(); slider.value = Math.round(t * 1000); } };
+    window.__hyGo = (m, sc) => { root.hidden = false; if (curCh !== m) render(m); scrollToSec(m, sc); };
+    window.__hyBack = () => { root.hidden = false; if (curCh !== state.m && MOVES[state.m]?.scenes && CH.some(c => c[0] === state.m)) { render(state.m); scrollToSec(state.m, state.sc); }
+      else if (curCh == null) render('squat'); };
+    $('pbRead').onclick = () => { const m = state.m, sc = state.sc; root.hidden = false; if (CH.some(c => c[0] === m)) { if (curCh !== m) render(m); scrollToSec(m, sc); } else if (curCh == null) render('squat'); };
+    $('rdToc').onclick = () => { root.hidden = true; window.__pbToc(null); };
+    show3D = (m, sc, v, btn, openIt) => { if (openIt) hyOpen(m, sc, v); };
+    open3D = b => hyOpen(b.dataset.m, b.dataset.sc, b.dataset.v);
+    // 따라 해 보기 단계: 장면을 열고 그 단계에서 멈춤
+    $('rdPage').addEventListener('click', e => { const b = e.target.closest('.rd-step'); if (!b) return; e.stopImmediatePropagation(); hyOpen(b.dataset.m, b.dataset.sc, b.dataset.v, +b.dataset.t); }, true);
+  }
+  if (!HYBRID) render('squat');
+}
+
 
 loop();
 </script>
