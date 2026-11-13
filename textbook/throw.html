@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14191c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="../icon-192.png">
+<link rel="apple-touch-icon" href="../icon-192.png">
+<title>던지기의 과학</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: 한 쪽 = 한 가지 원리. 위 단원·쪽, 가운데 3D 실험(사람 모형 없이 공·궤적·회전판), 아래 조작과 핵심 정리, 맨 아래 쪽 넘기기. 넓은 화면은 3D 왼쪽 · 글 오른쪽 */
+:root{
+  --bg:#edf1f4; --surface:#ffffff; --ink:#16212b; --muted:#5a6773; --line:#d3dbe2;
+  --sky:#dfeaf3; --field:#4c9a63; --chalk:#ffffff; --ball:#ff6a1a; --vx:#2463c4; --grav:#d6336c; --good:#2f8a4e;
+  --f-disp:'Do Hyeon','IBM Plex Sans KR',system-ui,sans-serif;
+  --f-body:'IBM Plex Sans KR',system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --f-num:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1418; --surface:#162027; --ink:#e5ecf1; --muted:#93a3af; --line:#2a3741;
+  --sky:#15232d; --field:#2e7046; --chalk:#e8eef2; --ball:#ff7a33; --vx:#6aa2ff; --grav:#ff5c8f; --good:#5cc47e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1418; --surface:#162027; --ink:#e5ecf1; --muted:#93a3af; --line:#2a3741;
+  --sky:#15232d; --field:#2e7046; --chalk:#e8eef2; --ball:#ff7a33; --vx:#6aa2ff; --grav:#ff5c8f; --good:#5cc47e; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.6;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--vx);outline-offset:2px}
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px;gap:10px;max-width:1280px;margin:0 auto}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.brand{font-family:var(--f-disp);font-size:24px;line-height:1;margin-right:auto;display:flex;align-items:center;gap:8px}
+.brand i{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--ball);box-shadow:0 0 0 3px color-mix(in srgb,var(--ball) 25%,transparent)}
+.back{font-size:14px;font-weight:600;color:var(--muted);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:var(--surface)}
+.chs{display:flex;gap:6px;width:100%}
+.chs button{flex:1;white-space:nowrap;min-height:46px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 12px}
+.chs button small{font-family:var(--f-num);font-size:12px;color:var(--muted);font-weight:500}
+.chs button[aria-current="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chs button[aria-current="true"] small{color:color-mix(in srgb,var(--bg) 70%,transparent)}
+.page{min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr);gap:10px}
+.head{display:grid;gap:2px}
+.kick{font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--ball)}
+.head h1{font-family:var(--f-disp);font-weight:400;font-size:clamp(26px,6vw,36px);line-height:1.15;margin:0;text-wrap:balance}
+.lead{margin:0;color:var(--muted);font-size:16px}
+.body{min-height:0;display:grid;grid-template-rows:minmax(0,1.5fr) minmax(0,1fr);gap:10px}
+.stage{position:relative;min-height:0;border-radius:16px;overflow:hidden;background:var(--sky);border:1px solid var(--line)}
+.stage canvas{display:block;width:100%;height:100%;touch-action:none}
+.read{position:absolute;left:10px;top:10px;display:flex;flex-wrap:wrap;gap:6px;pointer-events:none;max-width:calc(100% - 20px);z-index:2}
+.read span{background:color-mix(in srgb,var(--surface) 92%,transparent);border:1px solid var(--line);border-radius:10px;padding:3px 10px;font-size:13.5px;color:var(--muted)}
+.read b{font-family:var(--f-num);color:var(--ink);margin-left:4px;font-variant-numeric:tabular-nums}
+.read .ok{border-color:var(--good);color:var(--good)}.read .no{border-color:var(--grav);color:var(--grav)}
+.labels{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+.lb{position:absolute;transform:translate(-50%,-100%);white-space:nowrap;font-size:12.5px;font-weight:700;color:var(--ink);background:color-mix(in srgb,var(--surface) 88%,transparent);border-radius:7px;padding:1px 7px}
+.lb.vx{color:var(--vx)}.lb.gr{color:var(--grav)}.lb.ball{color:var(--ball)}.lb.good{color:var(--good)}.lb.plain{background:none;color:var(--chalk);font-family:var(--f-num);font-weight:600;font-size:11.5px}
+.hint{position:absolute;right:10px;bottom:8px;font-size:12px;color:var(--muted);pointer-events:none;z-index:2}
+.stage canvas.gcv{position:absolute;z-index:2;pointer-events:none;border-radius:12px;border:1px solid var(--line)}
+.stage canvas.gcv[hidden]{display:none}
+.stage canvas.gcv.card{right:8px;bottom:8px;width:min(48%,270px);height:min(42%,150px)}
+.stage canvas.gcv.wide{left:8px;bottom:8px;width:calc(100% - 16px);height:34%}
+.hint{top:auto}
+.side{display:grid;gap:10px;align-content:start;min-height:0;overflow-y:auto}
+.ctl{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ctl button{min-height:46px;padding:0 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-weight:700;font-size:15px}
+.ctl button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.ctl .go{background:var(--ball);border-color:var(--ball);color:#fff}
+.ctl label{flex:1 1 220px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;color:var(--muted)}
+.ctl input[type=range]{flex:1;min-width:0;height:36px;accent-color:var(--ball)}
+.ctl output{font-family:var(--f-num);color:var(--ink);min-width:3.5ch}
+.key{margin:0;padding:12px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font-size:16.5px}
+.key b{color:var(--ball)}
+.key .f{display:block;font-family:var(--f-num);font-size:15px;color:var(--ink);background:var(--sky);border-radius:8px;padding:6px 10px;margin-top:8px}
+.try{margin:0;font-size:15px;color:var(--muted)}
+.try b{color:var(--ink)}
+.quiz{display:grid;gap:14px}
+.q{display:grid;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.q p{margin:0;font-weight:700}
+.q .opts{display:grid;gap:6px}
+.q .opts button{text-align:left;min-height:48px;padding:8px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);font-size:15.5px}
+.q .opts button.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,var(--bg))}
+.q .opts button.wrong{border-color:var(--grav);background:color-mix(in srgb,var(--grav) 10%,var(--bg))}
+.q .fb{font-size:15px;color:var(--muted);margin:0}
+.q .fb:empty{display:none}
+.nav{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px}
+.nav button{min-height:50px;padding:0 18px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);font-weight:700;font-size:16px}
+.nav .nx{background:var(--ball);border-color:var(--ball);color:#fff}
+.nav button:disabled{opacity:.35;cursor:default}
+.dots{display:flex;justify-content:center;gap:6px}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--ink);width:24px;border-radius:5px}
+.page[data-kind="quiz"] .stage{display:none}
+.page[data-kind="quiz"] .body{grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1fr)}
+.load{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:15px}
+@media (min-width:860px) and (min-aspect-ratio:1/1){
+  .body{grid-template-rows:none;grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr)}
+  .chs{width:auto}
+}
+@media (orientation:landscape) and (max-height:520px){
+  .app{padding-block:6px;gap:6px}
+  .body{grid-template-rows:none;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
+  .head h1{font-size:24px}.lead{display:none}.chs{width:auto}.chs button{min-height:40px}
+  .nav button{min-height:42px}.key{font-size:15px;padding:9px 12px}
+}
+</style>
+
+<div class="app">
+  <header class="top">
+    <span class="brand"><i aria-hidden="true"></i>던지기의 과학</span>
+    <a class="back" id="back" href="hybrid.html#throw">교과서로</a>
+    <nav class="chs" id="chs" aria-label="단원"></nav>
+  </header>
+  <main class="page" id="page">
+    <div class="head"><span class="kick" id="kick"></span><h1 id="h1"></h1><p class="lead" id="lead"></p></div>
+    <div class="body">
+      <div class="stage" id="stage"><canvas id="cv" aria-label="던지기 원리를 보여 주는 3D 실험 화면"></canvas><div class="labels" id="labels"></div><div class="read" id="read" aria-live="polite"></div><canvas class="gcv" id="gcv" hidden></canvas><span class="hint" id="hint">끌어서 돌려 보기</span><div class="load" id="load">3D를 불러오는 중…</div></div>
+      <section class="side" id="side"></section>
+    </div>
+  </main>
+  <footer class="nav"><button type="button" id="prev">‹ 앞</button><div class="dots" id="dots" aria-hidden="true"></div><button type="button" class="nx" id="next">다음 ›</button></footer>
+</div>
+
+<script type="importmap">
+{"imports":{"three":"./lib/three.module.js","three/addons/":"./lib/addons/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+const $ = id => document.getElementById(id);
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const G = 9.8, D = Math.PI / 180, clamp = (x, a, b) => Math.max(a, Math.min(b, x)), V = (x, y, z) => new THREE.Vector3(x, y, z), UP = V(0, 1, 0);
+const C = {}; function tokens() { const s = getComputedStyle(document.documentElement); for (const k of ['ink', 'muted', 'line', 'sky', 'field', 'chalk', 'ball', 'vx', 'grav', 'good', 'surface']) C[k] = s.getPropertyValue('--' + k).trim(); }
+tokens();
+
+// ---------- 3D 기본 ----------
+const cv = $('cv'), stage = $('stage');
+const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.outputColorSpace = THREE.SRGBColorSpace;
+const scene = new THREE.Scene(); scene.background = new THREE.Color(C.sky);
+const camera = new THREE.PerspectiveCamera(40, 1, .05, 300);
+const controls = new OrbitControls(camera, cv); controls.enableDamping = true; controls.maxPolarAngle = Math.PI * .495; controls.enablePan = false;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8899aa, 1.35));
+const sun = new THREE.DirectionalLight(0xffffff, 2.2); sun.position.set(-8, 18, 10); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, near: 1, far: 60 }); scene.add(sun, sun.target);
+const mat = c => new THREE.MeshStandardMaterial({ color: new THREE.Color(c), roughness: .55 });
+const basic = (c, o = 1) => new THREE.MeshBasicMaterial({ color: new THREE.Color(c), transparent: o < 1, opacity: o, depthWrite: o === 1 });
+function resize() { const w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+new ResizeObserver(resize).observe(cv);
+
+// 3D 도우미
+function ball(c, r = .11) { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 24, 16), mat(c)); m.castShadow = true; return m; }
+function Arrow(c, r = .045) { const g = new THREE.Group(), m = mat(c), sh = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 1, 12), m), hd = new THREE.Mesh(new THREE.ConeGeometry(r * 2.8, r * 7, 16), m); g.add(sh, hd);
+  g.set = (o, v) => { const L = v.length(); g.visible = L > 1e-3; if (!g.visible) return; const hl = Math.min(r * 7, L * .5); g.position.copy(o); g.quaternion.setFromUnitVectors(UP, v.clone().normalize()); sh.scale.y = Math.max(.001, L - hl); sh.position.y = (L - hl) / 2; hd.position.y = L - hl / 2; }; return g; }
+function tube(pts, c, r = .05, o = 1) { const m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.length > 1 ? pts : [pts[0], pts[0].clone().add(V(.01, 0, 0))]), Math.max(8, pts.length), r, 8), basic(c, o)); m.userData.tub = Math.max(8, pts.length); return m; }
+const reveal = (m, f) => m.geometry.setDrawRange(0, Math.floor(clamp(f, 0, 1) * m.userData.tub) * 8 * 6);
+function rod(a, b, r, c) { const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 1, 12), mat(c)); m.castShadow = true; m.place = (a, b) => { const d = b.clone().sub(a), L = d.length(); m.position.copy(a).addScaledVector(d, .5); m.scale.set(1, Math.max(.001, L), 1); m.quaternion.setFromUnitVectors(UP, d.normalize()); }; m.place(a, b); return m; }
+function field(Gp, len, wid, step, extra = []) { const grd = new THREE.Mesh(new THREE.PlaneGeometry(len + 40, wid + 40), mat(C.field)); grd.rotation.x = -Math.PI / 2; grd.position.set(len / 2, 0, 0); grd.receiveShadow = true; Gp.add(grd);
+  const labs = []; const marks = [...Array(Math.floor(len / step) + 1).keys()].map(i => i * step).concat(extra);
+  for (const x of marks) { const l = new THREE.Mesh(new THREE.PlaneGeometry(.06, wid), basic(C.chalk, .85)); l.rotation.x = -Math.PI / 2; l.position.set(x, .005, 0); Gp.add(l); labs.push([V(x, 0, wid / 2 + .4), x + 'm', 'plain']); }
+  const side = new THREE.Mesh(new THREE.PlaneGeometry(len, .05), basic(C.chalk, .85)); side.rotation.x = -Math.PI / 2; side.position.set(len / 2, .005, wid / 2); Gp.add(side); return labs; }
+function zone(Gp, x) { const g = new THREE.Group(), lo = .5, hi = 1.2, w = .43; const m = basic(C.good, .22), f = new THREE.Mesh(new THREE.PlaneGeometry(w, hi - lo), m); f.rotation.y = Math.PI / 2; f.position.set(x, (lo + hi) / 2, 0); g.add(f);
+  const e = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(.02, hi - lo, w)), new THREE.LineBasicMaterial({ color: new THREE.Color(C.good) })); e.position.copy(f.position); g.add(e);
+  const plate = new THREE.Mesh(new THREE.CircleGeometry(.25, 5), basic(C.chalk)); plate.rotation.x = -Math.PI / 2; plate.position.set(x, .006, 0); g.add(plate); Gp.add(g); return g; }
+// 공의 길 계산: 발사 높이 h0, 빠르기 v(m/s), 발사각 a(도)
+function flight(v, a, h0, xMax = 1e9) { const vx = v * Math.cos(a * D), vy = v * Math.sin(a * D), pts = []; let T = 0, end = 'ground';
+  for (let t = 0; t < 8; t += .01) { const x = vx * t, y = h0 + vy * t - .5 * G * t * t; if (x >= xMax) { const tt = xMax / vx; pts.push(V(xMax, h0 + vy * tt - .5 * G * tt * tt, 0)); T = tt; end = 'target'; break; } if (y <= 0 && t > 0) { pts.push(V(x, 0, 0)); T = t; break; } pts.push(V(x, y, 0)); T = t; }
+  const last = pts[pts.length - 1]; return { pts, T, vx, vy, h0, end, at: t => V(vx * t, h0 + vy * t - .5 * G * t * t, 0), top: h0 + Math.max(0, vy) ** 2 / (2 * G), dist: last.x, endY: last.y }; }
+const SPOT = a => a <= -32 ? '머리 뒤' : a <= -12 ? '머리 위(뒤쪽)' : a <= 12 ? '머리 위' : a <= 34 ? '눈썹 위(앞)' : a <= 58 ? '눈앞' : '가슴 앞';
+
+// ---------- 쪽 ----------
+const PAGES = [], chapter = { a: { name: '공의 길', icon: 'A' }, b: { name: '몸의 회전', icon: 'B' } };
+let root = null, S = {};
+function setCam(p, t) { camera.position.copy(p); controls.target.copy(t); controls.update(); }
+
+PAGES.push({ id: 'a1', ch: 'a', kick: '공의 길 1', h1: '던진 공은 두 가지만 받아요', lead: '손을 떠난 공에는 "던진 방향으로 가려는 움직임"과 "아래로 당기는 중력"만 남아요.',
+  side: `<div class="ctl"><button type="button" data-g="on" aria-pressed="true">중력 있음</button><button type="button" data-g="off" aria-pressed="false">중력이 없다면?</button><button type="button" class="go" data-act="re">다시 던지기</button></div>
+    <p class="key">흐린 공은 <b>0.1초마다</b> 남긴 공의 자리예요. 공 사이의 <b>앞뒤 간격은 늘 같고</b>(파란 화살표 그대로), 위로 가던 움직임은 중력 때문에 점점 줄다가 아래로 바뀌어요(분홍 화살표). 두 움직임이 합쳐진 길이 <b>포물선</b>이에요.</p>
+    <p class="try"><b>그래프 읽기</b> 오른쪽 아래 그래프에서 앞으로 간 거리는 <b>곧은 선</b>(늘 같은 빠르기), 높이는 <b>산 모양</b>(올라갔다 내려옴)이에요.</p><p class="try"><b>해 보기</b> "중력이 없다면?"을 눌러 보세요. 공은 던진 방향으로 곧게 날아가요.</p>`,
+  build(g) { S.grav = true; S.t0 = performance.now(); S.labs = field(g, 25, 6, 5); const h0 = 1.6;
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, h0, 8), basic(C.muted, .6)); post.position.y = h0 / 2; g.add(post);
+    const pad = new THREE.Mesh(new THREE.CircleGeometry(.5, 32), basic(C.chalk, .5)); pad.rotation.x = -Math.PI / 2; pad.position.y = .006; g.add(pad);
+    S.ghosts = Array.from({ length: 30 }, () => { const b = ball(C.ball, .085); b.material.transparent = true; b.material.opacity = .55; b.visible = false; g.add(b); return b; });
+    S.guides = Array.from({ length: 30 }, () => { const l = new THREE.Mesh(new THREE.CylinderGeometry(.01, .01, 1, 6), basic(C.chalk, .5)); l.visible = false; g.add(l); return l; });
+    S.b = ball(C.ball, .13); g.add(S.b); S.ax = Arrow(C.vx); S.ay = Arrow(C.grav); g.add(S.ax, S.ay);
+    S.make = () => { if (S.path) { g.remove(S.path); S.path.geometry.dispose(); } const v = 15, a = 40; S.F = S.grav ? flight(v, a, h0) : { T: 1.9, at: t => V(v * Math.cos(a * D) * t, h0 + v * Math.sin(a * D) * t, 0) };
+      const pts = Array.from({ length: 50 }, (_, i) => S.F.at(S.F.T * i / 49)); S.path = tube(pts, C.ball, .025, .55); g.add(S.path); };
+    S.make(); setCam(V(12.5, 6.5, 21), V(11.5, 4, 0)); },
+  bind(side) { side.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { S.grav = b.dataset.g === 'on'; side.querySelectorAll('[data-g]').forEach(x => x.setAttribute('aria-pressed', x === b)); S.make(); S.t0 = performance.now(); });
+    side.querySelector('[data-act=re]').onclick = () => S.t0 = performance.now(); },
+  update(now) { const F = S.F, T = F.T, tt = reduce ? T : Math.min(T, ((now - S.t0) / 1000) * .5 % (T + 1.4)), v = 15, a = 40;
+    reveal(S.path, tt / T); let i = 0; for (let t = 0; t <= tt + 1e-6 && i < 30; t += .1, i++) { const p = F.at(t); S.ghosts[i].visible = true; S.ghosts[i].position.copy(p); S.guides[i].visible = true; S.guides[i].position.set(p.x, p.y / 2, 0); S.guides[i].scale.y = Math.max(.001, p.y); }
+    for (; i < 30; i++) { S.ghosts[i].visible = false; S.guides[i].visible = false; }
+    S.tt = tt; const p = F.at(tt), vx = v * Math.cos(a * D), vy = v * Math.sin(a * D) - (S.grav ? G * tt : 0), k = .12; S.b.position.copy(p); S.ax.set(p, V(vx * k, 0, 0)); S.ay.set(p, V(0, vy * k, 0));
+    return { read: [['시간', tt.toFixed(1) + '초'], ['높이', p.y.toFixed(1) + 'm'], ['거리', p.x.toFixed(1) + 'm']],
+      labels: [...S.labs, [p.clone().add(V(vx * k + .3, .2, 0)), '앞으로 (그대로)', 'vx'], [p.clone().add(V(0, vy * k + (vy >= 0 ? .45 : -.1), 0)), vy >= 0 ? '위로 (점점 느려짐)' : '아래로 (점점 빨라짐)', 'gr']] }; } });
+
+PAGES.push({ id: 'a2', ch: 'a', kick: '공의 길 2', h1: '발사각이 길을 바꿔요', lead: '같은 힘으로 던져도, 공이 손을 떠나는 각도(발사각)에 따라 높이와 거리가 달라져요.',
+  side: `<div class="ctl"><label for="ang">발사각<input id="ang" type="range" min="5" max="80" step="1" value="45"><output id="angV">45°</output></label></div>
+    <div class="ctl"><button type="button" data-a="15">15°</button><button type="button" data-a="30">30°</button><button type="button" data-a="45">45°</button><button type="button" data-a="60">60°</button><button type="button" data-a="75">75°</button></div>
+    <p class="key">같은 빠르기라면 <b>45° 근처</b>에서 가장 멀리 가요. 각도가 크면 <b>높이만</b> 올라가고, 작으면 금방 땅에 닿아요. 그래서 <b>멀리 던지기</b>는 비스듬히 위로, <b>포수에게 빠르게</b> 보낼 때는 낮게 던져요.<span class="f">30°와 60°는 떨어지는 곳이 같아요. 높이와 걸린 시간만 달라요.</span></p>
+    <p class="try">흐린 선은 앞에서 던진 공의 길이에요. 오른쪽 아래 그래프에 던진 각도마다 거리가 점으로 찍혀요. 산꼭대기가 45°예요.</p>`,
+  build(g) { S.a = 45; S.trails = []; S.t0 = performance.now(); S.labs = field(g, 30, 8, 5); S.g = g; S.b = ball(C.ball, .2); g.add(S.b); S.arr = Arrow(C.vx, .06); g.add(S.arr);
+    S.land = new THREE.Mesh(new THREE.RingGeometry(.35, .5, 32), basic(C.chalk)); S.land.rotation.x = -Math.PI / 2; S.land.position.y = .01; g.add(S.land);
+    S.make = () => { if (S.path) { g.remove(S.path); S.path.geometry.dispose(); } if (S.arc) { g.remove(S.arc); S.arc.geometry.dispose(); }
+      S.F = flight(16, S.a, 0); S.path = tube(S.F.pts, C.ball, .08); g.add(S.path);
+      S.arc = new THREE.Mesh(new THREE.RingGeometry(1.4, 1.5, 32, 1, 0, S.a * D), basic(C.vx)); g.add(S.arc); S.arr.set(V(0, 0, 0), V(Math.cos(S.a * D), Math.sin(S.a * D), 0).multiplyScalar(2.6)); S.land.position.x = S.F.dist; };
+    S.make(); setCam(V(15, 7, 29), V(13.5, 4.2, 0)); },
+  bind(side) { const set = a => { if (S.a !== a) { const old = tube(flight(16, S.a, 0).pts, C.muted, .04, .5); old.userData.a = S.a; S.g.add(old); S.trails.push(old); if (S.trails.length > 4) { const o = S.trails.shift(); S.g.remove(o); o.geometry.dispose(); } }
+      S.a = a; side.querySelector('#ang').value = a; side.querySelector('#angV').textContent = a + '°'; side.querySelectorAll('[data-a]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.a === a)); S.make(); S.t0 = performance.now(); };
+    side.querySelector('#ang').onchange = e => set(+e.target.value); side.querySelector('#ang').oninput = e => side.querySelector('#angV').textContent = e.target.value + '°';
+    side.querySelectorAll('[data-a]').forEach(b => b.onclick = () => set(+b.dataset.a)); side.querySelector('[data-a="45"]').setAttribute('aria-pressed', 'true'); },
+  update(now) { const F = S.F, tt = reduce ? F.T : Math.min(F.T, ((now - S.t0) / 1000) * .55); reveal(S.path, tt / F.T); S.b.position.copy(tt >= F.T ? F.pts[F.pts.length - 1] : F.at(tt)); S.land.visible = tt >= F.T;
+    const labs = [...S.labs, [V(1.9, .5, 0), S.a + '°', 'vx'], ...S.trails.map(o => { const T = flight(16, o.userData.a, 0); return [T.pts[Math.floor(T.pts.length / 2)].clone().add(V(0, .4, 0)), o.userData.a + '°', '']; })];
+    if (tt >= F.T) labs.push([V(F.dist, .7, 0), F.dist.toFixed(1) + 'm', 'ball']); labs.push([V(F.pts[Math.floor(F.pts.length / 2)].x, F.top + .7, 0), '최고 ' + F.top.toFixed(1) + 'm', 'ball']);
+    return { read: [['최고 높이', F.top.toFixed(1) + 'm'], ['날아간 거리', F.dist.toFixed(1) + 'm'], ['걸린 시간', F.T.toFixed(2) + '초']], labels: labs }; } });
+
+PAGES.push({ id: 'a3', ch: 'a', kick: '공의 길 3', h1: '어디서 놓느냐가 발사각을 정해요', lead: '던지는 팔은 어깨를 중심으로 원을 그려요. 공은 손이 원을 따라 가던 방향, 곧 원의 바깥쪽으로 날아가요.',
+  side: `<div class="ctl"><label for="rel">머리 뒤<input id="rel" type="range" min="-50" max="65" step="1" value="-4">눈앞</label></div>
+    <div class="ctl"><button type="button" data-r="-40">머리 뒤</button><button type="button" data-r="-4">머리 위</button><button type="button" data-r="45">눈앞</button></div>
+    <p class="key"><b>머리 뒤</b>에서 놓으면 손이 아직 위로 올라가는 중이라 공이 <b>위로</b> 떠요. <b>눈앞</b>에서 놓으면 손이 이미 내려가는 중이라 공이 <b>아래로</b> 꽂혀요. 투수판에서 홈플레이트(18.44m)까지 곧게 보내려면 <b>머리 위</b>에서 놓아요.</p>
+    <p class="try"><b>해 보기</b> 원 위의 주황 공을 손가락으로 끌어서 옮겨 보세요.</p>`,
+  build(g) { S.r = -4; S.trails = []; S.t0 = performance.now(); S.g = g; S.labs = field(g, 20, 4, 6, [18.44]).filter(l => l[1] !== '18m'); zone(g, 18.44);
+    const sh = V(0, 1.5, 0), R = .72; S.sh = sh; S.R = R;
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(R, .012, 8, 96), basic(C.muted, .8)); ring.position.copy(sh); g.add(ring);
+    const disc = new THREE.Mesh(new THREE.CircleGeometry(R, 64), basic(C.surface, .35)); disc.position.copy(sh); g.add(disc);
+    const sDot = ball(C.ink, .06); sDot.position.copy(sh); g.add(sDot);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(.12, 24, 16), mat(C.line)); head.position.set(.05, sh.y + .3, -.22); g.add(head);
+    S.arm = rod(sh, sh.clone().add(V(0, R, 0)), .025, C.muted); g.add(S.arm); S.hand = ball(C.ball, .1); g.add(S.hand); S.tan = Arrow(C.vx, .03); g.add(S.tan);
+    S.b = ball(C.ball, .1); g.add(S.b); S.mk = new THREE.Mesh(new THREE.SphereGeometry(.07, 16, 12), basic(C.ball)); g.add(S.mk);
+    S.make = () => { if (S.path) { g.remove(S.path); S.path.geometry.dispose(); } const a = S.r, hp = sh.clone().add(V(R * Math.sin(a * D), R * Math.cos(a * D), 0));
+      S.hp = hp; S.F = flight(25, -a, hp.y, 18.44); S.F.pts.forEach(p => p.x += hp.x); const at = S.F.at; S.F.at = t => at(t).add(V(hp.x, 0, 0));
+      S.path = tube(S.F.pts, C.ball, .035); g.add(S.path); S.arm.place(sh, hp); S.hand.position.copy(hp); S.tan.set(hp, V(Math.cos(a * D), -Math.sin(a * D), 0).multiplyScalar(.6)); };
+    S.make(); setCam(V(-2.6, 2.4, 3.9), V(2.6, 1.25, -.5)); },
+  bind(side) { const set = (r, keep) => { if (!keep && S.r !== r) { const o = tube(S.F.pts, C.muted, .02, .5); S.g.add(o); S.trails.push(o); if (S.trails.length > 3) { const x = S.trails.shift(); S.g.remove(x); x.geometry.dispose(); } }
+      S.r = r; side.querySelector('#rel').value = r; S.make(); S.t0 = performance.now(); }; S.set = set;
+    side.querySelector('#rel').oninput = e => set(+e.target.value, true); side.querySelector('#rel').onchange = e => set(+e.target.value);
+    side.querySelectorAll('[data-r]').forEach(b => b.onclick = () => set(+b.dataset.r)); },
+  drag(x, y, start) { const r = cv.getBoundingClientRect(), p = S.hand.position.clone().project(camera), hx = (p.x + 1) / 2 * r.width, hy = (1 - p.y) / 2 * r.height;
+    if (start && Math.hypot(x - hx, y - hy) > 44) return false;
+    const ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(x / r.width * 2 - 1, -y / r.height * 2 + 1), camera); const hit = V(0, 0, 0); ray.ray.intersectPlane(new THREE.Plane(V(0, 0, 1), 0), hit);
+    if (!hit) return true; const a = Math.atan2(hit.x - S.sh.x, hit.y - S.sh.y) / D; S.set(Math.round(clamp(a, -50, 65)), true); return true; },
+  update(now) { const F = S.F, tt = reduce ? F.T : Math.min(F.T, ((now - S.t0) / 1000) * .3); reveal(S.path, tt / F.T); S.b.position.copy(tt >= F.T ? F.pts[F.pts.length - 1] : F.at(tt)); S.mk.position.copy(F.pts[F.pts.length - 1]); S.mk.visible = tt >= F.T;
+    const e = F.endY, [c, res] = F.end === 'target' ? (e >= .5 && e <= 1.2 ? ['ok', '스트라이크!'] : e > 1.2 ? ['no', `${(e - 1.2).toFixed(1)}m 높게 지나감`] : ['no', '낮게 들어옴']) : ['no', `${(18.44 - F.dist).toFixed(1)}m 앞에서 땅`];
+    const sh = S.sh; return { read: [['놓는 곳', SPOT(S.r)], ['발사각', (S.r <= 0 ? '위 ' : '아래 ') + Math.abs(S.r) + '°'], [res, '', c]],
+      labels: [...S.labs, [S.hp.clone().add(V(0, .22, 0)), SPOT(S.r), 'ball'], [sh.clone().add(V(-.05, -.12, 0)), '어깨', ''], [V(.05, sh.y + .48, -.22), '머리', ''], [V(18.44, 1.45, 0), '스트라이크 존', 'good'], [S.hp.clone().add(V(Math.cos(S.r * D) * .75, -Math.sin(S.r * D) * .75 + .12, 0)), '공이 떠나는 방향', 'vx']] }; } });
+
+PAGES.push({ id: 'a4', ch: 'a', kind: 'quiz', kick: '공의 길 정리', h1: '확인해 볼까요?', lead: '앞에서 실험한 것을 떠올리며 골라 보세요.',
+  quiz: [['공이 자꾸 포수 머리 위로 높이 날아가요. 무엇을 바꿔야 할까요?', ['공을 조금 더 늦게(앞에서) 놓는다', '공을 더 일찍(머리 뒤에서) 놓는다', '더 세게만 던진다'], 0, '일찍 놓으면 손이 위로 가는 중이라 공이 떠요. 조금 더 앞에서 놓으면 발사각이 낮아져요.'],
+    ['같은 힘으로 가장 멀리 던지려면 발사각은 어느 쪽이 좋을까요?', ['45° 근처', '10°', '80°'], 0, '너무 낮으면 금방 떨어지고, 너무 높으면 높이만 올라가요. 45° 근처가 가장 멀리 가요.'],
+    ['날아가는 공의 "앞으로 가는 빠르기"는 어떻게 될까요?', ['거의 그대로 유지된다', '점점 빨라진다', '곧바로 0이 된다'], 0, '0.1초마다 남긴 공의 앞뒤 간격이 늘 같았죠? 중력은 아래로만 당겨서 앞으로 가는 빠르기는 거의 그대로예요.']] });
+
+PAGES.push({ id: 'b1', ch: 'b', kick: '몸의 회전 1', h1: '돌 때는 바깥쪽이 더 빨라요', lead: '회전목마에서 바깥쪽 말이 안쪽 말보다 같은 시간에 더 긴 길을 돌아요. 던지는 팔도 같아요.',
+  side: `<div class="ctl"><label for="spin">천천히<input id="spin" type="range" min="1" max="10" step="1" value="5">빨리 돌기</label></div>
+    <p class="key">한 바퀴 도는 시간은 세 공이 모두 같지만, <b>바깥쪽 공</b>은 같은 시간에 더 긴 원을 돌아서 <b>더 빨라요</b>(화살표가 더 길어요). 그래서 팔을 몸에 붙이지 않고 <b>뻗어서 돌리면</b> 손끝의 공이 빨라지고, <b>빨리 돌릴수록</b> 또 빨라져요.<span class="f">손끝 빠르기 = 몸에서 떨어진 거리 × 도는 빠르기</span></p>`,
+  build(g) { S.w = 5; S.ang = 0; S.last = performance.now(); const floor = new THREE.Mesh(new THREE.CircleGeometry(8, 64), mat(C.line)); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; g.add(floor);
+    S.disk = new THREE.Group(); g.add(S.disk); const plate = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.6, .12, 64), mat(C.surface)); plate.position.y = .06; plate.receiveShadow = true; S.disk.add(plate);
+    for (const r of [.8, 1.6, 2.4]) { const l = new THREE.Mesh(new THREE.TorusGeometry(r, .012, 6, 96), basic(C.muted, .6)); l.rotation.x = Math.PI / 2; l.position.y = .125; S.disk.add(l); }
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(2.5, .06, .1), mat(C.ink)); bar.position.set(1.25, .16, 0); S.disk.add(bar);
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(.12, .12, 1.2, 16), mat(C.ink)); post.position.y = .6; g.add(post);
+    S.rs = [[.8, '몸 가까이', C.muted], [1.6, '팔 굽힘', C.vx], [2.4, '팔 뻗음', C.ball]];
+    S.balls = S.rs.map(([r, , c]) => { const b = ball(c, r === 2.4 ? .2 : .15); g.add(b); return b; }); S.arrows = S.rs.map(([, , c]) => { const a = Arrow(c, .04); g.add(a); return a; });
+    S.trails = S.rs.map(([, , c]) => { const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints(Array.from({ length: 40 }, () => V(0, 0, 0))), new THREE.LineBasicMaterial({ color: new THREE.Color(c), transparent: true, opacity: .7 })); g.add(l); return l; });
+    setCam(V(0, 6.2, 6.4), V(0, 0, 0)); },
+  bind(side) { side.querySelector('#spin').oninput = e => S.w = +e.target.value; },
+  update(now) { const dt = Math.min(.05, (now - S.last) / 1000); S.last = now; const om = S.w * .32; if (!reduce) S.ang += om * dt; S.disk.rotation.y = -S.ang;
+    const labels = [], read = [['도는 빠르기', S.w + '단계']];
+    S.rs.forEach(([r, nm], i) => { const p = V(r * Math.cos(S.ang), .32, r * Math.sin(S.ang)); S.balls[i].position.copy(p); const v = r * om, tdir = V(-Math.sin(S.ang), 0, Math.cos(S.ang)); S.arrows[i].set(p, tdir.multiplyScalar(v * .45));
+      const pos = S.trails[i].geometry.attributes.position; for (let k = 0; k < 40; k++) { const a = S.ang - k * .03; pos.setXYZ(k, r * Math.cos(a), .32, r * Math.sin(a)); } pos.needsUpdate = true;
+      labels.push([p.clone().add(V(0, .45, 0)), nm, i === 2 ? 'ball' : i === 1 ? 'vx' : '']); read.push([nm, (v * 1.4).toFixed(1) + ' m/s']); });
+    labels.push([V(0, 1.35, 0), '회전축(몸)', '']); return { read, labels }; } });
+
+const CHAIN = [['다리·허리', '#7a8b99', 1.1], ['몸통·어깨', '#2463c4', 1], ['위팔', '#c2410c', .8], ['아래팔·손', '#ff6a1a', .75]];
+const MODES = { seq: { name: '차례로 (채찍처럼)', peaks: [.18, .3, .41, .5], amp: [.35, .55, .8, 1], tip: 31 }, all: { name: '한꺼번에', peaks: [.36, .36, .36, .36], amp: [.42, .45, .5, .55], tip: 20 }, arm: { name: '팔로만', peaks: [9, 9, .38, .45], amp: [0, 0, .5, .6], tip: 13 } };
+const gauss = (x, p) => Math.exp(-((x - p) ** 2) / (2 * .045 ** 2)), erf = x => { const t = 1 / (1 + .3275911 * Math.abs(x)), y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - .284496736) * t + .254829592) * t * Math.exp(-x * x); return x >= 0 ? y : -y; };
+const cumG = (x, p) => .5 * (1 + erf((x - p) / (.045 * Math.SQRT2)));
+PAGES.push({ id: 'b2', ch: 'b', kick: '몸의 회전 2', h1: '큰 부위부터 차례로, 채찍처럼', lead: '잘 던지는 사람은 다리와 허리가 먼저 돌고, 그 힘이 몸통 → 위팔 → 아래팔·손 순서로 넘어가요.',
+  side: `<div class="ctl"><button type="button" data-m="seq" aria-pressed="true">차례로</button><button type="button" data-m="all" aria-pressed="false">한꺼번에</button><button type="button" data-m="arm" aria-pressed="false">팔로만</button></div>
+    <p class="key">채찍 손잡이를 휘두르면 끝이 가장 빨라지는 것처럼, <b>먼저 돈 부위가 멈추면서</b> 다음 부위에 힘을 넘겨요. 그래서 <b>끝(손)으로 갈수록 빨라져요</b>. 한꺼번에 돌리거나 팔로만 던지면 넘겨받는 힘이 없어서 손끝이 덜 빨라요.<span class="f">아래 그래프: 각 부위가 가장 빨리 도는 순간이 차례로 와요</span></p>
+    <p class="try">숫자는 원리를 보여 주려고 만든 예시예요.</p>`,
+  build(g) { S.m = 'seq'; S.t0 = performance.now(); const floor = new THREE.Mesh(new THREE.CircleGeometry(9, 64), mat(C.line)); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; g.add(floor);
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(.14, .18, .9, 16), mat(C.ink)); post.position.y = .45; g.add(post);
+    S.segs = CHAIN.map(([, c, L]) => { const r = rod(V(0, .9, 0), V(L, .9, 0), .11 - 0 * L, c); g.add(r); return r; });
+    S.joints = CHAIN.map(([, c]) => { const j = ball(c, .14); g.add(j); return j; }); S.tip = ball(C.ball, .2); g.add(S.tip);
+    S.trail = new THREE.Line(new THREE.BufferGeometry().setFromPoints(Array.from({ length: 50 }, () => V(0, .9, 0))), new THREE.LineBasicMaterial({ color: new THREE.Color(C.ball) })); g.add(S.trail); S.tp = [];
+    setCam(V(0, 9, 6.2), V(-.2, 0, .6)); },
+  bind(side) { side.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { S.m = b.dataset.m; S.t0 = performance.now(); S.tp = []; side.querySelectorAll('[data-m]').forEach(x => x.setAttribute('aria-pressed', x === b)); }); },
+  update(now) { const M = MODES[S.m], u = reduce ? .62 : (((now - S.t0) / 1000) * .35) % 1.2, t = Math.min(u, 1); if (u < .02) S.tp = [];
+    let p = V(0, .9, 0), ang = 160; const labels = [];
+    CHAIN.forEach(([nm, , L], i) => { ang -= M.amp[i] ? 115 * cumG(t, M.peaks[i]) : 0; const a = (ang + i * 10) * D, q = p.clone().add(V(Math.cos(a) * L, 0, -Math.sin(a) * L)); S.segs[i].place(p, q); S.joints[i].position.copy(p); labels.push([p.clone().lerp(q, .5).add(V(0, .25, 0)), nm, '']); p = q; });
+    S.tip.position.copy(p); S.tp.unshift(p.clone()); if (S.tp.length > 50) S.tp.pop(); const pos = S.trail.geometry.attributes.position; for (let k = 0; k < 50; k++) { const q = S.tp[Math.min(k, S.tp.length - 1)]; pos.setXYZ(k, q.x, q.y, q.z); } pos.needsUpdate = true;
+    S.gt = t; labels.push([p.clone().add(V(0, .4, 0)), '공', 'ball']);
+    return { read: [['방법', M.name], ['손끝 최고 빠르기', M.tip + ' m/s'], ['공 빠르기', Math.round(M.tip * 3.6 * .82) + ' km/h']], labels }; },
+  chartKind: 'wide', chart(x, W, H) { drawGraph(x, W, H, MODES[S.m], S.gt || 0); } });
+function drawGraph(x, W, H, M, t) {
+  const gx = 14, gw = W - 28, gy = H - 18, gH = H - 44; x.strokeStyle = C.line; x.lineWidth = 1.5; x.beginPath(); x.moveTo(gx, gy); x.lineTo(gx + gw, gy); x.stroke();
+  x.font = '600 11.5px "IBM Plex Sans KR", sans-serif'; x.fillStyle = C.muted; x.textAlign = 'right'; x.fillText('시간 →', gx + gw, gy + 14); x.textAlign = 'left'; x.fillText('도는 빠르기', gx, 16);
+  CHAIN.forEach(([nm, col], i) => { if (!M.amp[i]) return; x.beginPath(); for (let k = 0; k <= 120; k++) { const xx = k / 120, yy = gy - M.amp[i] * gauss(xx, M.peaks[i]) * gH; k ? x.lineTo(gx + xx * gw, yy) : x.moveTo(gx + xx * gw, yy); } x.strokeStyle = col; x.lineWidth = 2.5; x.stroke();
+    x.fillStyle = col; x.textAlign = 'center'; x.font = '700 11.5px "IBM Plex Sans KR", sans-serif'; x.fillText(nm, gx + M.peaks[i] * gw, gy - M.amp[i] * gH - 5); });
+  x.setLineDash([3, 4]); x.strokeStyle = C.ink; x.beginPath(); x.moveTo(gx + t * gw, 22); x.lineTo(gx + t * gw, gy); x.stroke(); x.setLineDash([]); }
+
+PAGES.push({ id: 'b3', ch: 'b', kick: '몸의 회전 3', h1: '빠른 공은 덜 떨어져요', lead: '몸을 차례로 써서 빨라진 공은 포수까지 가는 시간이 짧아요. 중력이 끌어내릴 시간도 그만큼 짧아요.',
+  side: `<div class="ctl"><button type="button" class="go" data-act="re">같이 던지기</button></div>
+    <p class="key">두 공을 <b>같은 높이에서 수평으로</b> 던졌어요. 흐린 공은 0.1초마다의 자리예요. 느린 공은 오래 날아서 <b>많이 떨어지고</b> 홈플레이트(18.44m)에 못 가요. 빠른 공은 <b>조금만</b> 떨어져서 거의 직선처럼 가요.</p>
+    <p class="try"><b>공의 길 2</b>와 이어 보세요. 느린 공을 멀리 보내려면 발사각을 높여야 해서 포물선이 커져요.</p>`,
+  build(g) { S.t0 = performance.now(); S.labs = field(g, 20, 4, 6, [18.44]).filter(l => l[1] !== '18m'); zone(g, 18.44);
+    S.set = [[13, '팔로만 47km/h', C.muted, -.45], [32, '온몸으로 115km/h', C.ball, .45]].map(([v, nm, c, z]) => { const F = flight(v, 0, 1.8, 18.44); F.pts.forEach(p => p.z = z);
+      const path = tube(F.pts, c, .02, .5); g.add(path); const b = ball(c, .11); g.add(b); const gh = Array.from({ length: 16 }, () => { const m = ball(c, .08); m.material.transparent = true; m.material.opacity = .5; m.visible = false; g.add(m); return m; }); return { v, nm, c, z, F, b, gh }; });
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, 1.8, 8), basic(C.muted, .6)); post.position.y = .9; g.add(post);
+    setCam(V(9.5, 3.2, 14), V(9.2, 1, 0)); },
+  bind(side) { side.querySelector('[data-act=re]').onclick = () => S.t0 = performance.now(); },
+  update(now) { const el = reduce ? 9 : ((now - S.t0) / 1000) * .4, read = [], labels = [...S.labs, [V(18.44, 1.45, 0), '스트라이크 존', 'good']];
+    S.set.forEach(s => { const F = s.F, tt = Math.min(F.T, el); let i = 0; for (let t = 0; t <= tt + 1e-6 && i < 16; t += .1, i++) { const p = F.at(t); p.z = s.z; s.gh[i].visible = p.y >= 0; s.gh[i].position.copy(p); } for (; i < 16; i++) s.gh[i].visible = false;
+      const p = tt >= F.T ? F.pts[F.pts.length - 1] : F.at(tt); p.z = s.z; s.b.position.copy(p); const e = F.pts[F.pts.length - 1];
+      labels.push([V(Math.min(e.x, 14), Math.max(e.y, .1) + .55, s.z), s.nm, s.c === C.ball ? 'ball' : '']);
+      read.push([s.nm.split(' ')[0], F.end === 'target' ? `${F.T.toFixed(2)}초 · ${(1.8 - e.y).toFixed(1)}m 떨어짐` : `${F.T.toFixed(2)}초 · ${(18.44 - e.x).toFixed(1)}m 앞에서 땅`]); });
+    return { read, labels }; } });
+
+PAGES.push({ id: 'b4', ch: 'b', kind: 'quiz', kick: '몸의 회전 정리', h1: '확인해 볼까요?', lead: '회전과 채찍 효과를 떠올리며 골라 보세요.',
+  quiz: [['손끝(공)을 더 빠르게 하려면 팔을 어떻게 해야 할까요?', ['몸에서 멀리 뻗어 돌린다', '몸에 딱 붙인다', '돌리지 않고 민다'], 0, '같은 빠르기로 돌 때, 몸에서 멀수록 같은 시간에 더 긴 원을 돌아서 빨라요.'],
+    ['잘 던지는 사람의 몸은 어떤 순서로 돌까요?', ['다리·허리 → 몸통 → 위팔 → 손', '손 → 위팔 → 몸통 → 다리', '모두 동시에'], 0, '큰 부위가 먼저 돌고 멈추며 다음 부위에 힘을 넘겨줘요. 채찍처럼 끝이 가장 빨라져요.'],
+    ['팔로만 던진 느린 공이 포수에게 못 가고 떨어지는 까닭은?', ['날아가는 시간이 길어 중력이 오래 끌어내려서', '공이 무거워져서', '바람이 없어서'], 0, '느린 공은 같은 거리를 가는 데 오래 걸려요. 그동안 중력이 계속 아래로 당겨요.']] });
+
+
+// ---------- 2D 그래프 (3D와 함께 보는 다른 표현) ----------
+function axes(x, W, H, l, b, xl, yl) { x.strokeStyle = C.line; x.lineWidth = 1.5; x.beginPath(); x.moveTo(l, 8); x.lineTo(l, H - b); x.lineTo(W - 8, H - b); x.stroke(); x.font = '600 11px "IBM Plex Sans KR", sans-serif'; x.fillStyle = C.muted; x.textAlign = 'right'; x.fillText(xl, W - 8, H - b + 14); x.textAlign = 'left'; x.fillText(yl, l + 4, 16); }
+function curve(x, pts, col, w = 2.5) { x.beginPath(); pts.forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b)); x.strokeStyle = col; x.lineWidth = w; x.stroke(); }
+function cdot(x, a, b, r, col) { x.beginPath(); x.arc(a, b, r, 0, 7); x.fillStyle = col; x.fill(); }
+function ctext(x, s, a, b, col, al = 'center', w = 700) { x.font = `${w} 11.5px "IBM Plex Sans KR", sans-serif`; x.fillStyle = col; x.textAlign = al; x.fillText(s, a, b); }
+const CHARTS = {
+  a1(x, W, H) { const F = S.F, T = F.T, tt = S.tt || 0, half = (W - 12) / 2, plots = [['앞으로 간 거리', t => F.at(t).x, 25, C.vx], ['높이', t => F.at(t).y, 6.5, C.grav]];
+    plots.forEach(([nm, fn, mx, col], i) => { const ox = 6 + i * half, l = ox + 22, b = 20, w = half - 30, h = H - 40, X = t => l + t / T * w, Y = v => H - b - clamp(v / mx, 0, 1) * h;
+      x.strokeStyle = C.line; x.lineWidth = 1.2; x.beginPath(); x.moveTo(l, 10); x.lineTo(l, H - b); x.lineTo(l + w, H - b); x.stroke();
+      curve(x, Array.from({ length: 40 }, (_, k) => { const t = T * k / 39; return [X(t), Y(fn(t))]; }), col); cdot(x, X(tt), Y(fn(tt)), 4.5, C.ball);
+      ctext(x, nm, l + 4, 14, col, 'left'); ctext(x, '시간 →', l + w, H - 6, C.muted, 'right', 600); });
+  },
+  a2(x, W, H) { const l = 30, b = 22, w = W - l - 12, h = H - b - 26, X = a => l + a / 90 * w, Y = d => H - b - d / 27 * h, dist = a => 16 * 16 * Math.sin(2 * a * D) / G;
+    axes(x, W, H, l, b, '발사각 →', '날아간 거리'); curve(x, Array.from({ length: 91 }, (_, a) => [X(a), Y(dist(a))]), C.vx);
+    for (const a of [0, 45, 90]) ctext(x, a + '°', X(a), H - b + 14, C.muted, 'center', 600);
+    (S.trails || []).forEach(o => cdot(x, X(o.userData.a), Y(dist(o.userData.a)), 4, C.muted));
+    cdot(x, X(S.a), Y(dist(S.a)), 6, C.ball); ctext(x, dist(S.a).toFixed(1) + 'm', X(S.a), Y(dist(S.a)) - 9, C.ball); ctext(x, '가장 멀리', X(45), Y(dist(45)) + 16, C.vx); },
+  b1(x, W, H) { const om = S.w * .32, rows = S.rs.map(([r, nm, c]) => [nm, r * om * 1.4, c]), mx = 2.4 * 3.2 * 1.4, l = 66, top = 26, rh = (H - top - 8) / 3;
+    ctext(x, '손끝 빠르기 (m/s)', 8, 16, C.muted, 'left', 600);
+    rows.forEach(([nm, v, c], i) => { const y = top + i * rh; ctext(x, nm, 8, y + rh * .62, C.ink, 'left', 600); x.fillStyle = C.line; x.fillRect(l, y + rh * .2, W - l - 46, rh * .55); x.fillStyle = c; x.fillRect(l, y + rh * .2, (W - l - 46) * v / mx, rh * .55); ctext(x, v.toFixed(1), W - 8, y + rh * .62, C.ink, 'right', 600); }); },
+  b3(x, W, H) { const rows = S.set.map(s => { const e = s.F.pts[s.F.pts.length - 1]; return [s.nm.split(' ')[0], s.F.T, s.F.end === 'target' ? 1.8 - e.y : 1.8, s.c]; }), half = (H - 26) / 2;
+    [['포수까지 걸린 시간', 1, 1.5, '초'], ['떨어진 높이', 2, 1.8, 'm']].forEach(([nm, k, mx, u], j) => { const y0 = 6 + j * half; ctext(x, nm, 8, y0 + 12, C.muted, 'left', 600);
+      rows.forEach((r, i) => { const y = y0 + 18 + i * (half - 22) / 2, bh = (half - 26) / 2; x.fillStyle = C.line; x.fillRect(70, y, W - 120, bh); x.fillStyle = r[3]; x.fillRect(70, y, (W - 120) * clamp(r[k] / mx, 0, 1), bh); ctext(x, r[0], 8, y + bh * .8, C.ink, 'left', 600); ctext(x, r[k].toFixed(2) + u + (k === 2 && r[2] >= 1.8 ? '+' : ''), W - 8, y + bh * .8, C.ink, 'right', 600); }); }); } };
+PAGES.forEach(p => { if (CHARTS[p.id]) { p.chart = CHARTS[p.id]; p.chartKind = 'card'; } });
+const gcv = $('gcv'); function drawChart(P) { if (!P.chart) return; const r = gcv.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2); if (!r.width) return;
+  if (gcv.width !== Math.round(r.width * d) || gcv.height !== Math.round(r.height * d)) { gcv.width = Math.round(r.width * d); gcv.height = Math.round(r.height * d); }
+  const x = gcv.getContext('2d'); x.setTransform(d, 0, 0, d, 0, 0); x.clearRect(0, 0, r.width, r.height); x.fillStyle = C.surface; x.globalAlpha = .93; x.fillRect(0, 0, r.width, r.height); x.globalAlpha = 1; P.chart(x, r.width, r.height); }
+
+// ---------- 화면 ----------
+let cur = 0;
+const pool = []; function labels(list) { const box = $('labels'), w = cv.clientWidth, h = cv.clientHeight; list.forEach(([p, text, cls], i) => { let el = pool[i]; if (!el) { el = document.createElement('div'); box.appendChild(el); pool[i] = el; }
+    const q = p.clone().project(camera), vis = q.z < 1 && Math.abs(q.x) < 1.1 && Math.abs(q.y) < 1.1; el.hidden = !vis; if (!vis) return; el.className = 'lb ' + (cls || ''); if (el.textContent !== text) el.textContent = text; el.style.left = ((q.x + 1) / 2 * w) + 'px'; el.style.top = ((1 - q.y) / 2 * h) + 'px'; });
+  for (let i = list.length; i < pool.length; i++) pool[i].hidden = true; }
+function dispose(o) { o.traverse(m => { m.geometry?.dispose(); if (m.material) [].concat(m.material).forEach(x => x.dispose()); }); }
+function render() { const P = PAGES[cur]; PAGES.forEach(p => p !== P && p.leave?.()); $('page').dataset.kind = P.kind || 'lab'; $('kick').textContent = P.kick; $('h1').textContent = P.h1; $('lead').textContent = P.lead;
+  $('chs').innerHTML = Object.entries(chapter).map(([k, c]) => { const ps = PAGES.filter(p => p.ch === k); const n = ps.findIndex(p => p.id === P.id); return `<button type="button" data-ch="${k}" aria-current="${P.ch === k}">${c.icon}. ${c.name}<small>${(n < 0 ? 0 : n) + 1}/${ps.length}</small></button>`; }).join('');
+  $('chs').querySelectorAll('[data-ch]').forEach(b => b.onclick = () => go(PAGES.findIndex(p => p.ch === b.dataset.ch)));
+  if (root) { scene.remove(root); dispose(root); } root = new THREE.Group(); scene.add(root); S = {}; scene.background = new THREE.Color(C.sky); controls.enabled = true;
+  const side = $('side');
+  if (P.kind === 'quiz') { side.innerHTML = `<div class="quiz">${P.quiz.map(([q, o, a], i) => `<div class="q" data-i="${i}"><p>${i + 1}. ${q}</p><div class="opts">${[0, 1, 2].map(k => (k + i) % 3).map(k => `<button type="button" data-k="${k}">${o[k]}</button>`).join('')}</div><p class="fb"></p></div>`).join('')}</div>`;
+    side.querySelectorAll('.q').forEach(qe => { const [, , a, fb] = P.quiz[+qe.dataset.i]; qe.querySelectorAll('button').forEach(b => b.onclick = () => { const ok = +b.dataset.k === a; qe.querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong')); b.classList.add(ok ? 'right' : 'wrong'); if (!ok) qe.querySelector(`[data-k="${a}"]`).classList.add('right'); qe.querySelector('.fb').textContent = (ok ? '맞아요! ' : '다시 생각해 봐요. ') + fb; }); }); }
+  else { side.innerHTML = P.side; P.build(root); P.bind?.(side); setTimeout(resize, 0); }
+  gcv.hidden = !P.chart; gcv.className = 'gcv ' + (P.chartKind || 'card'); $('hint').hidden = !!P.chart;
+  $('dots').innerHTML = PAGES.map((p, i) => `<i class="${i === cur ? 'on' : ''}"></i>`).join('');
+  $('prev').disabled = cur === 0; $('next').textContent = cur === PAGES.length - 1 ? '처음으로 ↺' : '다음 ›'; side.scrollTop = 0;
+  if (location.hash.slice(1) !== P.id) history.replaceState(null, '', '#' + P.id); }
+function go(i) { cur = (i + PAGES.length) % PAGES.length; render(); }
+$('prev').onclick = () => go(cur - 1); $('next').onclick = () => go(cur + 1);
+addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; if (e.key === 'ArrowRight') go(cur + 1); if (e.key === 'ArrowLeft' && cur > 0) go(cur - 1); });
+addEventListener('hashchange', () => { const i = PAGES.findIndex(p => p.id === location.hash.slice(1)); if (i >= 0 && i !== cur) { cur = i; render(); } });
+const retheme = () => { tokens(); render(); }; matchMedia('(prefers-color-scheme: dark)').addEventListener('change', retheme);
+new MutationObserver(retheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+let dragging = false; const pt = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+cv.addEventListener('pointerdown', e => { const P = PAGES[cur]; if (P.drag && P.drag(...pt(e), true)) { dragging = true; controls.enabled = false; cv.setPointerCapture(e.pointerId); } }, true);
+cv.addEventListener('pointermove', e => { if (dragging) PAGES[cur].drag(...pt(e), false); });
+cv.addEventListener('pointerup', () => { if (dragging) { dragging = false; controls.enabled = true; S.set?.(S.r); } });
+function loop(now) { const P = PAGES[cur]; if (P.update && cv.clientWidth) { const r = P.update(now) || {}; controls.update(); renderer.render(scene, camera); labels(r.labels || []); drawChart(P);
+    const html = (r.read || []).map(([k, v, c]) => `<span class="${c || ''}">${k}${v ? `<b>${v}</b>` : ''}</span>`).join(''); if ($('read').innerHTML !== html) $('read').innerHTML = html; } requestAnimationFrame(loop); }
+cur = Math.max(0, PAGES.findIndex(p => p.id === location.hash.slice(1))); resize(); render(); $('load').remove(); requestAnimationFrame(loop); window.__ready = true;
+</script>
+<script>
+setTimeout(function () { var l = document.getElementById('load'); if (l) l.textContent = '3D를 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요.'; }, 9000);
+</script>
+
+<script>
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>

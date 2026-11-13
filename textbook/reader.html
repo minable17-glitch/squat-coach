@@ -923,7 +923,7 @@ body.reader .rd-stage .ctrl{justify-content:flex-start;background:none;padding:0
 .rd-step[aria-pressed="true"]{border-color:var(--good);background:#eaf7ec}
 .rd-cta{display:grid;gap:2px;margin:14px 0 4px;padding:14px 16px;border-radius:14px;text-decoration:none;color:#fff}
 .rd-cta b{font-size:18px}.rd-cta span{font-size:14.5px;opacity:.9}
-.rd-cta.cam{background:var(--navy)}.rd-cta.lab{background:#5f3dc4}
+.rd-cta.cam{background:var(--navy)}.rd-cta.lab{background:#5f3dc4}.rd-cta.sci{background:#e8590c}
 .rd-act{flex:none;display:flex;align-items:center;height:40px;padding:0 11px;border-radius:10px;color:#fff;font-weight:700;font-size:14px;text-decoration:none;white-space:nowrap}
 .rd-act[hidden]{display:none}
 .rd-act.yt{background:#e03131}.rd-act.cam{background:#3b5bdb}.rd-act.lab{background:#7048e8}
@@ -3551,6 +3551,7 @@ if (READER) {
     let h = `<p class="rd-kick">${ci + 1}단원 · ${CH[ci][1]}</p><h1>${esc(M.name)}</h1><p class="rd-lead">${esc(M.pattern || '')}</p>`;
     if (m === 'squat' || m === 'pushup') h += `<a class="rd-cta cam" href="${camUrl(m)}" target="_blank" rel="noopener"><b>📷 카메라로 내 ${M.name} 자세 평가</b><span>폰 카메라가 자세를 보고 바로 알려 줘요 ›</span></a>`;
     if (m === 'train') h += `<a class="rd-cta lab" href="${labUrl()}" target="_blank" rel="noopener"><b>🧪 실험실: 내가 고른 무게로 근육 키우기</b><span>다섯 가지 원리를 직접 해 보고 퀴즈로 정리해요 ›</span></a>`;
+    if (m === 'throw') h += `<a class="rd-cta sci" href="https://claude.ai/artifact/WabJNMwy8qUtWLXhKDrcJX" target="_blank" rel="noopener"><b>⚾ 던지기의 과학: 3D 실험으로 원리 이해하기</b><span>발사각과 공의 길, 몸의 회전과 채찍 효과를 공·궤적·그래프로 실험해요 ›</span></a>`;
     const groups = framed ? FRAME.map(([g, lb]) => [lb, sc.filter(x => x[1] === g)]).filter(([, xs]) => xs.length) : [['', sc]];
     h += `<nav class="rd-toc">${groups.map(([lb, xs]) => `${lb ? `<b>${lb}</b>` : ''}${xs.map(([k, , d]) => `<a href="#sec-${m}-${k}">${esc(d.sceneLabel || d.name)}</a>`).join('')}`).join('')}</nav>`;
     let n = 0; groups.forEach(([lb, xs]) => { if (lb) h += `<p class="rd-grp">${lb}</p>`; xs.forEach(([k, , d]) => { n++; h += scenePart(m, k, d, `${ci + 1}-${n}`); }); });
