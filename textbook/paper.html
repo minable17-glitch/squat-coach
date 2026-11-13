@@ -1047,6 +1047,22 @@ body.hybrid .pb .stage canvas.xchart.card{height:min(34%,140px)!important}
 body.hybrid .pb .stage canvas.xchart.wide{height:min(30%,140px)!important}
 @media (max-width:600px){body.hybrid .pb .stage canvas.xchart.card{height:min(30%,118px)!important}}
 body.nofig .pg-flow .detail{display:none}
+
+/* 차례: 분류 기준 고르기 */
+.toc-lab{margin:4px 0 0;font-size:13px;font-weight:700;color:var(--pmuted)}
+.toc-modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;background:#efe7d3;border-radius:14px;padding:4px}
+.toc-modes button{min-height:44px;border:0;border-radius:10px;background:transparent;font-weight:700;font-size:14.5px;color:var(--pmuted)}
+.toc-modes button[aria-selected="true"]{background:var(--navy);color:#fff!important}
+.toc-base{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))!important}
+.toc-base .toc-mv{min-height:62px;align-content:center}
+.toc-base .toc-mv b{font-size:19px}
+.toc-use{border-top:1px dashed var(--pline);padding-top:10px;display:grid;gap:6px}
+.toc-use h3{margin:0;font-size:14px;font-weight:700;color:#fff;background:var(--gc);justify-self:start;padding:2px 12px;border-radius:999px}
+.toc-use p{margin:0;font-size:15px;color:var(--pmuted)}
+.toc-chips{display:flex;flex-wrap:wrap;gap:6px}
+.toc-chip{min-height:40px;padding:0 13px;border-radius:999px;border:1.5px solid var(--pline);background:#fff;font-weight:600;font-size:14.5px}
+.toc-grp h3.lv{background:#f28c38;letter-spacing:1px}
+.toc-row.ex small{display:inline}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -3646,22 +3662,42 @@ if (PAPER) {
   window.__pbMus = () => { const d = $('dname').closest('section'); $('pgFlow').scrollTo({ top: d.offsetTop - $('pgFlow').offsetTop, behavior: reduce ? 'auto' : 'smooth' }); };
   window.__pbGoScene = (m, sc) => { const i = idxOf(m, sc); if (i >= 0) show(i); };
   // 차례
-  let tocCat = '기본';
-  function openToc(cat) { if (cat) tocCat = cat; const CATD = { 기본: '움직임마다 가장 기본이 되는 동작', 응용: '기본 동작을 바꾸거나 도구를 더한 동작', 일상: '생활 속에서 같은 움직임이 쓰이는 장면', 스포츠: '경기에서 같은 움직임이 쓰이는 장면' };
-    const n = g => SEQ.filter(p => p.g === g).length, lbOf = g => FRAME.find(fr => fr[0] === g)[1];
-    const row = (p) => { const i = SEQ.indexOf(p); return `<button type="button" class="toc-row" data-i="${i}"><span>${p.d.sceneLabel || p.d.name}</span><i></i><b>›</b></button>`; };
-    const star = n => '★'.repeat(n) + '<i>' + '★'.repeat(5 - n) + '</i>';
-    const exList = () => `<div class="toc-ch">${Object.entries(EXMAP).map(([part, xs]) => `<div class="toc-grp"><h3 style="--gc:#14284b">${part}</h3>${xs.map(([key, n]) => { const [m, sc] = key.split(':'), i = SEQ.findIndex(p => p.m === m && p.sc === sc); if (i < 0) return ''; const p = SEQ[i];
-      return `<button type="button" class="toc-row ex" data-i="${i}"><span>${p.d.sceneLabel || p.d.name}<small>${MOVES[m].name}</small></span><em>${star(n)}</em></button>`; }).join('')}</div>`).join('')}</div>`;
-    const list = tocCat === '모음' ? exList() : tocCat === '기본' ? `<div class="toc-base">${MV.map((k, j) => { const p = SEQ.find(x => x.m === k && x.g === '기본'); return `<button type="button" class="toc-mv" data-i="${SEQ.indexOf(p)}"><small>움직임 ${j + 1}</small><b>${MOVES[k].name}</b><span>${p.d.sceneLabel || p.d.name}</span></button>`; }).join('')}</div>`
-      : `<div class="toc-ch">${MV.map(k => { const xs = SEQ.filter(p => p.m === k && p.g === tocCat); return `<div class="toc-grp"><h3 style="--gc:${GROUP_COLOR[tocCat]}">${MOVES[k].name}</h3>${xs.length ? xs.map(row).join('') : '<p class="toc-none">준비 중</p>'}</div>`; }).join('')}</div>`;
-    $('pbToc').innerHTML = `<section class="pg pg-l toc-l"><span class="ribbon">차례</span><h1><span>3D 체육 교과서</span></h1>
-        <div class="toc-cats" role="tablist" aria-label="기본, 응용, 일상에서, 스포츠에서">${FRAME.map(([g, lb]) => `<button type="button" role="tab" data-cat="${g}" aria-selected="${g === tocCat}" style="--gc:${GROUP_COLOR[g]}"><b>${lb}</b><small>${n(g)}개</small></button>`).join('')}</div>
-        <button type="button" class="toc-ex" data-cat="모음" aria-pressed="${tocCat === '모음'}"><b>💪 운동 모음</b><span>몸 부위 · 난이도(★)로 고르기</span></button>
+  let tocCat = '기본', tocMode = 'move', tocMv = 'squat'; try { tocMode = localStorage.getItem('toc-mode') || 'move'; } catch (e) { }
+  const VERB = { squat: ['앉기', '스쿼트'], lunge: ['한 발 딛기', '런지'], hinge: ['숙이기', '힙힌지'], pushup: ['밀기', '푸시업'], pull: ['당기기', '덤벨 로우'], plank: ['버티기', '플랭크'], throw: ['던지기', '공 던지기'] };
+  const MVO = ['squat', 'lunge', 'hinge', 'pushup', 'pull', 'plank', 'throw'];
+  const MODES = [['move', '인체 동작별'], ['frame', '기본·응용·일상·스포츠'], ['part', '몸 부위별'], ['level', '난이도별']];
+  const PART_N = { 하체: '하체', 상체: '상체', 몸통: '코어', 전신: '전신' };
+  function openToc(cat) { if (cat) tocCat = cat; const CATD = { 기본: '움직임마다 가장 기본이 되는 동작', 원리: '동작에 숨어 있는 과학 원리', 응용: '기본 동작을 바꾸거나 도구를 더한 동작', 일상: '생활 속에서 같은 움직임이 쓰이는 장면', 스포츠: '경기에서 같은 움직임이 쓰이는 장면' };
+    const n = g => SEQ.filter(p => p.g === g).length, lbOf = g => FRAME.find(fr => fr[0] === g)[1], idx = (m, sc) => SEQ.findIndex(p => p.m === m && p.sc === sc), nm = p => p.d.sceneLabel || p.d.name;
+    const row = p => `<button type="button" class="toc-row" data-i="${SEQ.indexOf(p)}"><span>${nm(p)}</span><i></i><b>›</b></button>`;
+    const star = k => '★'.repeat(k) + '<i>' + '★'.repeat(5 - k) + '</i>';
+    const exRow = ([key, k], sub) => { const [m, sc] = key.split(':'), i = idx(m, sc); if (i < 0) return ''; return `<button type="button" class="toc-row ex" data-i="${i}"><span>${nm(SEQ[i])}<small>${sub}</small></span><em>${star(k)}</em></button>`; };
+    const partOf = {}; for (const [pt, xs] of Object.entries(EXMAP)) for (const [key] of xs) partOf[key] = PART_N[pt];
+    const modeBar = `<div class="toc-modes" role="tablist" aria-label="분류 기준">${MODES.map(([k, lb]) => `<button type="button" role="tab" data-mode="${k}" aria-selected="${k === tocMode}">${lb}</button>`).join('')}</div>`;
+    let left = '', right = '';
+    if (tocMode === 'move') {
+      left = `<div class="toc-base">${MVO.map(k => `<button type="button" class="toc-mv" data-mv="${k}" aria-pressed="${k === tocMv}"><b>${VERB[k][0]}</b><span>${VERB[k][1]}</span></button>`).join('')}</div>`;
+      const xs = g => SEQ.filter(p => p.m === tocMv && p.g === g), uses = g => xs(g).map(p => `<button type="button" class="toc-chip" data-i="${SEQ.indexOf(p)}">${nm(p)}</button>`).join('');
+      right = `<span class="ribbon">${VERB[tocMv][0]}</span><p class="toc-desc">${MOVES[tocMv].pattern || ''}</p><div class="toc-ch">
+        ${['기본', '원리', '응용'].filter(g => xs(g).length).map(g => `<div class="toc-grp"><h3 style="--gc:${GROUP_COLOR[g] || '#7048e8'}">${lbOf(g)}</h3>${xs(g).map(row).join('')}</div>`).join('')}
+        ${['일상', '스포츠'].filter(g => xs(g).length).map(g => `<div class="toc-use"><h3 style="--gc:${GROUP_COLOR[g]}">${g === '일상' ? '일상에서는' : '스포츠에서는'}</h3><p>${VERB[tocMv][0]} 동작은 ${g === '일상' ? '생활 속' : '경기 속'} 이런 장면에서 쓰여요.</p><div class="toc-chips">${uses(g)}</div></div>`).join('')}</div>`;
+    } else if (tocMode === 'frame') {
+      left = `<div class="toc-cats" role="tablist" aria-label="기본, 원리, 응용, 일상에서, 스포츠에서">${FRAME.map(([g, lb]) => `<button type="button" role="tab" data-cat="${g}" aria-selected="${g === tocCat}" style="--gc:${GROUP_COLOR[g] || '#7048e8'}"><b>${lb}</b><small>${n(g)}개</small></button>`).join('')}</div>`;
+      right = `<span class="ribbon" style="background:${GROUP_COLOR[tocCat] || '#7048e8'}">${lbOf(tocCat)}</span><p class="toc-desc">${CATD[tocCat]}</p><div class="toc-ch">${MV.map(k => { const ys = SEQ.filter(p => p.m === k && p.g === tocCat); return ys.length ? `<div class="toc-grp"><h3 style="--gc:${GROUP_COLOR[tocCat] || '#7048e8'}">${MOVES[k].name}</h3>${ys.map(row).join('')}</div>` : ''; }).join('')}</div>`;
+    } else if (tocMode === 'part') {
+      left = `<p class="toc-desc">학교에서 맨몸이나 뜀틀로 할 수 있는 운동을 몸 부위별로, 쉬운 것부터 모았어요.</p>`;
+      right = `<span class="ribbon">몸 부위별</span><div class="toc-ch">${Object.entries(EXMAP).map(([pt, xs]) => `<div class="toc-grp"><h3 style="--gc:#14284b">${PART_N[pt]}</h3>${[...xs].sort((a, b) => a[1] - b[1]).map(x => exRow(x, VERB[x[0].split(':')[0]]?.[0] || '')).join('')}</div>`).join('')}</div>`;
+    } else {
+      const all = Object.values(EXMAP).flat(); left = `<p class="toc-desc">★ 하나부터 차례로 올라가요. 지금 쉽게 되는 단계 바로 위를 골라 보세요.</p>`;
+      right = `<span class="ribbon">난이도별</span><div class="toc-ch">${[1, 2, 3, 4, 5].map(k => { const ys = all.filter(x => x[1] === k); return ys.length ? `<div class="toc-grp"><h3 class="lv">${'★'.repeat(k)}</h3>${ys.map(x => exRow(x, partOf[x[0]])).join('')}</div>` : ''; }).join('')}</div>`;
+    }
+    $('pbToc').innerHTML = `<section class="pg pg-l toc-l"><span class="ribbon">차례</span><h1><span>3D 체육 교과서</span></h1><p class="toc-lab">분류 기준</p>${modeBar}${left}
         <div class="toc-extra"><button type="button" class="toc-mv x1" data-m="fitness"><b>💓 체력 요소</b><span>체력의 5가지 영역</span></button><button type="button" class="toc-mv x2" data-m="train"><b>🏋️ 트레이닝 원리</b><span>효과적인 운동 방법</span></button><button type="button" class="toc-mv x3" data-m="body"><b>🧍 몸 지도</b><span>근육으로 운동 찾기</span></button></div>
         ${started ? '<button type="button" class="toc-resume" id="tocResume">보던 장면으로 돌아가기 ›</button>' : ''}</section>
-      <section class="pg pg-r toc-r"><span class="ribbon" style="background:${tocCat === '모음' ? '#14284b' : GROUP_COLOR[tocCat]}">${tocCat === '모음' ? '운동 모음' : lbOf(tocCat)}</span><p class="toc-desc">${tocCat === '모음' ? '학교에서 맨몸이나 뜀틀로 할 수 있는 운동을 몸 부위와 난이도(★)로 모았어요. 쉬운 것부터 해 보세요.' : CATD[tocCat]}</p>${list}</section>`;
+      <section class="pg pg-r toc-r">${right}</section>`;
     $('pbToc').dataset.view = 'home'; $('pbToc').hidden = false; $('pbBook').hidden = true; root.dataset.toc = '1';
+    $('pbToc').querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { tocMode = b.dataset.mode; try { localStorage.setItem('toc-mode', tocMode); } catch (e) { } openToc(null); });
+    $('pbToc').querySelectorAll('[data-mv]').forEach(b => b.onclick = () => { tocMv = b.dataset.mv; openToc(null); if (mqPort.matches) $('pbToc').querySelector('.toc-r')?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); });
     $('pbToc').querySelectorAll('[data-cat]').forEach(b => b.onclick = () => openToc(b.dataset.cat));
     const go2 = i => window.__hyGo && SEQ[i].m !== 'body' ? window.__hyGo(SEQ[i].m, SEQ[i].sc) : show(i);
     $('pbToc').querySelectorAll('[data-m]').forEach(b => b.onclick = () => go2(firstOf(b.dataset.m)));

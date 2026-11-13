@@ -1,5 +1,5 @@
 // 한 번 열면 기기에 저장해서, 다음부터는 인터넷이 약해도 교과서가 열리게 해요
-const CACHE = 'pe-textbook-v9';
+const CACHE = 'pe-textbook-v10';
 const FILES = ['./', 'index.html', 'principles.html', 'book.html', 'manifest.webmanifest', 'lib/three.module.js', 'lib/addons/controls/OrbitControls.js', '../icon-192.png', '../icon-512.png'];
 self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('pe-textbook') && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())));
