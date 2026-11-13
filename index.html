@@ -341,15 +341,23 @@ function analyzePush(lm) {
     M.depth = clamp((E.calib.top - 6 - M.elbow) / Math.max(20, E.calib.top - 6 - 100), 0, 1.3); // 1 = 팔꿈치 100°
     const u = (J('hip').x - J('sh').x) / ((J('ankle').x - J('sh').x) || 1), off = (J('hip').y - (J('sh').y + (J('ankle').y - J('sh').y) * u)) / (len || 1);
     E.lineRun = M.line < 163 ? (E.lineRun || 0) + 1 : 0; M.lineBad = E.lineRun >= 4; M.sag = M.lineBad && off > 0; M.pike = M.lineBad && off <= 0;
-  } else { // 앞에서: 어깨가 손목 쪽으로 내려온 정도로 깊이
-    const ks = ['sh', 'el', 'wr'], Lp = k => lm[ARM.L[k]], Rp = k => lm[ARM.R[k]], mid = k => ({ x: (Lp(k).x + Rp(k).x) / 2, y: (Lp(k).y + Rp(k).y) / 2 });
-    M.visible = Math.min(vis('L', ks), vis('R', ks)) > .5; if (!M.visible) return M;
-    const sh = mid('sh'), wr = mid('wr'), hip = mid('hip'), d = wr.y - sh.y, shW = Math.abs(Lp('sh').x - Rp('sh').x);
+  } else { // 앞에서: 머리(얼굴)와 어깨가 손목 쪽으로 내려온 정도로 깊이. 내려가면 머리가 어깨를 가려도 얼굴은 잘 잡혀요
+    const Lp = k => lm[ARM.L[k]], Rp = k => lm[ARM.R[k]], mid = k => ({ x: (Lp(k).x + Rp(k).x) / 2, y: (Lp(k).y + Rp(k).y) / 2 });
+    const face = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => lm[i]).filter(p => p.v > .35), headOk = face.length >= 3;
+    const head = headOk ? { x: face.reduce((a, p) => a + p.x, 0) / face.length, y: face.reduce((a, p) => a + p.y, 0) / face.length } : null;
+    const armVis = k => (lm[ARM[k].sh].v + lm[ARM[k].el].v + lm[ARM[k].wr].v) / 3, wrOk = Math.min(Lp('wr').v, Rp('wr').v) > .25, shOk = Math.min(Lp('sh').v, Rp('sh').v) > .3;
+    M.visible = (Math.min(armVis('L'), armVis('R')) > .5) || (wrOk && headOk); if (!M.visible) return M; M.head = head;
+    if (location.hash === '#debug') window.__vis = { face: face.length, wr: [Lp('wr').v, Rp('wr').v], sh: [Lp('sh').v, Rp('sh').v] };
+    const sh = mid('sh'), wr = mid('wr'), d = wr.y - sh.y, dh = head ? wr.y - head.y : null, shW = Math.abs(Lp('sh').x - Rp('sh').x), wrW = Math.abs(Lp('wr').x - Rp('wr').x);
     M.elbow = (ang(Lp('sh'), Lp('el'), Lp('wr')) + ang(Rp('sh'), Rp('el'), Rp('wr'))) / 2;
-    const hipSeen = (Lp('hip').v + Rp('hip').v) / 2 > .5, prone = !hipSeen || (hip.y - sh.y) < .6 * Math.max(d, shW * .5); // 서 있으면 엉덩이가 어깨보다 한참 아래
-    if (M.elbow > 145 && d > shW * .6 && prone) { if (!E.stillSince) E.stillSince = now; if (now - E.stillSince > 900 && (!E.calib || E.phase === 'up')) E.calib = { armH: d }; } else E.stillSince = 0;
+    // 준비: 팔을 편 채 엎드려 1초. 서 있을 때는 손이 어깨보다 한참 아래이고 두 손이 좁아요 → 엎드리면 두 손이 어깨너비 이상
+    const hip = mid('hip'), hipSeen = (Lp('hip').v + Rp('hip').v) / 2 > .5, prone = (wrW > shW * .8 && d > shW * .4 && d < shW * 2.6) || !hipSeen || (hip.y - sh.y) < .6 * Math.max(d, shW * .5);
+    if (location.hash === '#debug') window.__pv = { wrW: wrW / shW, d: d / shW, el: M.elbow, prone };
+    if (M.elbow > 145 && prone) { if (!E.stillSince) E.stillSince = now; if (now - E.stillSince > 900 && (!E.calib || E.phase === 'up')) E.calib = { armH: d, headH: dh, shW }; } else E.stillSince = 0;
     M.ready = !!E.calib; if (!M.ready) return M;
-    M.depth = clamp((1 - d / E.calib.armH) / .5, 0, 1.3); // 1 = 어깨가 절반 높이까지 내려옴
+    const C = E.calib, dS = shOk ? clamp((1 - d / C.armH) / .5, 0, 1.3) : null, dH = head && C.headH ? clamp((1 - dh / C.headH) / .55, 0, 1.3) : null;
+    M.depth = dS != null && dH != null ? (dS + dH) / 2 : (dH ?? dS ?? 0);
+    if (M.elbow > 150 && (dS == null || dS < .3)) M.depth = Math.min(M.depth, .4); // 팔은 편 채 고개만 숙이면 인정 안 됨
   }
   return M;
 }
@@ -379,7 +387,7 @@ function track(M) {
 function liveCue(M) {
   if (performance.now() < E.cueUntil) return null;
   const push = S.ex === 'pushup', down = E.phase === 'down';
-  if (!M.visible) return [push ? (S.view === 'side' ? '몸 전체가 옆으로 보이게 해요' : '어깨와 두 손이 보이게 해요') : '몸 전체가 보이게 뒤로 가요', 'warn'];
+  if (!M.visible) return [push ? (S.view === 'side' ? '몸 전체가 옆으로 보이게 해요' : '얼굴과 두 손이 보이게 해요') : '몸 전체가 보이게 뒤로 가요', 'warn'];
   if (!M.ready) return [push ? '팔을 펴고 엎드려 잠깐 멈춰요' : '똑바로 서서 잠깐 멈춰요', 'warn'];
   if (push) {
     if (!down) return ['내려가 볼까요?', ''];
@@ -422,10 +430,15 @@ function draw(M) {
   if (M.heelLift) mark('27-29', '28-30', '29-31', '30-32');
   if (M.lineBad) mark('11-23', '12-24', '23-25', '24-26');
   g.lineCap = 'round';
-  for (const [a, b] of BONES) { const p = lm[a], q = lm[b]; if (p.v < .4 || q.v < .4) continue;
+  const pushFront = S.ex === 'pushup' && S.view === 'front', hide = new Set(pushFront ? [23, 24, 25, 26, 27, 28, 29, 30, 31, 32] : []);
+  for (const [a, b] of BONES) { const p = lm[a], q = lm[b]; if (p.v < .4 || q.v < .4 || hide.has(a) || hide.has(b)) continue;
     g.strokeStyle = bad.has(a + '-' + b) ? '#ff6b4a' : (E.phase === 'down' && M.depth >= S.target ? '#3ddc84' : '#ffffffcc'); g.lineWidth = lw;
     g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(q.x, q.y); g.stroke(); }
-  for (const i of [11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28, 29, 30]) { const p = lm[i]; if (p.v < .4) continue; g.fillStyle = '#4dabf7'; g.beginPath(); g.arc(p.x, p.y, lw * 1.3, 0, 7); g.fill(); }
+  if (pushFront) { const fc = '#ff922b'; g.strokeStyle = fc; g.lineWidth = lw * .8; g.beginPath(); let st = false; // 얼굴: 귀-눈-코-눈-귀
+    for (const i of [7, 2, 0, 5, 8]) { const p = lm[i]; if (p.v < .35) { st = false; continue; } st ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y); st = true; } g.stroke();
+    for (const i of [0, 2, 5, 7, 8, 9, 10]) { const p = lm[i]; if (p.v < .35) continue; g.fillStyle = '#fff'; g.beginPath(); g.arc(p.x, p.y, lw * 1.1, 0, 7); g.fill(); }
+    if (E.calib && M.head) { const wy = (lm[15].y + lm[16].y) / 2, y = wy - E.calib.headH * (1 - .55 * S.target); g.setLineDash([lw * 3, lw * 2]); g.strokeStyle = '#ffc53d'; g.lineWidth = lw * .6; g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); g.setLineDash([]); } }
+  for (const i of [11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28, 29, 30]) { const p = lm[i]; if (p.v < .4 || hide.has(i)) continue; g.fillStyle = '#4dabf7'; g.beginPath(); g.arc(p.x, p.y, lw * 1.3, 0, 7); g.fill(); }
   if (S.ex === 'squat' && E.calib && M.visible && S.view === 'front') { // 엉덩이가 내려가야 할 높이
     const y = E.calib.hipY + .38 * E.calib.leg * S.target; g.setLineDash([lw * 3, lw * 2]); g.strokeStyle = '#ffc53d'; g.lineWidth = lw * .6;
     g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); g.setLineDash([]); }
@@ -535,7 +548,7 @@ function setMode(m) {
 }
 const HOWTO = {
   squat: ['기기를 허리 높이에 세우고 <b>2~3 m</b> 떨어져요.', '<b>머리부터 발끝까지</b> 화면에 다 나오게 서요.', '옆에서 찍으면 <b>깊이·무릎 위치·상체</b>를, 앞에서 찍으면 <b>깊이·무릎 모임</b>을 봐요.', '처음에 똑바로 서서 1초 멈추면 준비가 끝나요.'],
-  pushup: ['폰을 <b>바닥에 세워</b> 두고 1.5~2 m 떨어져요.', '<b>앞에서</b> 찍으면 얼굴과 두 손이, <b>옆에서</b> 찍으면 머리부터 발끝까지 보이게 엎드려요.', '옆에서 찍으면 <b>깊이·몸 일직선</b>을, 앞에서 찍으면 <b>깊이</b>를 봐요.', '팔을 펴고 엎드려 1초 멈추면 준비가 끝나요.'],
+  pushup: ['폰을 <b>바닥에 세워</b> 두고 1.5~2 m 떨어져요.', '<b>앞에서</b> 찍으면 얼굴과 두 손이, <b>옆에서</b> 찍으면 머리부터 발끝까지 보이게 엎드려요.', '옆에서 찍으면 <b>깊이·몸 일직선</b>을, 앞에서 찍으면 <b>얼굴과 어깨가 내려온 깊이</b>를 봐요 (노란 선까지 얼굴이 내려가면 인정).', '팔을 펴고 엎드려 1초 멈추면 준비가 끝나요.'],
 };
 function applyExercise(ex, keepView) { // 운동 바꾸기: 기준을 새로 잡아요
   S.ex = ex; document.querySelectorAll('[data-ex]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ex === ex));
