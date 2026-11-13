@@ -1151,6 +1151,23 @@ body.paper .ctrl [data-view="diag"]::after{font-size:15px}
 body.paper #ghost::after{font-size:12.5px}
 
 .toc-sub{margin:6px 0 -2px;font-size:13px;font-weight:700;color:var(--navy);border-left:4px solid var(--navy);padding-left:8px}
+
+/* 글로 읽기: 교과서 그림 */
+.rd-ill{margin:14px 0;padding:12px;border:1.5px solid #e2d6bb;border-radius:14px;background:#fff;display:grid;gap:10px}
+.rd-svg{width:100%;height:auto;display:block;max-width:520px;margin:0 auto}
+.rd-ill figcaption{font-size:13.5px;color:var(--muted);text-align:center}
+.rd-panel{font-size:15px;color:var(--ink)}
+.rd-panel:empty{display:none}
+.rd-panel svg{width:100%;height:auto}
+.rd-panel .steps{display:grid;gap:6px;list-style:none}
+.rd-panel .steps>div{display:flex;align-items:center;gap:8px;font-size:14px}
+.rd-panel .steps>div i{display:block;height:12px;border-radius:6px;background:#7048e8}
+.rd-panel .steps>div.on{font-weight:700}
+.rd-panel .ptable{font-size:14px}
+.rd-panel .ptable th{color:var(--navy);padding:4px 8px 4px 0}
+.rd-panel .ptable td{padding:4px 0}
+.rd-panel .zones{font-size:13px}
+.rd-panel p{margin:6px 0 0;font-size:14.5px!important;color:var(--muted)}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -2801,6 +2818,44 @@ EXMAP.상체.splice(0, 0, ['pull:curl', 1]); EXMAP.전신.splice(0, 0, ['pull:er
 // 밀기·당기기를 상체(팔)와 하체(다리)로 나누어 보기
 const PUSHPULL = { pushup: { up: '팔로 밀기 (상체)', down: '다리로 밀기 (하체)', downNote: '다리로 바닥을 밀어 몸을 올리는 동작도 밀기예요. 앉았다 일어서기, 한 발로 딛고 일어서기, 점프가 모두 하체 밀기예요.', links: [['squat', 'base'], ['lunge', 'base'], ['squat', 'jump'], ['squat', 'boxjump'], ['pull', 'erg']] },
   pull: { up: '팔로 당기기 (상체)', down: '엉덩이·다리로 당기기 (하체)', downNote: '바닥의 물건을 엉덩이와 허벅지 뒤 힘으로 끌어올리는 동작이 하체 당기기예요. 숙였다가 엉덩이를 앞으로 밀며 일어서요.', links: [['hinge', 'base'], ['hinge', 'swing']] } };
+
+// ---------- 당기기 일상: 문 당겨 열기 · 무거운 상자 끌어오기 ----------
+const doorHandle = th => { const c = Math.cos(th), sn = Math.sin(th); return V(.5 + -.9 * c + -.04 * sn, 1.0, .62 + .9 * sn + -.04 * c); };
+const DOORPULL = { name: '문 당겨 열기', sceneLabel: '무거운 문 당겨 열기', env: 'class', props: ['door'], range: ['잡기', '문 열림'], cam: { x: -.3, y: .95, z: 0, dist: 3.8, dirs: { diag: V(-.75, .35, -.55), side: V(-1, .25, -.05) } }, defaultView: 'diag',
+  muscles: ['lat', 'bi', 'trap', 'glute', 'quad', 'erector'],
+  frame: t => { DOOR_PIVOT.rotation.y = -.5 * ss(.2, 1, t); },
+  variants: {
+    good: { name: '한 발 뒤로, 몸무게를 뒤로', desc: '손잡이를 잡고 한 발을 뒤로 빼요. 등을 곧게 편 채 몸무게를 뒤로 실으며 팔꿈치를 몸 쪽으로 당겨 문을 열어요. 팔만이 아니라 등과 다리 힘으로 당겨요.',
+      checks: ['한 발을 뒤로 빼기', '등은 곧게', '몸무게를 뒤로 싣기', '팔꿈치를 옆구리 쪽으로'], p: t => ({ t, round: 0 }) },
+    round: { name: '허리 숙여 팔로만 당김', danger: [['back', [0]]], desc: '두 발을 모은 채 허리를 숙이고 팔 힘으로만 문을 잡아당겨요.',
+      why: '허리를 숙인 채 세게 당기면 허리 뒤쪽에 힘이 몰려요. 팔 근육만 쓰니 무거운 문은 잘 열리지도 않아요.', fix: ['한 발 뒤로 빼고 서기', '가슴을 펴고 몸무게를 뒤로', '팔꿈치를 몸 쪽으로 당기기'], p: t => ({ t, round: 1 }) },
+  },
+  spec(q) { const t = q.t, u = ss(.2, 1, t), h = doorHandle(-.5 * u), x0 = -.3, r = q.round;
+    const feet = r ? sym(s => footStand(x0 + s * .1, .02)) : { 1: footStand(x0 + .13, .05 - .05 * u, 0, 1), [-1]: footStand(x0 - .13, -.42 - .05 * u, 0, -1) };
+    const hip = r ? V(x0, .9, -.05) : V(x0, .9 - .04 * u, -.12 - .12 * u), lean = r ? 34 : -6 - 10 * u;
+    return { feet, hip, low: lean * (r ? .4 : 1), up: lean * (r ? 1.4 : 1), head: lean * .5, kneePole: sym(s => V(s * .2, 0, 1)),
+      arms: { mode: 'ik', wr: { [-1]: h.clone().add(V(0, 0, -.03)), 1: V(x0 + .27, .8, -.05) }, pole: sym(s => V(s * .6, -.6, -.6)) }, q }; },
+  act(v, P, t) { const p = ss(.15, .7, t); return v === 'round' ? { lat: [.2, .45], bi: [.2, .7], trap: .3, glute: .15, quad: .15, erector: .7 } : { lat: [.2, .3 + .5 * p], bi: [.15, .25 + .45 * p], trap: .25 + .4 * p, glute: .35 + .3 * p, quad: .35, erector: .3 }; },
+  readouts: [['문 열림', P => Math.round(ss(.2, 1, P.q.t) * 29), '°']],
+  notes: { lat: { good: '팔꿈치를 몸 쪽으로 당길 때 등 옆 근육(광배근)이 크게 일해요. 덤벨 로우와 같은 당기기예요.' }, erector: { round: '허리를 숙인 채 당기니 척추세움근에 부담이 몰려요.' } } };
+const BOXDRAG = { name: '무거운 상자 끌어오기', sceneLabel: '무거운 상자 끌어오기', env: 'gym', props: ['crate'], range: ['잡기', '끌어옴'], cam: { y: .55, z: .25, dist: 3.4 }, defaultView: 'side',
+  muscles: ['lat', 'bi', 'glute', 'ham', 'erector', 'quad'],
+  frame: (t, v, P) => { if (!P) return; const m = P.side[1].wr.clone().add(P.side[-1].wr).multiplyScalar(.5); CRATE.position.set(0, .2, m.z + .2); },
+  variants: {
+    good: { name: '엉덩이 뒤로, 등은 곧게', desc: '바닥의 무거운 상자를 몸 쪽으로 끌어올 때는 무릎을 굽히고 엉덩이를 뒤로 빼서 자세를 낮춰요. 등을 곧게 편 채 몸무게를 뒤로 실으면서 팔꿈치를 당겨요.',
+      checks: ['무릎 굽히고 엉덩이 뒤로', '등은 곧게', '몸무게를 뒤로 싣기', '상자는 몸 가까이'], p: t => ({ t, round: 0 }) },
+    round: { name: '다리 펴고 등 굽혀 당김', danger: [['back', [0]]], desc: '다리를 편 채 등을 둥글게 굽혀 팔로 상자를 끌어당겨요.',
+      why: '등이 굽은 채 무게를 당기면 허리 디스크에 큰 힘이 실려요. 무거운 물건을 옮길 때 허리를 다치는 가장 흔한 자세예요.', fix: ['무릎을 굽혀 자세 낮추기', '가슴을 펴고 등 곧게', '상자가 무거우면 둘이 함께'], p: t => ({ t, round: 1 }) },
+  },
+  spec(q) { const t = q.t, u = ss(.15, .9, t), r = q.round, feet = sym(s => footStand(s * .16, -.05 - .15 * u, 0, s, 8)), a = r ? 8 : 30, k = r ? 28 : 105, h = r ? 100 : 128, tor = a - k + h, lum = r ? 30 : 0;
+    const hip = widen(chainUp(feet[1].ankle, a, k), feet[1].ankle, .16); hip.z -= .05 + .12 * u;
+    const reach = .62 - .3 * u;
+    return { feet, hip, low: tor - lum * .4, up: tor + lum * .6 - (r ? 0 : 10 * u), head: tor - 35, kneePole: sym(s => V(s * .25, 0, 1)),
+      arms: { mode: 'ik', wr: sym(s => V(s * .22, .42, reach)), pole: sym(s => V(s * .8, -.2, -1)) }, q }; },
+  act(v, P, t) { const p = ss(.15, .9, t); return v === 'round' ? { lat: .3 + .3 * p, bi: .4 + .3 * p, glute: .15, ham: .3, erector: .85, quad: .1 } : { lat: .3 + .5 * p, bi: .25 + .35 * p, glute: .5, ham: .45, erector: .4, quad: .45 }; },
+  readouts: [['상체 기울기', P => Math.max(0, P.up)]],
+  notes: { glute: { good: '엉덩이를 뒤로 빼고 버티면 큰 엉덩이 근육이 당기는 힘을 도와줘요. 하체와 상체가 함께 당겨요.' }, erector: { round: '등이 굽은 채 당기니 척추세움근이 늘어난 채로 크게 버텨요.' } } };
+MOVES.pull.scenes.push(['door', '일상', DOORPULL], ['crate', '일상', BOXDRAG]);
 let USES_CACHE = null;
 function muscleUses(id) {
   if (!USES_CACHE) { USES_CACHE = [];
@@ -3055,6 +3110,8 @@ const ERG3 = (() => { const g = PROPS.erg = new THREE.Group(); g.visible = false
   const handle = new THREE.Mesh(new THREE.CylinderGeometry(.02, .02, .5, 10), std(0x212529)); handle.rotation.z = Math.PI / 2; g.add(handle);
   const chain = new THREE.Mesh(new THREE.CylinderGeometry(.006, .006, 1, 6), lt); chain.place = (a, b) => { const d = b.clone().sub(a), L = d.length(); chain.position.copy(a).addScaledVector(d, .5); chain.scale.set(1, L, 1); chain.quaternion.setFromUnitVectors(V(0, 1, 0), d.normalize()); }; g.add(chain);
   return { seat, handle, chain }; })();
+PROPS.crate = new THREE.Group(); PROPS.crate.visible = false; scene.add(PROPS.crate);
+const CRATE = boxAt(PROPS.crate, .55, .4, .4, 0, 0, 0, std(0xb07a45, { roughness: .8 }));
 const BOAT3 = (() => { const g = PROPS.boat = new THREE.Group(); g.visible = false; scene.add(g); const hull = new THREE.Mesh(new THREE.CylinderGeometry(.32, .32, 4.5, 24, 1, false, 0, Math.PI), std(0xf1f3f5, { side: THREE.DoubleSide }));
   hull.rotation.set(Math.PI / 2, 0, Math.PI); hull.scale.set(1.2, 1, .7); hull.position.set(0, 1.13, -.2); g.add(hull);
   const seat = new THREE.Mesh(new THREE.BoxGeometry(.3, .05, .28), std(0x495057)); g.add(seat);
@@ -3882,6 +3939,23 @@ if (PAPER) {
   document.addEventListener('keydown', e => { if (!$('pbToc').hidden || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return; if (e.key === 'ArrowRight' || e.key === 'PageDown') $('pbNext').click(); else if (e.key === 'ArrowLeft' || e.key === 'PageUp') $('pbPrev').click(); });
   window.__pbShow = show; window.__pbToc = openToc; sync(); openToc(null);
 }
+
+// 교과서 삽화: 체력 요소·트레이닝 원리 (간단한 그림)
+const svgI = (body, vb = '0 0 320 120') => `<svg class="rd-svg" viewBox="${vb}" role="img" aria-hidden="true">${body}</svg>`;
+const figPerson = (x, y, s = 1, c = '#14284b', pose = 'stand') => { const L = (a, b, cc, d, w = 6) => `<line x1="${x + a * s}" y1="${y + b * s}" x2="${x + cc * s}" y2="${y + d * s}" stroke="${c}" stroke-width="${w * s}" stroke-linecap="round"/>`;
+  const head = `<circle cx="${x}" cy="${y - 52 * s}" r="${9 * s}" fill="${c}"/>`;
+  if (pose === 'run') return head + L(0, -42, 4, -10, 7) + L(4, -10, 18, 6) + L(18, 6, 12, 28) + L(4, -10, -10, 10) + L(-10, 10, -22, 22) + L(0, -36, 14, -22) + L(14, -22, 20, -34) + L(0, -36, -12, -24) + L(-12, -24, -20, -14);
+  if (pose === 'lift') return head + L(0, -42, 0, -10, 7) + L(0, -10, -8, 28) + L(0, -10, 8, 28) + L(0, -36, -16, -48) + L(-16, -48, -16, -62) + L(0, -36, 16, -48) + L(16, -48, 16, -62) + `<rect x="${x - 34 * s}" y="${y - 70 * s}" width="${68 * s}" height="${5 * s}" fill="${c}"/><rect x="${x - 40 * s}" y="${y - 78 * s}" width="${8 * s}" height="${20 * s}" fill="${c}"/><rect x="${x + 32 * s}" y="${y - 78 * s}" width="${8 * s}" height="${20 * s}" fill="${c}"/>`;
+  if (pose === 'reach') return head.replace(`cy="${y - 52 * s}"`, `cy="${y - 20 * s}"`).replace(`cx="${x}"`, `cx="${x + 30 * s}"`) + L(-24, 26, 0, -10, 7) + L(0, -10, 24, -18, 7) + L(-24, 26, 10, 26) + L(10, 26, 34, 26) + L(22, -16, 46, 6) ;
+  if (pose === 'jump') return head + L(0, -42, 0, -10, 7) + L(0, -10, -10, 10) + L(-10, 10, -6, 30) + L(0, -10, 10, 10) + L(10, 10, 6, 30) + L(0, -36, -14, -58) + L(0, -36, 14, -58);
+  return head + L(0, -42, 0, -10, 7) + L(0, -10, -8, 28) + L(0, -10, 8, 28) + L(0, -36, -14, -14) + L(0, -36, 14, -14); };
+const RD_ILL = {
+  'base:fitness': svgI(`<rect x="0" y="0" width="320" height="120" rx="12" fill="#eef5fb"/>${figPerson(70, 96, 1, '#14284b', 'run')}<path d="M130 60 h30 l8 -20 l10 40 l10 -30 l6 10 h40" fill="none" stroke="#e03131" stroke-width="4" stroke-linejoin="round"/><path d="M262 44 c-10 -14 -30 -6 -22 12 l22 22 l22 -22 c8 -18 -12 -26 -22 -12z" fill="#e03131"/><text x="262" y="108" text-anchor="middle" font-size="12" fill="#5c6475">심장 · 폐</text>`),
+  'strength': svgI(`<rect width="320" height="120" rx="12" fill="#f5f0ff"/>${figPerson(110, 108, 1, '#14284b', 'lift')}<text x="220" y="52" font-size="30" font-weight="700" fill="#7048e8">1번</text><text x="220" y="74" font-size="13" fill="#5c6475">가장 무거운 것을</text><text x="220" y="92" font-size="13" fill="#5c6475">한 번에 크게</text>`),
+  'endur': svgI(`<rect width="320" height="120" rx="12" fill="#eefaf2"/>${figPerson(70, 100)}${[...Array(10).keys()].map(i => `<rect x="${130 + i * 17}" y="${86 - 18 - (i % 2) * 0}" width="11" height="${18}" rx="3" fill="#2f8a4e" opacity="${.45 + i * .05}"/>`).join('')}<text x="215" y="108" text-anchor="middle" font-size="13" fill="#5c6475">여러 번 · 오래</text>`),
+  'flex': svgI(`<rect width="320" height="120" rx="12" fill="#fff7e8"/>${figPerson(90, 80, 1.1, '#14284b', 'reach')}<path d="M190 96 A60 60 0 0 1 250 36" fill="none" stroke="#f08c00" stroke-width="4" stroke-dasharray="6 5"/><text x="250" y="100" font-size="13" fill="#5c6475">움직이는 범위</text>`),
+  'power': svgI(`<rect width="320" height="120" rx="12" fill="#fff0f0"/>${figPerson(90, 92, 1, '#14284b', 'jump')}<path d="M130 92 v-60 l-8 10 m8 -10 l8 10" stroke="#e03131" stroke-width="4" fill="none"/><text x="170" y="56" font-size="22" font-weight="700" fill="#e03131">짧고 세게!</text><text x="170" y="80" font-size="13" fill="#5c6475">힘 × 빠르기</text>`) };
+
 // ---------- 글로 읽는 교과서 (READER): 본문을 읽다가 그림을 누르면 3D가 열림 ----------
 if (READER) {
   document.body.classList.add('reader'); document.documentElement.classList.add('reader');
@@ -3902,7 +3976,9 @@ if (READER) {
   function scenePart(m, sc, d, n) { const vs = Object.entries(d.variants), good = d.variants.good ? 'good' : vs[0][0], gv = d.variants[good], steps = STEPS[m + ':' + sc];
     let h = `<section class="rd-sec" id="sec-${m}-${sc}"><h2><span class="rd-no">${n}</span><span class="rd-h2t">${esc(d.sceneLabel || d.name)}</span><a class="rd-ytl" href="${ytUrl(m, d)}" target="_blank" rel="noopener">▶ 영상</a></h2>`;
     if (d.neutral) {
-      if (d.panel) { const tmp = document.createElement('div'); tmp.innerHTML = d.panel(good, 0); const key = tmp.querySelector('.key'); if (key) h += `<p class="rd-def"><b>뜻</b> ${key.textContent}</p>`; }
+      if (d.panel) { const tmp = document.createElement('div'); tmp.innerHTML = d.panel(good, .7); const key = tmp.querySelector('.key'); if (key) h += `<p class="rd-def"><b>뜻</b> ${key.textContent}</p>`;
+        tmp.querySelectorAll('h2,h3,.key').forEach(e => e.remove()); figNo++; const ill = RD_ILL[sc + ':' + m] || RD_ILL[sc] || '';
+        if (tmp.innerHTML.trim() || ill) h += `<figure class="rd-ill">${ill}<div class="rd-panel">${tmp.innerHTML}</div><figcaption>그림 ${figNo}. ${esc(d.sceneLabel || d.name)}</figcaption></figure>`; }
       vs.forEach(([k, v]) => { h += `<h3>${esc(v.name)}</h3><p>${esc(v.desc)}</p>`; if (v.why) h += `<p class="rd-why"><b>왜?</b> ${esc(v.why)}</p>`; h += figB(m, sc, k, v.name, v.warn ? 'bad' : ''); });
       return h + '</section>'; }
     h += `<p>${esc(gv.desc)}</p>` + figB(m, sc, good, `${d.sceneLabel || d.name} · 바른 자세`, 'good');
