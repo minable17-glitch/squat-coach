@@ -548,7 +548,7 @@ function drawPlay(fast) {
   el.innerHTML = `<div class="p-top"><span class="grow">${esc(pr.name)} · ${T.name}</span><button type="button" class="btn" id="pQuit" style="background:transparent;color:inherit;border-color:rgba(255,255,255,.3)">그만하기</button></div>
     <div class="p-mid"><span class="p-ph">${P.paused ? '멈춤' : phTxt}</span><div class="p-clock" aria-live="off">${clock}</div><div class="p-sub">${sub}</div>
       <div class="p-now">${now_}</div>${nx ? `<div class="p-next">${nx}</div>` : ''}
-      ${pl ? `<a class="p-pose" href="${pl}" target="_blank" rel="noopener">자세 보기 (3D 교과서) ↗</a>` : ''}
+      ${pl ? `<a class="p-pose" href="${pl}" target="_blank" rel="noopener">자세 보기 (움직임 교과서) ↗</a>` : ''}
       ${bar ? `<div class="p-bar" aria-hidden="true">${bar}</div>` : ''}</div>
     <div class="p-ctl"><button type="button" id="pPause">${P.paused ? '이어 하기' : '일시정지'}</button>${mainBtn}</div>`;
   $('pQuit').onclick = () => { if ($('pQuit').dataset.sure) { P.done && !P.timed ? finish(`그만둠 · ${pr.type === 'amrap' ? amrapRes() : P.done + '/' + P.steps.length}`) : stopPlay(); } else { $('pQuit').dataset.sure = 1; $('pQuit').textContent = '정말 그만하기'; } };

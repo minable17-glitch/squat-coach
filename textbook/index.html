@@ -7,7 +7,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="../icon-192.png">
 <link rel="apple-touch-icon" href="../icon-192.png">
-<title>3D 체육 교과서</title>
+<title>움직임 교과서</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1184,8 +1184,8 @@ body.paper #ghost::after{font-size:12.5px}
 </div>
 <div class="page">
   <header>
-    <div class="eyebrow" id="eyebrow">3D 체육 교과서 · 자유 탐색</div><button type="button" class="tocbtn" id="openCover">📖 목차</button>
-    <h1>3D 체육 교과서</h1><button type="button" class="landbtn" id="landBtn">↻ 가로로 크게 보기</button>
+    <div class="eyebrow" id="eyebrow">움직임 교과서 · 자유 탐색</div><button type="button" class="tocbtn" id="openCover">📖 목차</button>
+    <h1>움직임 교과서</h1><button type="button" class="landbtn" id="landBtn">↻ 가로로 크게 보기</button>
     <p>움직임을 고르고, 기본 · 응용 · 일상에서 · 스포츠에서 장면을 3D로 비교해요.</p>
   </header>
   <div class="moves" id="moves" role="group" aria-label="기본 동작 고르기"></div>
@@ -3782,11 +3782,11 @@ function goalOf(p) { return GOALS[pkey(p)] || (p.neutral ? `${p.label}을(를) 3
 function openCover() { renderToc(); $('cover').hidden = false; $('cover').scrollTop = 0; document.body.style.overflow = 'hidden'; }
 function closeCover() { $('cover').hidden = true; document.body.style.overflow = ''; }
 function enterBook(i) { document.body.classList.add('book'); $('bookbar').hidden = false; closeCover(); goPage(i, 0); }
-function freeMode() { document.body.classList.remove('book'); $('bookbar').hidden = true; ['goalCard', 'quizCard', 'bkNext2'].forEach(id => $(id).hidden = true); H1.textContent = H1_FREE; $('eyebrow').textContent = '3D 체육 교과서 · 자유 탐색'; state.book = null; closeCover(); }
+function freeMode() { document.body.classList.remove('book'); $('bookbar').hidden = true; ['goalCard', 'quizCard', 'bkNext2'].forEach(id => $(id).hidden = true); H1.textContent = H1_FREE; $('eyebrow').textContent = '움직임 교과서 · 자유 탐색'; state.book = null; closeCover(); }
 function goPage(i, dir = 1) {
   i = clamp(i, 0, PAGES.length - 1); state.book = i; const p = PAGES[i], u = BOOK[p.ui];
   if (state.m !== p.m) setMove(p.m); setScene(p.sc);
-  H1.textContent = `${p.ui + 1}단원 ${u.t}`; $('eyebrow').textContent = '3D 체육 교과서 · 책으로 읽기';
+  H1.textContent = `${p.ui + 1}단원 ${u.t}`; $('eyebrow').textContent = '움직임 교과서 · 책으로 읽기';
   $('bkUnit').textContent = `${p.ui + 1}-${p.ci + 1} ${MOVES[p.m].name}`; $('bkTitle').textContent = p.label; $('bkNum').textContent = `${i + 1} / ${PAGES.length}`;
   $('bkBar').style.width = ((i + 1) / PAGES.length * 100) + '%'; $('bkPrev').disabled = i === 0; $('bkNext').disabled = i === PAGES.length - 1;
   $('goalCard').hidden = false; $('goalTxt').textContent = goalOf(p);
@@ -3812,7 +3812,7 @@ $('landBtn').onclick = async () => { const b = $('landBtn'); try { await documen
 $('landX').onclick = () => document.exitFullscreen?.();
 document.addEventListener('fullscreenchange', () => { const fs = !!document.fullscreenElement; $('landX').hidden = !fs; if (!fs) try { screen.orientation.unlock(); } catch (e) { } });
 state.book = null;
-if (BOOK3D) { const g0 = goPage; goPage = (i, dir = 1) => book3dGo(i, dir, g0); $('cvFree').hidden = $('cvBody').hidden = true; $('eyebrow').textContent = '3D 체육 교과서 · 책'; }
+if (BOOK3D) { const g0 = goPage; goPage = (i, dir = 1) => book3dGo(i, dir, g0); $('cvFree').hidden = $('cvBody').hidden = true; $('eyebrow').textContent = '움직임 교과서 · 책'; }
 if (BOOK3D) openCover();
 // ---------- 종이 교과서 버전: 세로는 책 한 쪽, 가로는 펼친 두 쪽 ----------
 if (PAPER) {
@@ -3910,7 +3910,7 @@ if (PAPER) {
       const all = Object.values(EXMAP).flat(); left = `<p class="toc-desc">★ 하나부터 차례로 올라가요. 지금 쉽게 되는 단계 바로 위를 골라 보세요.</p>`;
       right = `<span class="ribbon">난이도별</span><div class="toc-ch">${[1, 2, 3, 4, 5].map(k => { const ys = all.filter(x => x[1] === k); return ys.length ? `<div class="toc-grp"><h3 class="lv">${'★'.repeat(k)}</h3>${ys.map(x => exRow(x, partOf[x[0]])).join('')}</div>` : ''; }).join('')}</div>`;
     }
-    $('pbToc').innerHTML = `<section class="pg pg-l toc-l"><div class="toc-head"><h1><span>3D 체육 교과서</span></h1></div><p class="toc-lab">분류 기준</p>${modeBar}${left}
+    $('pbToc').innerHTML = `<section class="pg pg-l toc-l"><div class="toc-head"><h1><span>움직임 교과서</span></h1></div><p class="toc-lab">분류 기준</p>${modeBar}${left}
         <div class="toc-extra"><button type="button" class="toc-mv x1" data-m="fitness"><b>💓 체력 요소</b><span>체력의 5가지 영역</span></button><button type="button" class="toc-mv x2" data-m="train"><b>🏋️ 훈련 원리</b><span>효과적인 운동 방법</span></button><button type="button" class="toc-mv x3" data-m="body"><b>🧍 몸 지도</b><span>근육으로 운동 찾기</span></button></div>
         ${started ? '<button type="button" class="toc-resume" id="tocResume">보던 장면으로 돌아가기 ›</button>' : ''}</section>
       <section class="pg pg-r toc-r">${right}</section>`;
@@ -3968,7 +3968,7 @@ if (READER) {
   const CH = [['squat', '움직임'], ['lunge', '움직임'], ['pushup', '움직임'], ['pull', '움직임'], ['throw', '움직임'], ['hinge', '움직임'], ['plank', '움직임'], ['fitness', '이론'], ['train', '이론']];
   const esc = x => String(x ?? '');
   const root = document.createElement('div'); root.className = 'rd'; root.id = 'rd';
-  root.innerHTML = `<header class="rd-top">${HYBRID ? '<button type="button" class="rd-toc-btn" id="rdToc" aria-label="차례">☰ 차례</button>' : ''}<span class="rd-logo">3D 체육 교과서</span><label class="rd-sel"><select id="rdCh" aria-label="단원 고르기">${CH.map(([k, g], i) => `<option value="${k}">${i + 1}. ${MOVES[k].name}</option>`).join('')}<option value="ex">💪 운동 모음</option></select></label></header>
+  root.innerHTML = `<header class="rd-top">${HYBRID ? '<button type="button" class="rd-toc-btn" id="rdToc" aria-label="차례">☰ 차례</button>' : ''}<span class="rd-logo">움직임 교과서</span><label class="rd-sel"><select id="rdCh" aria-label="단원 고르기">${CH.map(([k, g], i) => `<option value="${k}">${i + 1}. ${MOVES[k].name}</option>`).join('')}<option value="ex">💪 운동 모음</option></select></label></header>
     <div class="rd-body"><article class="rd-page" id="rdPage"></article>
       <aside class="rd-fig" id="rdFig" aria-label="3D 그림"><div class="rd-fighead"><b id="rdFigT">그림을 누르면 여기에 3D가 나와요</b><a class="rd-act yt" id="rdYt" target="_blank" rel="noopener">▶ 영상</a><a class="rd-act cam" id="rdCam" target="_blank" rel="noopener" hidden>📷 평가</a><a class="rd-act lab" id="rdLab" target="_blank" rel="noopener" hidden>🧪 실험실</a><button type="button" class="rd-x" id="rdX" aria-label="3D 닫기">✕</button></div><div class="rd-tabs" id="rdTabs"></div><div class="rd-stage" id="rdStage"></div></aside></div>`;
   document.body.prepend(root);
