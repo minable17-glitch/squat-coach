@@ -1190,6 +1190,8 @@ body.lab .page,body.lab .pb{display:none!important}
 .lab-step h2{margin:0;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--lab-mute)}
 .lab-step h2 b{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--lab-navy);color:#fff;font-size:11px;letter-spacing:0}
 .lab-tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+.lab-list b em{font-style:normal;font-size:11px;font-weight:700;color:#fff;background:var(--gc);border-radius:5px;padding:0 6px;margin-left:6px;vertical-align:2px}
+.lab-list{max-height:none}
 .lab-tools button{display:grid;justify-items:center;gap:2px;padding:7px 4px 6px;border-radius:12px;border:1.5px solid var(--lab-line);background:#fff;color:var(--lab-navy)}
 .lab-tools svg{width:40px;height:20px;fill:currentColor}
 .lab-tools b{font-size:14px}
@@ -2964,8 +2966,8 @@ EXMAP.상체.push(['pushup:press', 2]);
 PUSHPULL.pushup.over = { t: '위로 밀기 (머리 위)', note: '팔을 머리 위로 뻗어 무게를 밀어 올리는 것도 밀기예요. 앞으로 미는 푸시업은 가슴이, 위로 미는 동작은 어깨가 가장 크게 일해요.', links: [['pushup', 'press'], ['pushup', 'pike'], ['pushup', 'shelf'], ['pushup', 'toss'], ['squat', 'thruster'], ['squat', 'wallball']] };
 
 // ---------- 움직임 실험실: 도구 × 동작 ----------
-const LAB_TOOLS = [['db', '덤벨', '한 손에 하나씩 드는 짧은 무게'], ['bb', '바벨', '긴 봉 양쪽에 원판을 끼운 무게'], ['kb', '케틀벨', '손잡이가 달린 쇠공'], ['mb', '월볼', '부드럽고 무거운 공 (메디신볼)']];
-const LAB_VERBS = ['앉기', '한 발 딛기', '숙이기', '밀기', '당기기', '들고 걷기', '일어서기'];
+const LAB_TOOLS = [['body', '맨몸', '도구 없이 내 몸무게로'], ['db', '덤벨', '한 손에 하나씩 드는 짧은 무게'], ['bb', '바벨', '긴 봉 양쪽에 원판을 끼운 무게'], ['kb', '케틀벨', '손잡이가 달린 쇠공'], ['mb', '공', '월볼·농구공·배구공'], ['eq', '기구·소품', '의자·벽·박스·문·로잉 머신'], ['sp', '스포츠', '경기 속 동작']];
+const LAB_VERBS = ['앉기', '한 발 딛기', '숙이기', '밀기', '당기기', '버티기', '던지기', '들고 걷기', '일어서기'];
 const labBase = path => { const [m, sc] = path.split(':'), e = MOVES[m].scenes?.find(x => x[0] === sc); return e ? e[2] : MOVES[m]; };
 function labDef(path, o = {}) {
   const B = labBase(path), d = { ...B, bar: false, scenes: undefined, uses: undefined, bodyMap: undefined };
@@ -2999,6 +3001,18 @@ const LAB_LIST = [
   ['mb-chest', 'mb', '밀기', '체스트 패스', 'pushup:chestpass', '공을 가슴 앞에서 두 손으로 밀어 앞으로 던져요. 푸시업처럼 앞으로 미는 동작이에요.'],
   ['mb-over', 'mb', '밀기', '머리 위로 밀어 던지기', 'pushup:toss', '공을 이마 위에서 두 손으로 위로 밀어 올려요. 숄더 프레스처럼 위로 미는 동작이에요.'],
 ].map(([key, tool, verb, name, path, cue, o]) => ({ key, tool, verb, name, path, cue, custom: !!o?.tool, def: o ? labDef(path, { ...o, name }) : { ...labBase(path), name, sceneLabel: name } }));
+// 교과서에 있는 장면을 모두 실험실로: 쓰는 도구를 보고 자동으로 나누기
+{ const VERB_OF = { squat: '앉기', lunge: '한 발 딛기', pushup: '밀기', pull: '당기기', hinge: '숙이기', plank: '버티기', throw: '던지기' }, GO = ['기본', '응용', '일상', '스포츠', '원리'];
+  const grpOf = path => { const [m, sc] = path.split(':'); return MOVES[m].scenes?.find(x => x[0] === sc)?.[1] || '기본'; };
+  LAB_LIST.forEach(x => { x.g = grpOf(x.path); });
+  const seen = new Set(LAB_LIST.filter(x => !x.custom).map(x => x.path).concat(['squat:goblet']));
+  for (const m in VERB_OF) for (const [sc, g, d] of MOVES[m].scenes || []) { const path = m + ':' + sc;
+    if (seen.has(path) || d.noFig || d.neutral || d.bodyMap || !d.spec || !d.variants?.good) continue;
+    let S = {}; try { S = d.spec(d.variants.good.p(.5), .5) || {}; } catch (e) { }
+    const tool = S.dumb ? 'db' : (S.kbHands || S.kbR) ? 'kb' : S.ball ? 'mb' : (g === '스포츠' || S.tool || m === 'throw' || sc.startsWith('a_')) ? 'sp' : ((d.props || []).length || d.chair || sc === 'chair') ? 'eq' : 'body';
+    const cue = ((d.variants.good.desc || '').match(/^.*?[.요](?=\s|$)/) || [''])[0];
+    LAB_LIST.push({ key: path.replace(':', '-'), tool, verb: VERB_OF[m], name: (sc.startsWith('a_') ? '양궁 ' : '') + d.name, path, cue, custom: false, def: d, g }); seen.add(path); }
+  LAB_LIST.sort((a, b) => GO.indexOf(a.g) - GO.indexOf(b.g)); }
 if (LAB) MOVES.lab = { ...LAB_LIST[0].def, name: '움직임 실험실', scenes: LAB_LIST.map(x => [x.key, '응용', x.def]) };
 let USES_CACHE = null;
 function muscleUses(id) {
@@ -4238,6 +4252,9 @@ if (LAB) {
   document.body.classList.add('lab');
   const BOOKU = /github\.io$/.test(location.hostname) ? 'hybrid.html' : 'https://claude.ai/artifact/63vdMFpPEtReXDStqeoU7D';
   const ICON = {
+    body: '<svg viewBox="0 0 48 24" aria-hidden="true"><circle cx="24" cy="4" r="3.2"/><path d="M24 8 V15 M15 10 L24 11 L33 10 M24 15 L18 23 M24 15 L30 23" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>',
+    eq: '<svg viewBox="0 0 48 24" aria-hidden="true"><rect x="12" y="9" width="24" height="13" rx="1.5"/><rect x="15" y="4" width="18" height="5" rx="1"/></svg>',
+    sp: '<svg viewBox="0 0 48 24" aria-hidden="true"><ellipse cx="18" cy="9" rx="7" ry="8" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M22 15 L30 23" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="36" cy="8" r="4"/></svg>',
     db: '<svg viewBox="0 0 48 24" aria-hidden="true"><rect x="2" y="5" width="7" height="14" rx="2"/><rect x="39" y="5" width="7" height="14" rx="2"/><rect x="9" y="8" width="5" height="8" rx="1"/><rect x="34" y="8" width="5" height="8" rx="1"/><rect x="14" y="10.5" width="20" height="3" rx="1"/></svg>',
     bb: '<svg viewBox="0 0 48 24" aria-hidden="true"><rect x="1" y="10.5" width="46" height="3" rx="1"/><rect x="6" y="2" width="4" height="20" rx="1.5"/><rect x="11" y="4" width="3" height="16" rx="1.2"/><rect x="38" y="2" width="4" height="20" rx="1.5"/><rect x="34" y="4" width="3" height="16" rx="1.2"/></svg>',
     kb: '<svg viewBox="0 0 48 24" aria-hidden="true"><path d="M17 9 C17 2 31 2 31 9" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="15" r="8"/></svg>',
@@ -4251,7 +4268,7 @@ if (LAB) {
     <section class="lab-info" id="labInfo" aria-live="polite"></section>
   </aside><div class="lab-stage" id="labStage"></div>`;
   document.body.appendChild(wrap); $('labStage').appendChild($('stage'));
-  let tool = 'db', verb = null, cur = null;
+  let tool = 'body', verb = null, cur = null;
   try { const v = JSON.parse(localStorage.getItem('lab-pick') || 'null'); if (v && LAB_LIST.some(x => x.key === v.key)) { tool = v.tool; verb = v.verb; cur = v.key; } } catch (e) { }
   const has = (t, vb) => LAB_LIST.some(x => x.tool === t && x.verb === vb);
   function draw() {
@@ -4259,7 +4276,7 @@ if (LAB) {
     const vs = LAB_VERBS.filter(vb => has(tool, vb)); if (!vs.includes(verb)) verb = vs[0];
     $('labVerbs').innerHTML = vs.map(vb => `<button type="button" data-verb="${vb}" aria-pressed="${vb === verb}">${vb}<small>${LAB_LIST.filter(x => x.tool === tool && x.verb === vb).length}</small></button>`).join('');
     const xs = LAB_LIST.filter(x => x.tool === tool && x.verb === verb); if (!xs.some(x => x.key === cur)) cur = xs[0].key;
-    $('labList').innerHTML = xs.map(x => `<button type="button" data-key="${x.key}" aria-pressed="${x.key === cur}"><b>${x.name}</b><span>${x.cue}</span></button>`).join('');
+    $('labList').innerHTML = xs.map(x => `<button type="button" data-key="${x.key}" aria-pressed="${x.key === cur}"><b>${x.name}<em style="--gc:${GROUP_COLOR[x.g] || '#7048e8'}">${x.g}</em></b><span>${x.cue}</span></button>`).join('');
     wrap.querySelectorAll('[data-tool]').forEach(b => b.onclick = () => { tool = b.dataset.tool; verb = null; cur = null; draw(); go(); });
     wrap.querySelectorAll('[data-verb]').forEach(b => b.onclick = () => { verb = b.dataset.verb; cur = null; draw(); go(); });
     wrap.querySelectorAll('[data-key]').forEach(b => b.onclick = () => { cur = b.dataset.key; draw(); go(); });
