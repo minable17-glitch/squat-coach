@@ -1170,7 +1170,73 @@ body.paper #ghost::after{font-size:12.5px}
 .rd-panel p{margin:6px 0 0;font-size:14.5px!important;color:var(--muted)}
 .rd-photo{display:block;width:100%;height:auto;border-radius:10px;max-width:640px;margin:0 auto}
 .toc-extra{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.toc-mv.x5{border-color:#c5b3f2!important;background:#f5f0ff!important}
+.toc-extra>:last-child:nth-child(odd){grid-column:1/-1}
 a.toc-mv{text-decoration:none;color:inherit}.toc-mv.x4{border-color:#f2c94c!important;background:#fffbe6!important}
+
+/* ===== 움직임 실험실: 왼쪽 고르기(도구 → 동작 → 운동) · 오른쪽 3D 크게 / 세로는 위 3D · 아래 고르기 ===== */
+.lab{--lab-navy:#14284b;--lab-lime:#d7f25a;--lab-paper:#fbf5e6;--lab-orange:#f28c38;--lab-ink:#1c2434;--lab-mute:#5c6475;--lab-line:#e2d6bb;--lab-good:#2f8a4e;--lab-bad:#c2410c;
+  position:fixed;inset:0;display:grid;grid-template-columns:minmax(300px,360px) minmax(0,1fr);background:var(--lab-navy);color:var(--lab-ink);font-family:var(--f-body)}
+html:has(body.lab),body.lab{height:100%;overflow:hidden;background:#14284b}
+body.lab .page,body.lab .pb{display:none!important}
+.lab button{font:inherit;color:inherit;cursor:pointer}
+.lab-side{min-height:0;overflow-y:auto;background:var(--lab-paper);display:grid;align-content:start;gap:12px;
+  padding:max(12px,env(safe-area-inset-top,0px)) 14px max(16px,env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px))}
+.lab-head{display:grid;gap:2px}
+.lab-back{justify-self:start;font-size:12.5px;font-weight:600;color:var(--lab-mute);text-decoration:none}
+.lab-head h1{margin:0;font-size:22px;line-height:1.25;color:var(--lab-navy);letter-spacing:-.01em}
+.lab-head p{margin:0;font-size:13.5px;color:var(--lab-mute);line-height:1.5}
+.lab-step{display:grid;gap:6px}
+.lab-step h2{margin:0;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--lab-mute)}
+.lab-step h2 b{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--lab-navy);color:#fff;font-size:11px;letter-spacing:0}
+.lab-tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+.lab-tools button{display:grid;justify-items:center;gap:2px;padding:7px 4px 6px;border-radius:12px;border:1.5px solid var(--lab-line);background:#fff;color:var(--lab-navy)}
+.lab-tools svg{width:40px;height:20px;fill:currentColor}
+.lab-tools b{font-size:14px}
+.lab-tools small{display:none}
+.lab-tools button[aria-pressed="true"]{background:var(--lab-navy);border-color:var(--lab-navy);color:#fff}
+.lab-tools button[aria-pressed="true"] svg path[fill="none"]{stroke:#fff}
+.lab-verbs{display:flex;flex-wrap:wrap;gap:5px}
+.lab-verbs button{display:flex;align-items:center;gap:5px;min-height:36px;padding:0 12px;border-radius:999px;border:1.5px solid var(--lab-line);background:#fff;font-size:14px;font-weight:700;color:var(--lab-navy)}
+.lab-verbs small{font:600 11px var(--f-num);color:var(--lab-mute)}
+.lab-verbs button[aria-pressed="true"]{background:var(--lab-lime);border-color:#b9d53f}
+.lab-list{display:grid;gap:5px}
+.lab-list button{display:grid;gap:1px;text-align:left;padding:8px 11px;border-radius:12px;border:1.5px solid var(--lab-line);background:#fff}
+.lab-list b{font-size:15px;color:var(--lab-navy)}
+.lab-list span{font-size:12.5px;color:var(--lab-mute);line-height:1.45}
+.lab-list button[aria-pressed="true"]{border-color:var(--lab-navy);box-shadow:inset 4px 0 0 var(--lab-orange)}
+.lab-list button:not([aria-pressed="true"]) span{display:none}
+.lab-info{display:grid;gap:8px;background:#fff;border-radius:14px;padding:11px 12px;border:1.5px solid var(--lab-line)}
+.lab-ih{display:grid;gap:1px}
+.lab-tag{justify-self:start;font-size:11.5px;font-weight:700;color:#fff;background:var(--lab-orange);border-radius:6px;padding:1px 8px}
+.lab-ih h2{margin:0;font-size:17px;color:var(--lab-navy)}
+.lab-vs{display:flex;flex-wrap:wrap;gap:4px}
+.lab-vs button{min-height:32px;padding:0 10px;border-radius:9px;border:1.5px solid var(--lab-line);background:var(--lab-paper);font-size:13px;font-weight:700}
+.lab-vs button.ok[aria-pressed="true"]{background:var(--lab-good);border-color:var(--lab-good);color:#fff}
+.lab-vs button.bad[aria-pressed="true"]{background:var(--lab-bad);border-color:var(--lab-bad);color:#fff}
+.lab-ck{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:14px;line-height:1.45}
+.lab-ck li{display:flex;gap:7px}.lab-ck li::before{content:"✓";color:var(--lab-good);font-weight:700}
+.lab-ck.fix li::before{content:"→";color:#2a6fb5}
+.lab-why{margin:0;font-size:14px;line-height:1.55;background:#fff7e8;border:1.5px solid #f3d3a6;border-radius:10px;padding:7px 9px}
+.lab-book{justify-self:start;font-size:13px;font-weight:700;color:var(--lab-navy)}
+.lab :focus-visible{outline:3px solid var(--lab-orange);outline-offset:2px}
+.lab-stage{position:relative;min-width:0;min-height:0}
+.lab-stage .stage{position:absolute!important;inset:0;height:auto!important;min-height:0!important;border-radius:0!important;display:block!important;background:#f4eedf}
+.lab-stage .stage canvas{height:100%!important;min-height:0!important}
+.lab-stage .stage .ctrl{position:absolute!important;left:8px;right:8px;bottom:max(8px,env(safe-area-inset-bottom,0px));margin:0;border-radius:12px;background:rgba(20,40,75,.86);flex-wrap:nowrap}
+.lab-stage .hint,.lab-stage .st-cam{display:none!important}
+.lab-stage .chips{top:8px;left:8px}
+.lab-stage .mini{top:8px;right:max(8px,env(safe-area-inset-right,0px))}
+.lab-stage .mini{width:136px}.lab-stage .mi{font-size:11.5px;min-height:22px;padding:1px 6px}
+@media (orientation:portrait),(max-width:720px){
+  .lab{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,52fr) minmax(0,48fr)}
+  .lab-stage{grid-row:1}
+  .lab-side{grid-row:2;padding-top:10px;padding-right:max(14px,env(safe-area-inset-right,0px));gap:10px;border-radius:16px 16px 0 0}
+  .lab-head h1{font-size:18px}.lab-head p{display:none}
+  .lab-stage .stage .ctrl{bottom:8px}
+  .lab-stage .stage .ctrl .scrub{display:none}
+}
+@media (orientation:landscape) and (max-height:500px){.lab-head p{display:none}.lab-side{gap:8px}}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -1283,6 +1349,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 const BOOK3D = /[?&]book3d\b/.test(location.search); // 책상 위 3D 책 버전
 const HYBRID = false; // 글로 읽다가 그림을 누르면 장면 화면(3D+글)
 const PAPER = true;
+const LAB = /[?&]lab\b/.test(location.search); // 움직임 실험실: 도구 → 동작 → 운동
 const READER = false; // 글로 읽는 교과서: 그림을 누르면 3D // 종이 교과서 버전(세로 한 쪽 · 가로 두 쪽)
 
 const D = Math.PI / 180;
@@ -1327,6 +1394,7 @@ function build(S) {
     if (A.mode === 'angle') { const pk = v => Array.isArray(v) ? v[s === 1 ? 0 : 1] : (v || 0), ab = pk(A.abd), fl = pk(A.flex);
       el = sh.clone().addScaledVector(armDir(s, ab, fl), L.uarm); wr = el.clone().addScaledVector(armDir(s, ab * .6, fl + pk(A.elbow)), L.farm); }
     else if (A.mode === 'hang') { const R = L.uarm + L.farm - .01, dz = clamp(A.z - sh.z, -R, R); wr = sh.clone().add(V(s * -.02, -Math.sqrt(R * R - dz * dz), dz)); el = ik(sh, wr, L.uarm, L.farm, V(s, 0, -1)); }
+    else if (A.mode === 'neck') { wr = neck.clone().addScaledVector(dirA(S.up + 90), A.fwd).addScaledVector(dirA(S.up), -A.drop).add(V(s * A.w, 0, 0)); el = ik(sh, wr, L.uarm, L.farm, V(s, -1, -.5)); }
     else if (A.mode === 'hold') { const tg = neck.clone().addScaledVector(dirA(S.up + 90), A.fwd).addScaledVector(dirA(S.up), -A.drop); P.hold = tg;
       wr = tg.clone().add(V(s * .07, 0, 0)); el = ik(sh, wr, L.uarm, L.farm, V(s * .6, -1, 0)); }
     else { wr = A.wr[s].clone(); const dw = wr.clone().sub(sh), Lm = L.uarm + L.farm - .004; if (dw.length() > Lm) wr = sh.clone().addScaledVector(dw.normalize(), Lm); el = ik(sh, wr, L.uarm, L.farm, A.pole[s]); } // 팔이 닿지 않는 곳이면 손을 팔 길이까지만
@@ -2894,6 +2962,44 @@ const SHELF = { name: '선반에 상자 올리기', sceneLabel: '높은 선반�
 MOVES.pushup.scenes.push(['press', '응용', PRESS], ['shelf', '일상', SHELF]);
 EXMAP.상체.push(['pushup:press', 2]);
 PUSHPULL.pushup.over = { t: '위로 밀기 (머리 위)', note: '팔을 머리 위로 뻗어 무게를 밀어 올리는 것도 밀기예요. 앞으로 미는 푸시업은 가슴이, 위로 미는 동작은 어깨가 가장 크게 일해요.', links: [['pushup', 'press'], ['pushup', 'pike'], ['pushup', 'shelf'], ['pushup', 'toss'], ['squat', 'thruster'], ['squat', 'wallball']] };
+
+// ---------- 움직임 실험실: 도구 × 동작 ----------
+const LAB_TOOLS = [['db', '덤벨', '한 손에 하나씩 드는 짧은 무게'], ['bb', '바벨', '긴 봉 양쪽에 원판을 끼운 무게'], ['kb', '케틀벨', '손잡이가 달린 쇠공'], ['mb', '월볼', '부드럽고 무거운 공 (메디신볼)']];
+const LAB_VERBS = ['앉기', '한 발 딛기', '숙이기', '밀기', '당기기', '들고 걷기', '일어서기'];
+const labBase = path => { const [m, sc] = path.split(':'), e = MOVES[m].scenes?.find(x => x[0] === sc); return e ? e[2] : MOVES[m]; };
+function labDef(path, o = {}) {
+  const B = labBase(path), d = { ...B, bar: false, scenes: undefined, uses: undefined, bodyMap: undefined };
+  if (o.tool) { const sp = B.spec; d.spec = function (q, t) { const S = sp.call(B, q, t); S.dumb = 0; S.kbHands = S.kbR = false; S.ball = null; o.tool(S, q, t); return S; }; }
+  if (o.vs) d.variants = Object.fromEntries(o.vs.map(k => [k, { ...B.variants[k], ...(o.vp?.[k] ? { p: o.vp[k] } : {}) }]));
+  d.name = d.sceneLabel = o.name; return d; }
+const hangAt = S => { S.arms = { mode: 'hang', z: S.hip.z + .02 }; };
+const DLp = { good: t => ({ a: 10 * t, k: 62 * t, h: 98 * t, lum: 0, z: .12 }), round: t => ({ a: 6 * t, k: 26 * t, h: 66 * t, lum: 46 * ss(.25, 1, t), z: .17 }) };
+// [키, 도구, 동작, 이름, 교과서 장면, 한 줄 설명, 덮어쓰기]
+const LAB_LIST = [
+  ['db-goblet', 'db', '앉기', '덤벨 고블릿 스쿼트', 'squat:goblet', '덤벨 하나를 세워 가슴에 붙여 안고 앉아요. 무게가 몸 앞에 있어서 상체를 세우기 쉬워요.', { tool: S => { S.dumbMid = true; } }],
+  ['db-thruster', 'db', '앉기', '덤벨 스러스터', 'squat:thruster', '덤벨을 어깨에 얹고 앉았다가, 일어서는 힘으로 머리 위까지 밀어 올려요.'],
+  ['db-lunge', 'db', '한 발 딛기', '덤벨 런지', 'lunge:base', '양손에 덤벨을 늘어뜨려 들고 한 발 앞으로 딛어 내려가요. 덤벨이 몸 옆에 있어 균형 잡기가 쉬워요.', { tool: S => { S.dumb = 6; hangAt(S); } }],
+  ['db-rdl', 'db', '숙이기', '덤벨 루마니안 데드리프트', 'hinge:base', '덤벨을 허벅지 앞에 들고, 무릎은 살짝만 굽힌 채 엉덩이를 뒤로 밀며 숙여요. 덤벨은 다리를 스치듯 내려가요.', { tool: S => { S.dumb = 8; }, vs: ['good', 'round'] }],
+  ['db-press', 'db', '밀기', '덤벨 숄더 프레스', 'pushup:press', '어깨 높이의 덤벨을 귀 옆으로 지나 머리 위로 곧게 밀어 올려요.'],
+  ['db-row', 'db', '당기기', '덤벨 로우', 'pull:base', '엉덩이를 뒤로 빼 상체를 숙이고, 팔꿈치를 뒤로 당겨 덤벨을 옆구리로 끌어올려요.'],
+  ['db-curl', 'db', '당기기', '덤벨 컬', 'pull:curl', '팔꿈치를 옆구리에 붙인 채 아래팔만 굽혀 덤벨을 어깨 쪽으로 끌어올려요.'],
+  ['db-carry', 'db', '들고 걷기', '덤벨 파머스 캐리', 'plank:carry', '양손에 무거운 덤벨을 들고 몸통을 곧게 세운 채 걸어요.'],
+  ['bb-squat', 'bb', '앉기', '바벨 백 스쿼트', 'squat:base', '바벨을 목 뒤 등 위쪽에 얹고 앉았다 일어나요. 무릎은 발끝 방향, 등은 곧게 지켜요.', { tool: S => { S.barbell = true; S.arms = { mode: 'neck', fwd: -.12, drop: .02, w: .4 }; } }],
+  ['bb-thruster', 'bb', '앉기', '바벨 스러스터', 'squat:thruster', '바벨을 어깨 앞에 얹고 앉았다가, 일어서는 힘으로 머리 위까지 밀어 올려요.', { tool: S => { S.barbell = true; } }],
+  ['bb-dl', 'bb', '숙이기', '바벨 데드리프트', 'hinge:base', '바닥의 바벨을 정강이 가까이 잡고, 등을 곧게 편 채 다리와 엉덩이 힘으로 일어서요.', { tool: S => { S.barbell = true; }, vs: ['good', 'round'], vp: DLp }],
+  ['bb-press', 'bb', '밀기', '바벨 오버헤드 프레스', 'pushup:press', '어깨 앞의 바벨을 얼굴 가까이 지나 머리 위로 곧게 밀어 올려요.', { tool: S => { S.barbell = true; } }],
+  ['bb-row', 'bb', '당기기', '바벨 로우', 'pull:base', '상체를 숙인 채 바벨을 배꼽 쪽으로 끌어올려요. 등을 곧게 지키는 것이 먼저예요.', { tool: S => { S.barbell = .15; } }],
+  ['kb-goblet', 'kb', '앉기', '케틀벨 고블릿 스쿼트', 'squat:goblet', '케틀벨 손잡이 양쪽을 잡아 가슴에 붙이고 앉아요.', { tool: S => { S.kbHands = true; } }],
+  ['kb-dl', 'kb', '숙이기', '케틀벨 데드리프트', 'hinge:base', '두 발 사이의 케틀벨을 등을 곧게 편 채 엉덩이를 뒤로 밀며 들어 올려요.', { tool: S => { S.kbHands = true; }, vs: ['good', 'round'] }],
+  ['kb-swing', 'kb', '숙이기', '케틀벨 스윙', 'hinge:swing', '엉덩이를 뒤로 접었다가 앞으로 세게 밀어, 그 힘으로 케틀벨을 가슴 높이까지 띄워요. 팔로 드는 운동이 아니에요.'],
+  ['kb-carry', 'kb', '들고 걷기', '케틀벨 한 손 캐리', 'plank:carry', '한 손에만 케틀벨을 들고 걸어요. 몸이 한쪽으로 기울지 않게 버티는 옆구리 힘을 길러요.', { tool: S => { S.kbR = true; } }],
+  ['kb-getup', 'kb', '일어서기', '터키시 겟업', 'lunge:getup', '누운 자세에서 케틀벨을 머리 위로 든 채 단계별로 일어서요. 눈은 계속 케틀벨을 봐요.'],
+  ['mb-squat', 'mb', '앉기', '월볼 스쿼트', 'squat:goblet', '공을 가슴 앞에 안고 앉았다 일어나요. 월볼 샷을 배우기 전 연습이에요.', { tool: S => { S.ballHands = true; } }],
+  ['mb-wallball', 'mb', '앉기', '월볼 샷', 'squat:wallball', '공을 안고 스쿼트로 앉았다가, 일어서는 힘으로 벽의 과녁까지 던지고 받아요.'],
+  ['mb-chest', 'mb', '밀기', '체스트 패스', 'pushup:chestpass', '공을 가슴 앞에서 두 손으로 밀어 앞으로 던져요. 푸시업처럼 앞으로 미는 동작이에요.'],
+  ['mb-over', 'mb', '밀기', '머리 위로 밀어 던지기', 'pushup:toss', '공을 이마 위에서 두 손으로 위로 밀어 올려요. 숄더 프레스처럼 위로 미는 동작이에요.'],
+].map(([key, tool, verb, name, path, cue, o]) => ({ key, tool, verb, name, path, cue, custom: !!o?.tool, def: o ? labDef(path, { ...o, name }) : { ...labBase(path), name, sceneLabel: name } }));
+if (LAB) MOVES.lab = { ...LAB_LIST[0].def, name: '움직임 실험실', scenes: LAB_LIST.map(x => [x.key, '응용', x.def]) };
 let USES_CACHE = null;
 function muscleUses(id) {
   if (!USES_CACHE) { USES_CACHE = [];
@@ -3421,6 +3527,10 @@ class Figure {
     if (ghost) return;
     this.bar = new THREE.Mesh(new THREE.CylinderGeometry(.014, .014, 1.1, 12), new THREE.MeshStandardMaterial({ color: 0xc9a46a, roughness: .5 }));
     this.bar.castShadow = true; this.g.add(this.bar);
+    this.barbell = new THREE.Group(); { const mt = new THREE.MeshStandardMaterial({ color: 0xb8c0c6, metalness: .7, roughness: .3 }), pm = new THREE.MeshStandardMaterial({ color: 0x23324a, roughness: .6 });
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(.014, .014, 1.9, 12), mt); shaft.castShadow = true; this.barbell.add(shaft);
+      for (const sg of [1, -1]) for (const [y, r, h, m] of [[.66, .225, .045, pm], [.71, .225, .045, pm], [.6, .03, .06, mt]]) { const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 28), m); c.position.y = sg * y; c.castShadow = true; c.userData.plate = r > .1; this.barbell.add(c); }
+      this.barbell.visible = false; this.g.add(this.barbell); }
     const tm = c => new THREE.MeshStandardMaterial({ color: c, roughness: .4, metalness: .2 });
     const cy = (g, r, h, y, c) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 10), tm(c)); m.position.y = y; m.castShadow = true; g.add(m); };
     this.tools = { racket: new THREE.Group(), foil: new THREE.Group() };
@@ -3473,6 +3583,9 @@ class Figure {
     this.ball.visible = !!P.ball; if (P.ball) this.ball.position.copy(P.ball);
     this.dumbs.forEach((d, i) => { d.visible = !!P.dumb; if (!P.dumb) return; const r = .035 + P.dumb * .0065; d.userData[1].scale.set(r, 1 + P.dumb * .05, r); d.userData[-1].scale.set(r, 1 + P.dumb * .05, r); d.position.copy(P.side[i ? -1 : 1].wr); });
     this.bar.visible = !!M.bar; this.kb.visible = !!P.hold || !!P.kbHands || !!P.kbR; if (P.kbR) this.kb.position.copy(P.side[1].wr); if (P.hold) this.kb.position.copy(P.hold); if (P.kbHands) this.kb.position.copy(P.side[1].wr).add(P.side[-1].wr).multiplyScalar(.5);
+    this.barbell.visible = !!P.barbell; if (P.barbell) { const pr = typeof P.barbell === 'number' ? P.barbell / .225 : 1; this.barbell.children.forEach(c => { if (c.userData.plate) c.scale.set(pr, 1, pr); }); const a = P.side[1].wr, b = P.side[-1].wr; this.barbell.position.copy(a).add(b).multiplyScalar(.5); this.barbell.quaternion.setFromUnitVectors(V(0, 1, 0), a.clone().sub(b).normalize()); }
+    if (P.dumbMid) { const d0 = this.dumbs[0], r = .035 + 8 * .0065; d0.visible = true; this.dumbs[1].visible = false; d0.userData[1].scale.set(r, 1.4, r); d0.userData[-1].scale.set(r, 1.4, r); d0.position.copy(P.side[1].wr).add(P.side[-1].wr).multiplyScalar(.5).add(V(0, -.03, 0)); d0.rotation.set(0, 0, Math.PI / 2); } else this.dumbs[0].rotation.set(0, 0, 0);
+    if (P.ballHands) { this.ball.visible = true; this.ball.scale.setScalar(1.15); this.ball.position.copy(P.side[1].wr).add(P.side[-1].wr).multiplyScalar(.5).add(V(0, .02, .05)); } else this.ball.scale.setScalar(1);
     if (M.bar) { const a = P.side[1].wr, b = P.side[-1].wr; this.bar.position.copy(a).add(b).multiplyScalar(.5); this.bar.quaternion.setFromUnitVectors(V(0, 1, 0), a.clone().sub(b).normalize()); }
     const raw = M.act(vk, P, t), A = {};
     for (const id in MUSCLES) A[id] = raw[id] === undefined ? .04 : Array.isArray(raw[id]) ? raw[id].map(x => clamp(x)) : clamp(raw[id]);
@@ -3954,7 +4067,7 @@ if (PAPER) {
       right = `<span class="ribbon">난이도별</span><div class="toc-ch">${[1, 2, 3, 4, 5].map(k => { const ys = all.filter(x => x[1] === k); return ys.length ? `<div class="toc-grp"><h3 class="lv">${'★'.repeat(k)}</h3>${ys.map(x => exRow(x, partOf[x[0]])).join('')}</div>` : ''; }).join('')}</div>`;
     }
     $('pbToc').innerHTML = `<section class="pg pg-l toc-l"><div class="toc-head"><h1><span>움직임 교과서</span></h1></div><p class="toc-lab">분류 기준</p>${modeBar}${left}
-        <div class="toc-extra"><button type="button" class="toc-mv x1" data-m="fitness"><b>💓 체력 요소</b><span>체력의 5가지 영역</span></button><button type="button" class="toc-mv x2" data-m="train"><b>🏋️ 훈련 원리</b><span>효과적인 운동 방법</span></button><button type="button" class="toc-mv x3" data-m="body"><b>🧍 몸 지도</b><span>근육으로 운동 찾기</span></button><a class="toc-mv x4" href="train.html"><b>⏱️ 훈련 프로그램</b><span>와드·하이록스·서킷 만들고 해 보기</span></a></div>
+        <div class="toc-extra"><button type="button" class="toc-mv x1" data-m="fitness"><b>💓 체력 요소</b><span>체력의 5가지 영역</span></button><button type="button" class="toc-mv x2" data-m="train"><b>🏋️ 훈련 원리</b><span>효과적인 운동 방법</span></button><button type="button" class="toc-mv x3" data-m="body"><b>🧍 몸 지도</b><span>근육으로 운동 찾기</span></button><a class="toc-mv x4" href="train.html"><b>⏱️ 훈련 프로그램</b><span>와드·하이록스·서킷 만들고 해 보기</span></a><a class="toc-mv x5" href="lab.html"><b>🧪 움직임 실험실</b><span>도구 골라 동작 해 보기</span></a></div>
         ${started ? '<button type="button" class="toc-resume" id="tocResume">보던 장면으로 돌아가기 ›</button>' : ''}</section>
       <section class="pg pg-r toc-r">${right}</section>`;
     $('pbToc').dataset.view = 'home'; $('pbToc').hidden = false; $('pbBook').hidden = true; root.dataset.toc = '1'; if ($('nvTitle')) $('nvTitle').textContent = '차례';
@@ -4118,6 +4231,56 @@ if (READER) {
     window.addEventListener('hashchange', hashGo); setTimeout(hashGo, 0);
   }
   if (!HYBRID) render('squat');
+}
+
+// ---------- 움직임 실험실 화면 ----------
+if (LAB) {
+  document.body.classList.add('lab');
+  const BOOKU = /github\.io$/.test(location.hostname) ? 'hybrid.html' : 'https://claude.ai/artifact/63vdMFpPEtReXDStqeoU7D';
+  const ICON = {
+    db: '<svg viewBox="0 0 48 24" aria-hidden="true"><rect x="2" y="5" width="7" height="14" rx="2"/><rect x="39" y="5" width="7" height="14" rx="2"/><rect x="9" y="8" width="5" height="8" rx="1"/><rect x="34" y="8" width="5" height="8" rx="1"/><rect x="14" y="10.5" width="20" height="3" rx="1"/></svg>',
+    bb: '<svg viewBox="0 0 48 24" aria-hidden="true"><rect x="1" y="10.5" width="46" height="3" rx="1"/><rect x="6" y="2" width="4" height="20" rx="1.5"/><rect x="11" y="4" width="3" height="16" rx="1.2"/><rect x="38" y="2" width="4" height="20" rx="1.5"/><rect x="34" y="4" width="3" height="16" rx="1.2"/></svg>',
+    kb: '<svg viewBox="0 0 48 24" aria-hidden="true"><path d="M17 9 C17 2 31 2 31 9" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="15" r="8"/></svg>',
+    mb: '<svg viewBox="0 0 48 24" aria-hidden="true"><circle cx="24" cy="12" r="10"/><path d="M14 12 H34 M24 2 C19 8 19 16 24 22" fill="none" stroke="var(--lab-paper)" stroke-width="1.6"/></svg>' };
+  const wrap = document.createElement('div'); wrap.className = 'lab'; wrap.id = 'lab';
+  wrap.innerHTML = `<aside class="lab-side">
+    <header class="lab-head"><a class="lab-back" href="${BOOKU}">‹ 움직임 교과서</a><h1>움직임 실험실</h1><p>도구를 고르고 동작을 누르면, 모형이 그 도구를 들고 직접 해 봐요.</p></header>
+    <section class="lab-step"><h2><b>1</b>도구</h2><div class="lab-tools" id="labTools"></div></section>
+    <section class="lab-step"><h2><b>2</b>동작</h2><div class="lab-verbs" id="labVerbs"></div></section>
+    <section class="lab-step"><h2><b>3</b>운동</h2><div class="lab-list" id="labList"></div></section>
+    <section class="lab-info" id="labInfo" aria-live="polite"></section>
+  </aside><div class="lab-stage" id="labStage"></div>`;
+  document.body.appendChild(wrap); $('labStage').appendChild($('stage'));
+  let tool = 'db', verb = null, cur = null;
+  try { const v = JSON.parse(localStorage.getItem('lab-pick') || 'null'); if (v && LAB_LIST.some(x => x.key === v.key)) { tool = v.tool; verb = v.verb; cur = v.key; } } catch (e) { }
+  const has = (t, vb) => LAB_LIST.some(x => x.tool === t && x.verb === vb);
+  function draw() {
+    $('labTools').innerHTML = LAB_TOOLS.map(([k, n, d]) => `<button type="button" data-tool="${k}" aria-pressed="${k === tool}">${ICON[k]}<b>${n}</b><small>${d}</small></button>`).join('');
+    const vs = LAB_VERBS.filter(vb => has(tool, vb)); if (!vs.includes(verb)) verb = vs[0];
+    $('labVerbs').innerHTML = vs.map(vb => `<button type="button" data-verb="${vb}" aria-pressed="${vb === verb}">${vb}<small>${LAB_LIST.filter(x => x.tool === tool && x.verb === vb).length}</small></button>`).join('');
+    const xs = LAB_LIST.filter(x => x.tool === tool && x.verb === verb); if (!xs.some(x => x.key === cur)) cur = xs[0].key;
+    $('labList').innerHTML = xs.map(x => `<button type="button" data-key="${x.key}" aria-pressed="${x.key === cur}"><b>${x.name}</b><span>${x.cue}</span></button>`).join('');
+    wrap.querySelectorAll('[data-tool]').forEach(b => b.onclick = () => { tool = b.dataset.tool; verb = null; cur = null; draw(); go(); });
+    wrap.querySelectorAll('[data-verb]').forEach(b => b.onclick = () => { verb = b.dataset.verb; cur = null; draw(); go(); });
+    wrap.querySelectorAll('[data-key]').forEach(b => b.onclick = () => { cur = b.dataset.key; draw(); go(); });
+  }
+  function info() {
+    const x = LAB_LIST.find(y => y.key === cur), d = x.def, v = d.variants[state.v] || d.variants.good, good = state.v === 'good', [m, sc] = x.path.split(':');
+    const tn = LAB_TOOLS.find(t => t[0] === x.tool)[1];
+    $('labInfo').innerHTML = `<div class="lab-ih"><span class="lab-tag">${tn} · ${x.verb}</span><h2>${x.name}</h2></div>
+      <div class="lab-vs" role="group" aria-label="자세">${Object.entries(d.variants).map(([k, vv]) => `<button type="button" data-v="${k}" class="${k === 'good' ? 'ok' : 'bad'}" aria-pressed="${k === state.v}">${k === 'good' ? '바른 자세' : vv.name}</button>`).join('')}</div>
+      ${good ? `<ul class="lab-ck">${(v.checks || []).map(c => `<li>${c}</li>`).join('')}</ul>`
+        : `<p class="lab-why">${v.why || v.desc || ''}</p>${v.fix ? `<ul class="lab-ck fix">${v.fix.map(c => `<li>${c}</li>`).join('')}</ul>` : ''}`}
+      ${x.custom ? '' : `<a class="lab-book" href="${BOOKU}#s-${m}-${sc}" target="_blank" rel="noopener">교과서에서 자세히 보기 ›</a>`}`;
+    $('labInfo').querySelectorAll('[data-v]').forEach(b => b.onclick = () => { setVariant(b.dataset.v); info(); });
+  }
+  function go() {
+    const x = LAB_LIST.find(y => y.key === cur); setScene(cur); state.playing = true; syncPlay(); setView(x.def.defaultView || 'diag'); info();
+    try { localStorage.setItem('lab-pick', JSON.stringify({ tool, verb, key: cur })); } catch (e) { }
+    setTimeout(resize, 30);
+  }
+  setMove('lab'); draw(); go();
+  addEventListener('resize', () => setTimeout(resize, 50));
 }
 
 
