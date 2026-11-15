@@ -6,8 +6,12 @@
 <meta name="theme-color" content="#14284b">
 <title>움직임 교과서</title>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="../icon-192.png">
-<link rel="apple-touch-icon" href="../icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="움직임 교과서">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
 <style>
@@ -27,6 +31,13 @@ nav button { display: grid; justify-items: center; align-content: center; gap: 2
 nav svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round }
 nav button[aria-selected="true"] { color: var(--navy); background: var(--lime) }
 nav button:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px }
+.inst { position: fixed; z-index: 5; right: max(10px, env(safe-area-inset-right, 0px)); bottom: calc(var(--bar) + 18px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 6px;
+  background: var(--lime); color: var(--navy); border-radius: 999px; padding: 4px 4px 4px 14px; font-weight: 700; font-size: 14px; box-shadow: 0 6px 18px rgba(0,0,0,.35) }
+.inst button { border: 0; font: inherit; cursor: pointer; border-radius: 999px; min-height: 36px; padding: 0 12px; background: var(--navy); color: var(--ink) }
+.inst .x { background: none; color: var(--navy); padding: 0 8px; font-size: 16px }
+.ios { position: fixed; z-index: 6; inset: auto 10px calc(var(--bar) + 18px + env(safe-area-inset-bottom, 0px)); max-width: 420px; margin: 0 auto; background: #fbf5e6; color: #1c2434; border-radius: 16px; padding: 14px 16px; box-shadow: 0 10px 30px rgba(0,0,0,.4); font-size: 14.5px; line-height: 1.55 }
+.ios b { color: #14284b } .ios ol { margin: 6px 0 8px; padding-left: 20px } .ios button { border: 0; border-radius: 10px; min-height: 38px; padding: 0 14px; background: #14284b; color: #fff; font: inherit; font-weight: 700 }
+@media (orientation: landscape) and (max-height: 600px), (min-width: 1100px) { .inst, .ios { bottom: max(12px, env(safe-area-inset-bottom, 0px)) } }
 @media (orientation: landscape) and (max-height: 600px), (min-width: 1100px) {
   .app { grid-template-rows: none; grid-template-columns: auto minmax(0, 1fr) }
   nav { grid-template-columns: none; grid-auto-rows: min-content; align-content: center; gap: 6px; width: calc(var(--rail) + env(safe-area-inset-left, 0px)); border-top: 0; border-right: 1px solid rgba(255,255,255,.08);
@@ -47,6 +58,10 @@ nav button:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px }
     <button type="button" role="tab" data-tab="coach" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>자세 코치</button>
   </nav>
 </div>
+<div class="inst" id="inst" hidden><span>앱으로 설치하기</span><button type="button" id="instGo">설치</button><button type="button" class="x" id="instX" aria-label="닫기">✕</button></div>
+<div class="ios" id="ios" hidden role="dialog" aria-label="홈 화면에 추가하는 방법"><b>아이폰·아이패드에 앱으로 설치하기</b>
+  <ol><li>Safari 아래(또는 위)의 <b>공유 버튼</b>(네모에서 화살표가 나가는 모양)을 눌러요.</li><li><b>홈 화면에 추가</b>를 눌러요.</li><li>오른쪽 위 <b>추가</b>를 누르면 홈 화면에 "움직임 교과서"가 생겨요.</li></ol>
+  <button type="button" id="iosX">알겠어요</button></div>
 <script>
 // 탭마다 페이지 하나: 처음 누를 때 불러오고, 그 뒤로는 보던 상태 그대로 둠
 const ROOT = new URL('../', location.href).pathname, HERE = new URL('./', location.href).pathname;
@@ -86,6 +101,17 @@ document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => go(b.data
 const start = location.hash.slice(1); let last = null; try { last = localStorage.getItem('app-tab'); } catch (e) { }
 go(SRC[start] ? start : SRC[last] ? last : 'book');
 addEventListener('hashchange', () => { const t = location.hash.slice(1); if (SRC[t] && t !== cur) go(t); });
+// 앱 설치: 안드로이드·크롬은 설치 버튼, 아이폰 Safari는 방법 안내
+const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const seen = k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, mark = k => { try { localStorage.setItem(k, '1'); } catch (e) { } };
+let deferred = null;
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; if (!standalone && !seen('inst-no')) $('inst').hidden = false; });
+$('instGo').onclick = async () => { $('inst').hidden = true; if (!deferred) return; deferred.prompt(); try { await deferred.userChoice; } catch (e) { } deferred = null; };
+$('instX').onclick = () => { $('inst').hidden = true; mark('inst-no'); };
+addEventListener('appinstalled', () => { $('inst').hidden = true; mark('inst-no'); });
+const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+if (ios && !standalone && !seen('ios-no')) setTimeout(() => { $('ios').hidden = false; }, 1500);
+$('iosX').onclick = () => { $('ios').hidden = true; mark('ios-no'); };
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 </body>

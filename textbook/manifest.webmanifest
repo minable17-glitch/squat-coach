@@ -1,16 +1,26 @@
 {
+  "id": "./",
   "name": "움직임 교과서",
   "short_name": "움직임 교과서",
-  "description": "움직임을 3D로 돌려 보며 바른 자세와 다치기 쉬운 자세, 일하는 근육을 배우는 체육 교과서 웹앱",
+  "description": "움직임을 3D로 돌려 보며 바른 자세와 일하는 근육을 배우고, 도구로 실험하고, 훈련 프로그램을 해 보는 체육 교과서 앱",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "any",
-  "background_color": "#14191c",
-  "theme_color": "#14191c",
+  "background_color": "#14284b",
+  "theme_color": "#14284b",
   "lang": "ko",
+  "categories": ["education", "health", "fitness"],
   "icons": [
-    { "src": "../icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "../icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "교과서", "url": "./#book", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "움직임 실험실", "url": "./#lab", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "훈련장", "url": "./#train", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "자세 코치", "url": "./#coach", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
   ]
 }
