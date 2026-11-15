@@ -1,7 +1,7 @@
 # 자세 코치 (스쿼트 · 푸시업) + 움직임 교과서
 
 - 자세 코치: https://minable17-glitch.github.io/squat-coach/
-- 움직임 교과서: https://minable17-glitch.github.io/squat-coach/textbook/ (`textbook/` 폴더)
+- 움직임 교과서 앱(교과서·실험실·훈련장·자세 코치 탭): https://minable17-glitch.github.io/squat-coach/textbook/ (`textbook/` 폴더)
 
 카메라로 스쿼트 자세를 실시간으로 봐 주는 체육 수업용 웹앱이에요. 연습, 게임(30초·60초 챌린지), 형성평가(5회) 모드가 있어요.
 
