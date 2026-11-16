@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#3a2a1c">
+<title>움직임 교과서 · 펼친 책 시안</title>
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=IBM+Plex+Sans+KR:wght@400;600;700&family=Black+Han+Sans&display=swap">
+<style>
+/* 시안: 가로 = 펼친 책 두 쪽, 세로 = 한 쪽씩. 그림을 누르면 3D만 크게 */
+:root { --desk: #3a2a1c; --paper: #fdf8ec; --paper2: #f6eedb; --ink: #2a2620; --mute: #6d665a; --navy: #14284b; --red: #c2410c; --good: #2f7a47; --lime: #d7f25a;
+  --serif: 'Noto Serif KR', 'Batang', serif; --sans: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', sans-serif }
+* { box-sizing: border-box; margin: 0 }
+html, body { height: 100%; overflow: hidden }
+body { background: radial-gradient(ellipse at 50% 40%, #5a4330, var(--desk) 70%); font-family: var(--serif); color: var(--ink) }
+[hidden] { display: none !important }
+.stage { position: fixed; inset: 0; display: grid; place-items: center; padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(54px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); perspective: 2600px }
+.book { position: relative; height: min(calc(100vh - 70px), calc((100vw - 24px) / 1.42)); height: min(calc(100svh - 70px), calc((100vw - 24px) / 1.42)); aspect-ratio: 1.42; display: grid; grid-template-columns: 1fr 1fr;
+  filter: drop-shadow(0 18px 30px rgba(0,0,0,.55)) }
+/* 쌓인 종이 두께 */
+.book::before, .book::after { content: ""; position: absolute; top: 4px; bottom: -6px; width: 50%; background: repeating-linear-gradient(0deg, #e9dfc6 0 1px, #f8f1df 1px 3px); z-index: -1; border-radius: 4px }
+.book::before { left: -6px } .book::after { right: -6px }
+.page { position: relative; background: var(--paper); overflow: hidden; padding: 4.2% 5.2% 3.4%; display: flex; flex-direction: column; gap: 1.6%; font-size: clamp(8px, min(1.32vw, 2.55vh), 19px); line-height: 1.62 }
+.page.l { border-radius: 6px 0 0 6px; background: linear-gradient(90deg, var(--paper) 0 86%, #efe5cd 97%, #d9cba8 100%) }
+.page.r { border-radius: 0 6px 6px 0; background: linear-gradient(270deg, var(--paper) 0 86%, #efe5cd 97%, #d9cba8 100%) }
+.run { display: flex; justify-content: space-between; font: 600 .72em var(--sans); color: var(--mute); letter-spacing: .04em; border-bottom: 1px solid #e3d8bf; padding-bottom: .5em }
+.pno { margin-top: auto; text-align: center; font: 600 .75em var(--sans); color: var(--mute) }
+h1 { font: 400 2.1em/1.15 'Black Han Sans', var(--sans); color: var(--navy) }
+h1 small { display: block; font: 700 .38em var(--sans); color: var(--red); letter-spacing: .12em; margin-bottom: .4em }
+h2 { font: 700 1.18em var(--sans); color: var(--navy); display: flex; align-items: center; gap: .4em }
+h2 i { font-style: normal; font-size: .72em; color: #fff; background: var(--navy); border-radius: 4px; padding: .05em .45em }
+p { text-align: justify; word-break: keep-all }
+p b { background: linear-gradient(transparent 60%, #ffe9a3 60%) }
+.fig { position: relative; cursor: pointer; border: 1px solid #e0d4b8; background: #f4ecda; border-radius: 4px; overflow: hidden; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; transition: transform .2s, box-shadow .2s }
+.fig:hover, .fig:focus-visible { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(60,40,10,.25); outline: none }
+.fig img { width: 100%; flex: 1; min-height: 0; object-fit: cover; display: block }
+.fig figcaption { font: 600 .74em var(--sans); color: var(--mute); padding: .45em .7em; background: var(--paper2); display: flex; justify-content: space-between; gap: .5em }
+.fig figcaption em { font-style: normal; color: var(--navy); white-space: nowrap }
+.fig .badge { position: absolute; right: .6em; top: .6em; font: 700 .72em var(--sans); color: #fff; background: rgba(20,40,75,.86); padding: .3em .7em; border-radius: 99px }
+.fig.bad { border-color: #e9b9a0 } .fig.bad .badge { background: rgba(194,65,12,.92) }
+.figs { display: grid; grid-template-columns: 1fr 1fr; gap: 3%; flex: 1 1 auto; min-height: 0 }
+.box { border-left: 4px solid var(--good); background: #eef6ef; padding: .6em .9em; font-size: .92em; border-radius: 0 4px 4px 0 }
+.box.warn { border-color: var(--red); background: #fdf0e8 }
+.box b { font-family: var(--sans) }
+ol { padding-left: 1.3em; font-size: .94em } ol li { margin: .15em 0 }
+.links { display: flex; flex-wrap: wrap; gap: .4em; font: 600 .78em var(--sans) }
+.links span { border: 1px solid #d8cba9; border-radius: 99px; padding: .15em .7em; background: #fff }
+/* 쪽 넘기기 */
+.flip { animation: flip .55s ease-in-out }
+@keyframes flip { 0% { transform: rotateY(0) } 50% { transform: rotateY(-7deg) scale(.985) } 100% { transform: rotateY(0) } }
+.nav { position: fixed; left: 0; right: 0; bottom: max(8px, env(safe-area-inset-bottom)); display: flex; justify-content: center; align-items: center; gap: 12px; font-family: var(--sans) }
+.nav button { border: 0; border-radius: 99px; background: rgba(253,248,236,.92); color: var(--navy); font: 700 15px var(--sans); padding: 8px 18px; cursor: pointer }
+.nav button:disabled { opacity: .35 }
+.nav span { color: #f3e7cc; font-size: 13px; font-weight: 600 }
+.tip { position: fixed; top: max(10px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); background: rgba(253,248,236,.95); color: var(--navy); font: 700 13px var(--sans); padding: 6px 14px; border-radius: 99px; z-index: 3; white-space: nowrap }
+/* 세로: 한 쪽씩 */
+@media (orientation: portrait) {
+  .book { height: auto; width: min(100%, calc((100vh - 80px) * .7)); aspect-ratio: .7; grid-template-columns: 1fr }
+  .book.showR .page.l, .book:not(.showR) .page.r { display: none }
+  .page { font-size: clamp(11px, min(3.4vw, 1.9vh), 18px); border-radius: 6px !important; background: var(--paper) !important }
+  .book::before { left: 4px; width: calc(100% - 8px) } .book::after { display: none }
+}
+/* 3D만 보기 */
+.v3d { position: fixed; inset: 0; z-index: 10; background: #10141a; display: grid; grid-template-rows: auto 1fr }
+.v3d header { display: flex; align-items: center; gap: 10px; padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left)); font-family: var(--sans); color: #fff }
+.v3d header b { flex: 1; font-size: 16px }
+.v3d header button { border: 0; border-radius: 10px; background: var(--lime); color: var(--navy); font: 700 15px var(--sans); padding: 8px 14px; cursor: pointer }
+.v3d iframe { width: 100%; height: 100%; border: 0; background: #f4eedf }
+.v3d.open { animation: rise .35s ease-out }
+@keyframes rise { from { opacity: 0; transform: scale(.94) } to { opacity: 1; transform: none } }
+@media (prefers-reduced-motion: reduce) { .flip, .v3d.open { animation: none } }
+</style>
+</head>
+<body>
+<div class="tip" id="tip">📖 시안 · 그림을 누르면 3D로 크게 봐요</div>
+<div class="stage"><div class="book" id="book">
+  <section class="page l" id="pl"></section><section class="page r" id="pr"></section>
+</div></div>
+<nav class="nav"><button type="button" id="prev">‹ 앞쪽</button><span id="pg"></span><button type="button" id="next">뒤쪽 ›</button></nav>
+<div class="v3d" id="v3d" hidden><header><b id="vTitle"></b><button type="button" id="vClose">✕ 책으로 돌아가기</button></header><iframe id="vFrame" title="3D 보기"></iframe></div>
+<script>
+const $ = id => document.getElementById(id);
+const fig = (img, cap, scene, v = 'good', bad = false, badge = '▶ 3D로 보기') => `<figure class="fig${bad ? ' bad' : ''}" tabindex="0" role="button" data-scene="${scene}" data-v="${v}" data-cap="${cap}"><img src="bookdemo/${img}.webp" alt="${cap}"><span class="badge">${badge}</span><figcaption>${cap}<em>눌러서 3D ›</em></figcaption></figure>`;
+const run = (a, b) => `<div class="run"><span>${a}</span><span>${b}</span></div>`;
+// 쪽 내용: [왼쪽, 오른쪽]
+const SP = [
+  [ `${run('Ⅰ. 기본 움직임', '앉기')}<h1><small>단원 1 · 앉기</small>스쿼트</h1>
+     <p>스쿼트는 <b>무릎과 고관절을 함께 굽혀</b> 앉았다 일어서는 움직임이에요. 의자에 앉고, 바닥의 물건을 줍고, 높이 뛰기 전에 몸을 낮추는 모든 순간에 쓰여요.</p>
+     ${fig('squat_good', '그림 1-1 바른 스쿼트', 's-squat-base')}
+     <p class="pno">12</p>`,
+    `${run('앉기', '바른 자세 익히기')}<h2><i>1</i>따라 해 보기</h2>
+     <ol><li><b>준비</b> 발을 어깨너비로 벌리고 발끝은 살짝 바깥으로.</li><li><b>내려가기</b> 엉덩이를 뒤로 빼며 의자에 앉듯.</li><li><b>가장 낮은 자세</b> 허벅지가 바닥과 수평.</li><li><b>일어서기</b> 발바닥 전체로 바닥을 밀어요.</li></ol>
+     <div class="box"><b>✓ 확인</b> 무릎은 발끝 방향, 등은 곧게, 뒤꿈치는 바닥에.</div>
+     <h2><i>2</i>이러면 다쳐요</h2>
+     ${fig('squat_valgus', '그림 1-2 무릎이 안으로 모임', 's-squat-base', 'valgus', true, '⚠ 3D로 보기')}
+     <p class="pno">13</p>` ],
+  [ `${run('앉기', '왜 위험할까')}<h2><i>3</i>무릎이 모이면</h2>
+     <p>엉덩이 옆 근육(중둔근)이 무릎을 바깥으로 잡아 주지 못하면 무릎이 안쪽으로 무너져요. 그 비틀림을 <b>무릎 인대</b>가 고스란히 받아요.</p>
+     <div class="box warn"><b>⚠ 고치는 법</b> 무릎을 발끝 방향으로 밀어내듯, 엉덩이에 힘을 주며 앉아요.</div>
+     <h2><i>4</i>물건 들 때도 같아요</h2>
+     <div class="figs">${fig('hinge_good', '그림 1-3 등 곧게', 's-hinge-base')}${fig('hinge_round', '그림 1-4 등이 굽음', 's-hinge-base', 'round', true, '⚠ 3D')}</div>
+     <p class="pno">14</p>`,
+    `${run('앉기', '생활과 경기 속으로')}<h2><i>5</i>일상에서, 스포츠에서</h2>
+     <p>스쿼트를 익히면 같은 원리로 생활 속 동작과 경기 속 자세가 이해돼요.</p>
+     <div class="figs">${fig('chair', '일상 · 의자에서 일어나기', 's-squat-chair')}${fig('defense', '스포츠 · 농구 수비 자세', 's-squat-defense')}</div>
+     <div class="links"><span>쪼그려 앉기</span><span>배구 리시브</span><span>야구 포수</span><span>고블릿 스쿼트</span><span>점프 스쿼트</span></div>
+     <p class="pno">15</p>` ],
+  [ `${run('Ⅳ. 체력과 트레이닝', '트레이닝 원리')}<h1><small>단원 4 · 원리</small>과부하의 원리</h1>
+     <p>근육은 <b>평소보다 조금 더 무거운 무게</b>를 만났을 때 자라요. 너무 가벼우면 변화가 없고, 너무 무거우면 바른 자세가 무너져 다쳐요.</p>
+     <div class="box"><b>실험</b> 알맞은 4 kg을 고르고 "4주 운동하기"를 눌러 보세요.</div>
+     <p class="pno">42</p>`,
+    `${run('트레이닝 원리', '실험 결과')}${fig('ov_after', '그림 4-1 4주 뒤 팔 근육 135%', 'principles', 'good', false, '▶ 실험실 열기')}
+     <p>같은 무게로 1년을 해도 근육은 처음 몇 주만 자라요. 커진 만큼 무게를 조금씩 올리는 것이 <b>점진성의 원리</b>예요.</p>
+     <p class="pno">43</p>` ],
+];
+let cur = 0, side = 0; const book = $('book');
+function render(anim) {
+  $('pl').innerHTML = SP[cur][0]; $('pr').innerHTML = SP[cur][1];
+  const portrait = matchMedia('(orientation: portrait)').matches; book.classList.toggle('showR', portrait && side === 1);
+  const total = portrait ? SP.length * 2 : SP.length, idx = portrait ? cur * 2 + side : cur;
+  $('pg').textContent = `${idx + 1} / ${total}`; $('prev').disabled = idx === 0; $('next').disabled = idx === total - 1;
+  if (anim) { book.classList.remove('flip'); void book.offsetWidth; book.classList.add('flip'); }
+  book.querySelectorAll('.fig').forEach(f => { f.onclick = () => open3D(f); f.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open3D(f); } }; });
+}
+function step(d) { const portrait = matchMedia('(orientation: portrait)').matches;
+  if (portrait) { let i = cur * 2 + side + d; i = Math.max(0, Math.min(SP.length * 2 - 1, i)); cur = i >> 1; side = i & 1; } else cur = Math.max(0, Math.min(SP.length - 1, cur + d));
+  render(true); }
+$('prev').onclick = () => step(-1); $('next').onclick = () => step(1);
+addEventListener('keydown', e => { if (!$('v3d').hidden) { if (e.key === 'Escape') close3D(); return; } if (e.key === 'ArrowRight') step(1); if (e.key === 'ArrowLeft') step(-1); });
+let sx = null; book.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive: true });
+book.addEventListener('touchend', e => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 60) step(dx < 0 ? 1 : -1); sx = null; });
+matchMedia('(orientation: portrait)').addEventListener('change', () => render(false));
+// 그림 → 3D만 크게 (교과서 3D 화면을 '3D만' 보기로 열기)
+function open3D(f) {
+  const sc = f.dataset.scene, fr = $('vFrame'); $('vTitle').textContent = f.dataset.cap; $('v3d').hidden = false; $('v3d').classList.add('open');
+  fr.onload = () => { if (sc === 'principles') return; const w = fr.contentWindow, d = fr.contentDocument; let n = 0;
+    const t = setInterval(() => { n++; const b3 = d.querySelector('#nvView [data-vw="3d"]'), tab = d.querySelector(`.tabs button[data-v="${f.dataset.v}"]`);
+      if (b3 && tab && w.__state) { d.querySelector('.rot-tip')?.remove(); tab.click(); b3.click(); setTimeout(() => w.dispatchEvent(new Event('resize')), 100); clearInterval(t); } if (n > 60) clearInterval(t); }, 150); };
+  fr.src = sc === 'principles' ? 'principles.html' : 'hybrid.html#' + sc;
+}
+function close3D() { $('v3d').hidden = true; $('vFrame').src = 'about:blank'; }
+$('vClose').onclick = close3D;
+setTimeout(() => $('tip').hidden = true, 5000);
+render(false);
+</script>
+</body>
+</html>
