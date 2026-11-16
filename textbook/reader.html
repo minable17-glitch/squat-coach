@@ -1379,6 +1379,19 @@ body.v2 .pg-text{position:relative}body.v2 .v2-fs{position:absolute;right:12px;t
 body.v2 .pg-text[data-fs="s"] .pg-flow{font-size:.88em}body.v2 .pg-text[data-fs="s"] .pg-flow p,body.v2 .pg-text[data-fs="s"] .pg-flow li{font-size:15px!important}
 body.v2 .pg-text[data-fs="l"] .pg-flow p,body.v2 .pg-text[data-fs="l"] .pg-flow li{font-size:20px!important;line-height:1.6!important}
 @media (orientation:portrait){body.v2 #pbRead{display:none!important}body.v2 .nv-title{font-size:19px!important}}
+/* 차례 스크롤·가로 정리 */
+body.v2 .pb[data-toc="1"] .pb-nav #sbS{display:none!important}
+@media (orientation:portrait){
+  body.v2 #pbToc{display:block!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch;height:100%;border-radius:22px}
+  body.v2 #pbToc .toc-l,body.v2 #pbToc .toc-r{display:grid!important;height:auto!important;max-height:none!important;overflow:visible!important}
+  body.v2 #pbToc .toc-r{margin-top:8px}
+}
+@media (orientation:landscape){
+  body.v2 .toc-base{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  body.v2 .toc-base .toc-mv{grid-template-columns:44px 1fr!important;min-height:52px!important}
+  body.v2 .toc-base .toc-mv .v2-th{width:44px;height:38px}
+  body.v2 .toc-base .toc-mv b{font-size:14.5px!important}
+}
 </style>
 
 <div class="cover" id="cover" hidden>
