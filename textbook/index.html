@@ -97,7 +97,9 @@ function frameFor(tab) {
   f.allow = 'camera; microphone; fullscreen; screen-wake-lock; autoplay'; f.src = SRC[tab];
   f.addEventListener('load', () => { hook(f); $('load').hidden = true; });
   $('frames').appendChild(f); return frames[tab] = f; }
+let fromPop = false;
 function go(tab, url) {
+  const cur0 = cur;
   if (cur === 'coach' && tab !== 'coach' && frames.coach) { frames.coach.remove(); delete frames.coach; } // 다른 탭으로 가면 카메라 끄기
   const f = frameFor(tab);
   if (url) { const want = new URL(url, location.href), now = (() => { try { return new URL(f.contentWindow.location.href); } catch (e) { return null; } })();
@@ -106,14 +108,14 @@ function go(tab, url) {
   for (const k in frames) frames[k].hidden = k !== tab;
   document.querySelectorAll('[data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === tab));
   cur = tab; try { localStorage.setItem('app-tab', tab); } catch (e) { }
-  if (location.hash !== '#' + tab) history.replaceState(null, '', '#' + tab);
+  if (location.hash !== '#' + tab) { if (cur0 && !fromPop) history.pushState({ tab }, '', '#' + tab); else history.replaceState({ tab }, '', '#' + tab); }
   setTimeout(() => { try { f.contentWindow.dispatchEvent(new Event('resize')); } catch (e) { } }, 60); }
 document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => go(b.dataset.tab));
 const start = location.hash.slice(1); let last = null; try { last = localStorage.getItem('app-tab'); } catch (e) { }
 go(SRC[start] ? start : SRC[last] ? last : 'book');
 if (!MODE) $('pick').hidden = false;
 document.querySelectorAll('#pick [data-m]').forEach(b => b.onclick = () => { const m = b.dataset.m; $('pick').hidden = true; if (m !== (MODE || 'screen')) { setMode(m); if (frames.book) { frames.book.src = SRC.book; } go('book'); } else setMode(m); });
-addEventListener('hashchange', () => { const t = location.hash.slice(1); if (SRC[t] && t !== cur) go(t); });
+addEventListener('popstate', () => { const t = location.hash.slice(1); if (SRC[t] && t !== cur) { fromPop = true; go(t); fromPop = false; } });
 // 앱 설치: 안드로이드·크롬은 설치 버튼, 아이폰 Safari는 방법 안내
 const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 const seen = k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, mark = k => { try { localStorage.setItem(k, '1'); } catch (e) { } };
