@@ -127,6 +127,11 @@ body.battling .cue{top:calc(172px + env(safe-area-inset-top,0px))}
 @media (max-width:640px){header h1{font-size:20px}.chips{left:10px;bottom:12px;gap:4px}.chip{min-width:0;font-size:12px;padding:4px 9px;gap:8px}.meter{left:10px;width:20px}.meter-lbl{display:none}}
 @media (prefers-reduced-motion:reduce){.pop.show{animation:none;opacity:1}}
 [data-mode="battle"][disabled]{opacity:.45;cursor:not-allowed} [data-mode="battle"] small{font-size:.72em;opacity:.85}
+.guide{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:min(86%,520px);display:grid;justify-items:center;gap:6px;text-align:center;padding:22px 20px 20px;border-radius:26px;background:rgba(20,40,75,.86);border:4px solid #d7f25a;box-shadow:0 14px 40px rgba(0,0,0,.45);pointer-events:none;z-index:4}
+.guide .gi{font-size:clamp(44px,12vw,80px);line-height:1}
+.guide b{font-family:var(--f-big);font-weight:400;font-size:clamp(32px,8.6vw,64px);line-height:1.15;color:#fff;word-break:keep-all}
+.guide small{font-size:clamp(17px,4.4vw,26px);color:#d7f25a;font-weight:700;word-break:keep-all}
+.guide.ok{border-color:#3ddc84} .guide.ok b{color:#3ddc84}
 </style>
 </head>
 <body>
@@ -193,6 +198,7 @@ body.battling .cue{top:calc(172px + env(safe-area-inset-top,0px))}
       <div class="combo" id="combo" hidden></div>
       <div class="count" id="count"><b id="countNum">0</b><small id="countSub">바른 스쿼트 0 · 전체 0</small></div>
       <div class="pop" id="pop"></div>
+      <div class="guide" id="guide" hidden><span class="gi" id="gIcon"></span><b id="gMain"></b><small id="gSub"></small></div>
     </div>
     <div class="intro" id="intro">
       <div class="box">
@@ -295,10 +301,28 @@ if (location.hash === '#debug') window.__E = E;
 const ang = (a, b, c) => { const v1x = a.x - b.x, v1y = a.y - b.y, v2x = c.x - b.x, v2y = c.y - b.y;
   return Math.acos(clamp((v1x * v2x + v1y * v2y) / (Math.hypot(v1x, v1y) * Math.hypot(v2x, v2y) || 1), -1, 1)) * DEG; };
 
+// 인식 전 안내: 어디로 움직이면 되는지 (스쿼트)
+function guideFor(lm, W, H) {
+  if (!lm) return ['🙋', '카메라 앞에 서 주세요', '머리부터 발끝까지 보이게'];
+  const ok = i => lm[i].v > .5, inY = p => p.y > H * .02 && p.y < H * .98;
+  const headOk = ok(0) && inY(lm[0]), feetOk = [27, 28, 29, 30, 31, 32].some(i => ok(i) && inY(lm[i]));
+  if (!headOk && !feetOk) return ['⬅️', '뒤로 더 가세요', '머리와 발이 안 보여요'];
+  if (!headOk) return ['⬅️', '조금 뒤로 가세요', '머리가 안 보여요'];
+  if (!feetOk) return ['⬅️', '조금 뒤로 가세요', '발끝까지 보여야 해요'];
+  const top = Math.min(lm[0].y, lm[11].y, lm[12].y), bot = Math.max(lm[27].y, lm[28].y);
+  const standing = Math.abs(lm[23].y - lm[27].y) > Math.abs(lm[11].y - lm[23].y) * .9;
+  if (standing && bot - top < H * .38) return ['➡️', '조금 앞으로 오세요', '몸이 너무 작게 보여요'];
+  const cx = (lm[23].x + lm[24].x) / 2; if (cx < W * .18 || cx > W * .82) return ['↔️', '화면 가운데로 오세요', ''];
+  const sw = Math.abs(lm[11].x - lm[12].x), tl = Math.abs((lm[23].y + lm[24].y - lm[11].y - lm[12].y) / 2);
+  if (S.view === 'side' && sw > tl * .45) return ['🔄', '몸을 옆으로 돌려 서세요', '카메라에 옆모습이 보이게 (비스듬히는 OK)'];
+  if (S.view === 'front' && sw < tl * .3) return ['🔄', '카메라를 보고 서세요', '앞에서 찍는 모드예요'];
+  return ['✅', '좋아요! 그대로 서 있어요', '1초 뒤에 시작해요', 'ok'];
+}
 function analyze(raw, W, H) {
   // 화면 비율을 맞춘 좌표로 바꿔서 각도를 잼
   const lm = E.smooth(raw).map(p => ({ x: p.x * W, y: p.y * H, v: p.visibility ?? 1 }));
-  return S.ex === 'pushup' ? analyzePush(lm) : analyzeSquat(lm, W, H);
+  if (S.ex === 'pushup') return analyzePush(lm);
+  const M = analyzeSquat(lm, W, H); if (!M.ready) M.guide = guideFor(lm, W, H); return M;
 }
 function analyzeSquat(lm, W0 = 1e9, H0 = 1e9) {
   const visOf = s => ['sh', 'hip', 'knee', 'ankle'].reduce((a, k) => a + lm[IDX[s][k]].v, 0) / 4;
@@ -462,6 +486,8 @@ function draw(M) {
 
 // ---------- 화면 갱신 ----------
 function setCue(text, cls, hold = 0) { const el = $('cue'); if (el.textContent !== text) el.textContent = text; el.className = 'cue ' + (cls || ''); if (hold) E.cueUntil = performance.now() + hold; }
+function showGuide(g) { const el = $('guide'); if (!g || !$('intro').hidden) { el.hidden = true; return; } el.hidden = false; el.className = 'guide ' + (g[3] || '');
+  if ($('gMain').textContent !== g[1]) { $('gIcon').textContent = g[0]; $('gMain').textContent = g[1]; $('gSub').textContent = g[2] || ''; } }
 function pop(text, color) { const p = $('pop'); p.textContent = text; p.style.color = color; p.classList.remove('show'); void p.offsetWidth; p.classList.add('show'); }
 function chip(id, label, val, state) { const c = $(id); c.className = 'chip ' + (state || ''); c.innerHTML = `${label} <b>${val}</b>`; }
 const myGood = () => E.reps.filter(r => r.good).length;
@@ -736,9 +762,10 @@ function loop() {
     let M = null;
     const paused = ['result', 'gameSetup', 'countdown', 'battleSetup', 'lobby'].some(id => !$(id).hidden) || (S.mode === 'game' && !S.game.on) || (S.mode === 'battle' && B.st !== 'play') || (S.mode === 'test' && E.reps.length >= S.test.n);
     if (raw) { M = analyze(raw, W, H); const r = paused ? null : track(M); if (r) onRep(r); }
-    else M = { visible: false };
-    const c = liveCue(M); if (c) setCue(c[0], c[1]);
-    draw(M); updateHUD(M);
+    else M = { visible: false, guide: S.ex === 'squat' ? (performance.now() - (E.gT || 0) < 1500 ? E.gLast : guideFor(null)) : null };
+    if (raw && M.guide) { E.gLast = M.guide; E.gT = performance.now(); }
+    const c = M?.guide ? ['준비 중', ''] : liveCue(M); if (c) setCue(c[0], c[1]);
+    draw(M); updateHUD(M); showGuide(M?.guide);
   }
   if (S.game.on) { const left = Math.max(0, (S.game.end - performance.now()) / 1000); $('timer').textContent = clock(left); $('timer').classList.toggle('low', left <= 5);
     if (left <= 0) endGame(); }
