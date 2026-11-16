@@ -45,7 +45,7 @@ html, body { height: 100%; margin: 0; overflow: hidden; background: var(--navy);
 .st-card .bd { grid-area: bd; justify-self: start; font-size: 13.5px; font-weight: 700; padding: 5px 14px; border-radius: 999px; margin-bottom: 8px }
 .st-card.bk .bd { background: var(--lime); color: var(--navy) } .st-card.sc .bd { background: var(--orange); color: #fff }
 .st-card img { grid-area: im; width: 100%; height: auto; border-radius: 12px; align-self: center }
-.st-card b { grid-area: tt; white-space: nowrap; font-size: 25px; line-height: 1.2; font-weight: 700; align-self: end }
+.st-card b { grid-area: tt; white-space: nowrap; font-size: clamp(20px, 5.9vw, 25px); line-height: 1.2; font-weight: 700; align-self: end }
 .st-card .ds { grid-area: ds; font-size: 15px; line-height: 1.5; color: var(--ink2); align-self: start; word-break: keep-all }
 .st-card .sh { display: none }
 .st-card i { grid-area: ar; font-style: normal; font-size: 24px; font-weight: 700; justify-self: end }
@@ -78,7 +78,7 @@ html, body { height: 100%; margin: 0; overflow: hidden; background: var(--navy);
   .st-hero { border-radius: 16px; margin-left: 6px }
   .st-cards { grid-template-columns: 1fr 1fr; gap: 10px }
   .st-card { grid-template-columns: 92px minmax(0, 1fr); grid-template-areas: "bd bd" "tt ar" "im ds"; column-gap: 10px; padding: 10px 12px 12px; border-radius: 18px }
-  .st-card .bd { font-size: 12.5px; padding: 4px 12px; margin-bottom: 2px } .st-card b { font-size: 21px; margin-bottom: 4px } .st-card i { align-self: center }
+  .st-card .bd { font-size: 12.5px; padding: 4px 12px; margin-bottom: 2px } .st-card b { font-size: 19px; margin-bottom: 4px } .st-card i { align-self: center }
   .st-card .lg { display: none } .st-card .sh { display: block; font-size: 15px }
   .st-sc button { min-height: 50px; font-size: 14.5px }
   .st-go { min-height: 50px; padding: 6px 12px } .st-go .gl { font-size: 15.5px } .st-go .gn { font-size: 14px } .st-go .gm { display: none }
@@ -158,7 +158,7 @@ nav button:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px }
     <div class="st-cards">
       <button type="button" class="st-card bk" data-m="book"><span class="bd">태블릿·TV 추천</span><img src="start/book.webp" alt="" width="204" height="142"><b>교과서로 보기</b>
         <span class="ds lg">종이 교과서처럼 펼쳐 넘기며 읽어요. 그림을 누르면 3D로 볼 수 있어요.</span><span class="ds sh">책처럼 읽고<br>그림은 3D로</span><i aria-hidden="true">→</i></button>
-      <button type="button" class="st-card sc" data-m="screen"><span class="bd">휴대폰 추천</span><img src="start/phone.webp" alt="" width="196" height="136"><b>3D로 보기</b>
+      <button type="button" class="st-card sc" data-m="screen"><span class="bd">휴대폰 추천</span><img src="start/phone.webp" alt="" width="196" height="136"><b>앱 화면으로 보기</b>
         <span class="ds lg">3D 모형을 돌려 보며 바른 자세와 일하는 근육을 익혀요.</span><span class="ds sh">돌려 보며<br>자세·근육 배우기</span><i aria-hidden="true">→</i></button>
     </div>
     <div class="st-sc">
@@ -222,7 +222,7 @@ const LS = { get(k) { try { return localStorage.getItem(k); } catch (e) { return
 function lastScene() { try { const o = JSON.parse(LS.get('last-scene')); return o && o.k && /^s-[\w-]+$/.test(o.k) ? o : null; } catch (e) { return null; } }
 function showStart() {
   const L = lastScene(); $('stCont').hidden = !L;
-  if (L) { $('stGoN').textContent = L.label || '마지막 장면'; $('stGoM').textContent = L.mode === 'book' ? '교과서' : '3D'; }
+  if (L) { $('stGoN').textContent = L.label || '마지막 장면'; $('stGoM').textContent = L.mode === 'book' ? '교과서' : '앱 화면'; }
   $('stSkip').checked = LS.get('start-skip') === '1'; $('start').hidden = false; $('start').scrollTop = 0;
  }
 function hideStart() { $('start').hidden = true; if (!cur) go('book'); }
