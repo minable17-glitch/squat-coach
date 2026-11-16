@@ -1242,6 +1242,7 @@ body.lab .page,body.lab .pb{display:none!important}
 .rd-page>.rd-cta{margin-left:auto!important;margin-right:auto!important}
 .rd-page>.rd-grp{margin-left:max(0px,calc((100% - 680px) / 2))!important}
 .toc-contact{order:10;margin:4px 0 0;font-size:13px;color:#5c6475;text-align:center}.toc-contact a{color:#14284b;font-weight:700;text-decoration:none}
+.nv-bookv{text-decoration:none;display:inline-flex;align-items:center;background:#f2e3c2!important;color:#14284b!important}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -4230,6 +4231,7 @@ if (READER) {
     const pb = $('pb');
     // 장면 화면 맨 위: 글로 돌아가기 + 보기 방식(3D+글 · 글 · 3D)
     $('pbHome').insertAdjacentHTML('afterend', '<button type="button" class="nv-read" id="pbRead">📖 글로</button>');
+    if (!/claude\.ai|claudeusercontent/.test(location.hostname)) { $('pbRead').insertAdjacentHTML('afterend', '<a class="nv-read nv-bookv" id="pbBookV" href="book_demo.html">📕 책으로</a>'); $('pbBookV').onclick = () => { try { localStorage.setItem('book-mode', 'book'); } catch (e) { } }; }
     $('nvYt').insertAdjacentHTML('afterend', '<div class="nv-view" id="nvView" role="group" aria-label="보기 방식"><button type="button" data-vw="both" aria-pressed="true">3D+글</button><button type="button" data-vw="text" aria-pressed="false">글만</button><button type="button" data-vw="3d" aria-pressed="false">3D만</button></div>');
     const setVw = w => { pb.dataset.vw = w; $('nvView').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.vw === w)); setTimeout(() => { resize(); setView(state.view); }, 60); };
     $('nvView').querySelectorAll('button').forEach(b => b.onclick = () => setVw(b.dataset.vw)); pb.dataset.vw = 'both';

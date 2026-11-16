@@ -91,7 +91,7 @@ p { word-break: keep-all } mark { background: var(--lime); color: inherit; paddi
   .book { grid-template-columns: 1fr }
   .page { font-size: clamp(10px, min(3.3vw, 1.9vh), 17px); border-radius: 6px !important; box-shadow: none !important }
   .book::after { display: none } .book::before { left: 4px; width: calc(100% - 8px) }
-  .top .unit, .pgn { display: none } .tabs button { padding: 5px 8px; font-size: 13px } .top .tb { padding: 6px 9px }
+  .top .unit, .pgn { display: none } #toScreen .tx { display: none } .tabs button { padding: 5px 8px; font-size: 13px } .top .tb { padding: 6px 9px }
 }
 @media (prefers-reduced-motion: reduce) { .flip { animation: none } .book { transition: none } }
 .tm { display: flex; gap: .3em; flex-wrap: wrap } .tm button { border: 1.5px solid var(--line); background: #fffdf7; border-radius: 99px; padding: .2em .9em; font: 700 .95em var(--sans); color: var(--navy) }
@@ -106,7 +106,7 @@ p { word-break: keep-all } mark { background: var(--lime); color: inherit; paddi
 <body>
 <header class="top"><button type="button" class="tb" id="tocBtn">☰ 차례</button><span class="unit" id="unitName"></span>
   <div class="tabs" id="tabs"><button type="button" data-g="기본">기본</button><button type="button" data-g="응용">응용</button><button type="button" data-g="일상">일상</button><button type="button" data-g="스포츠">스포츠</button></div>
-  <span class="pgn" id="pg"></span><button type="button" class="tb" id="zoomBtn" aria-pressed="false" aria-label="돋보기">🔍</button></header>
+  <a class="tb" id="toScreen" href="hybrid.html" style="text-decoration:none">📱<span class="tx"> 화면으로</span></a><span class="pgn" id="pg"></span><button type="button" class="tb" id="zoomBtn" aria-pressed="false" aria-label="돋보기">🔍</button></header>
 <div class="stage" id="stage"><div class="book" id="book"></div></div>
 <p class="zhint" id="zhint" hidden></p>
 <nav class="nav"><button type="button" id="prev" aria-label="앞쪽">‹</button><button type="button" id="next" aria-label="뒤쪽">›</button></nav>
@@ -234,6 +234,7 @@ function open3D(el) {
 }
 function close3D() { $('v3d').hidden = true; $('vFrame').src = 'about:blank'; }
 $('vClose').onclick = close3D;
+$('toScreen').onclick = () => { try { localStorage.setItem('book-mode', 'screen'); } catch (e) { } };
 render(false);
 </script>
 </body>
