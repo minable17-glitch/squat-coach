@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14284b">
+<title>움직임 교과서 · 책</title>
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=IBM+Plex+Sans+KR:wght@400;600;700&family=Black+Han+Sans&display=swap">
+<style>
+/*STYLE*/
+/* 자동 쪽 나누기 */
+.page { padding-bottom: 2% }
+.body { flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: .55em; padding-top: .6em }
+.body > *, .body > .w > * { flex-shrink: 0 }
+.page > .hd, .page > .ft { flex-shrink: 0 }
+.fig.sm { width: 27%; max-width: 9.5em }
+.fig.sm.l { float: left; margin: 0 .8em .2em 0 }
+.it { overflow: hidden; border-bottom: 1px dashed #d9cdb0; padding-bottom: .45em }
+.it h3 { font: 700 1.08em var(--sans); color: var(--navy); display: flex; gap: .5em; align-items: baseline; flex-wrap: wrap }
+.it h3 small { font: 700 .72em var(--sans); color: #fff; background: var(--navy); border-radius: .4em; padding: .05em .5em; cursor: pointer }
+.it p { font-size: .95em }
+.it .mus { font: 600 .8em var(--sans); color: var(--mute) }
+.fixl { font: 600 .88em var(--sans); color: #2a6fb5 } .fixl::before { content: "→ 이렇게 고쳐요 · "; color: var(--navy) }
+.gh { display: grid; gap: .2em } .gh .hl { margin-top: .2em } .gh p { color: var(--mute); font-size: .92em }
+.chk { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: .3em .9em; font-size: .92em } .chk li::before { content: "✓ "; color: #2f7a47; font-weight: 700 }
+.tchips { display: flex; flex-wrap: wrap; gap: .25em .35em; font-size: .9em }
+.tchips button { border: 1px solid var(--line); background: #fffdf7; border-radius: 99px; padding: .05em .65em; font-family: var(--serif) }
+.tchips button em { font: 700 .82em var(--sans); font-style: normal; color: var(--navy); margin-left: .35em }
+.tchips button:hover { border-color: var(--navy) }
+.tgh { font: 400 1.15em var(--disp); color: var(--navy); background: var(--lime); justify-self: start; align-self: flex-start; border-radius: .4em; padding: 0 .5em }
+.fig img { aspect-ratio: 1 / 1; object-fit: cover; height: auto } .fig.card img { aspect-ratio: 4 / 3.4 }
+.steps li { grid-template-columns: minmax(6.5em, auto) 1fr !important }
+.book { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important } .page { min-width: 0 } .hd .u { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0 }
+@media (orientation: portrait) { .book { grid-template-columns: minmax(0, 1fr) !important } }
+.trow { display: grid; grid-template-columns: 1.6em 1fr; gap: .1em .5em; align-items: baseline; border-bottom: 1px dashed #d9cdb0; padding-bottom: .4em }
+.trow > b { font: 400 1.2em var(--disp); color: var(--navy) } .trow strong { font: 700 1.05em var(--sans); color: var(--navy) } .trow span { font-size: .95em } .trow .tchips { grid-column: 2 }
+.v3d { grid-template-rows: 1fr !important }
+.stage { display: block !important } .book { width: 100% !important; height: 100% !important }
+.find { position: fixed; inset: 0; z-index: 9; background: rgba(10,16,28,.6); display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; justify-items: center; padding: max(12px, env(safe-area-inset-top)) 12px 12px }
+.fin { width: min(100%, 560px); max-height: 100%; overflow: auto; background: var(--paper); border-radius: 16px; padding: 12px; display: grid; gap: 8px; font-family: var(--sans) }
+.frow { display: flex; gap: 8px } .frow input { flex: 1; min-width: 0; width: 0; font: 600 16px var(--sans); border: 2px solid var(--navy); border-radius: 10px; padding: 8px 12px; background: #fff }
+.frow button { border: 0; background: var(--navy); color: #fff; border-radius: 10px; padding: 0 14px; font-weight: 700 }
+.fres { display: grid; gap: 4px } .fres button { display: flex; justify-content: space-between; gap: 10px; text-align: left; border: 1px solid var(--line); background: #fff; border-radius: 10px; padding: 9px 12px; font: 600 15px var(--sans); color: var(--ink) }
+.fres button small { color: var(--mute); font-weight: 600; white-space: nowrap } .fres p { color: var(--mute); font-size: 14px; padding: 6px 2px }
+@media (orientation: portrait) { .page { font-size: clamp(9px, min(2.85vw, 1.65vh), 15px) !important } #zoomBtn, .tx { display: none } .tabs button { padding: 5px 7px !important; font-size: 12.5px !important } .top { gap: 6px } .top .tb { padding: 6px 8px; font-size: 13px } }
+.measure { position: fixed; left: -9999px; top: 0; visibility: hidden }
+</style>
+</head>
+<body>
+<header class="top"><button type="button" class="tb" id="toStart" aria-label="시작 화면">🏠</button><button type="button" class="tb" id="tocBtn">☰ 차례</button><span class="unit" id="unitName"></span>
+  <div class="tabs" id="tabs"><button type="button" data-g="기본">기본</button><button type="button" data-g="응용">응용</button><button type="button" data-g="일상">일상</button><button type="button" data-g="스포츠">스포츠</button></div>
+  <button type="button" class="tb" id="findBtn" aria-label="찾기">⌕<span class="tx"> 찾기</span></button><a class="tb" id="toScreen" href="hybrid.html" style="text-decoration:none">📱 앱 화면</a><span class="pgn" id="pg"></span><button type="button" class="tb" id="zoomBtn" aria-pressed="false" aria-label="돋보기">🔍</button></header>
+<div class="stage" id="stage"><div class="book" id="book"></div></div>
+<p class="zhint" id="zhint" hidden></p>
+<nav class="nav"><button type="button" id="prev" aria-label="앞쪽">‹</button><button type="button" id="next" aria-label="뒤쪽">›</button></nav>
+<div class="find" id="find" hidden><div class="fin"><div class="frow"><input type="search" id="q" placeholder="동작·근육·원리 이름 (예: 런지, 농구, 과부하)" autocomplete="off"><button type="button" id="fx">닫기</button></div><div class="fres" id="fres"></div></div></div>
+<div class="v3d" id="v3d" hidden><b id="vTitle" hidden></b><button type="button" id="vClose" hidden></button><iframe id="vFrame" title="3D 보기"></iframe></div>
+<script>
+const D = /*DATA*/;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const first = t => (String(t).replace(/🧩\s*/, '').match(/^.*?(?:요|다)\.(?=\s|$)/) || [t])[0];
+const GO = ['기본', '응용', '원리', '일상', '스포츠'], GNAME = { 응용: ['응용 동작', '기본 동작을 익혔다면 도구를 들거나 모양을 바꿔 더 해 봐요.'], 원리: ['원리', '공과 궤적으로 원리를 이해해요.'], 일상: ['일상에서는', '생활 속 이런 장면에서 이 동작을 써요.'], 스포츠: ['스포츠에서는', '경기 속 이런 장면에서 이 동작을 써요.'] };
+const img = (m, sc, v) => D.img[`${m}-${sc}-${v}`];
+const fig = (src, cap, scene, v, cls) => src ? `<button type="button" class="fig ${cls}" data-scene="${scene}" data-v="${v}" data-cap="${esc(cap)}">${cls.includes('warn') ? '<span class="warnI">⚠</span>' : ''}<img src="${src}" alt="${esc(cap)}"><span class="b3">▶ 3D</span>${cls.includes('card') ? `<span class="cap">${esc(cap)}</span>` : ''}</button>` : '';
+// ---------- 내용 블록 만들기 ----------
+const BL = []; // { u, g, html, title?, key? }
+D.units.forEach((U, ui) => {
+  const uid = U.m, push = (g, html, extra = {}) => BL.push({ u: uid, g, html, ...extra });
+  if (U.kind === 'theory') {
+    push('기본', `<span class="unit-tag">단원 ${ui + 1} · ${U.verb}</span><h1>${U.name}</h1><p>${U.intro}</p>`, { title: true });
+    U.items.forEach(it => push('기본', `<div class="it">${it.img ? fig(it.img, it.name, it.scene, 'good', 'sm card') : ''}<h3>${it.name}<small data-scene="${it.scene}" data-v="good" data-cap="${it.name}">▶ 3D</small></h3><p>${it.text}</p></div>`, { key: it.scene, name: it.name }));
+    if (U.lab) push('기본', `<div class="mv"><button type="button" data-scene="principles" data-v="good" data-cap="트레이닝 원리 실험실"><strong>🧪 트레이닝 원리 실험실</strong><small>무게를 고르고 "4주 운동하기"로 직접 실험해요</small><em>▶ 3D</em></button></div>`);
+    return; }
+  const S = U.scenes, base = S.find(s => s.sc === 'base'), bg = base.vars[0], sk = `s-${uid}-base`;
+  push('기본', `<span class="unit-tag">단원 ${ui + 1} · ${U.verb}</span><h1>${base.name}</h1>
+    <div class="flow">${fig(img(uid, 'base', bg.k), '바른 ' + base.name, sk, bg.k, '')}<p><b>${U.pattern}.</b> ${esc(bg.desc.replace(/🧩\s*/, ''))}</p></div>`, { title: true, key: sk, name: '바른 ' + base.name });
+  if (base.steps.length) push('기본', `<div class="row"><span class="hl">따라 해 보기</span><span>순서대로 바른 자세로 해 보세요.</span></div><ol class="steps">${base.steps.map(([t, x], i) => `<li><b><i>${i + 1}</i>${esc(t)}</b><span>${esc(x)}</span></li>`).join('')}</ol>`);
+  if (bg.checks.length) push('기본', `<div class="box"><b>✓ 자세 확인</b><ul class="chk">${bg.checks.map(c => `<li>${esc(c)}</li>`).join('')}</ul></div>`);
+  if (base.muscles.length) push('기본', `<p class="it mus" style="border:0">💪 일하는 근육 · ${base.muscles.join(' · ')}</p>`);
+  const bads = base.vars.filter(v => !v.ok).slice(0, 3);
+  if (bads.length) push('기본', `<div class="gh"><span class="hl">이러면 다쳐요</span></div>`);
+  bads.forEach(v => push('기본', `<div class="it">${fig(img(uid, 'base', v.k), v.name, sk, v.k, 'sm card warn')}<h3>⚠ ${esc(v.name)}</h3><p>${esc(v.why || v.desc)}</p>${v.fix.length ? `<p class="fixl">${esc(v.fix.join(' · '))}</p>` : ''}</div>`));
+  for (const g of GO.slice(1)) { const xs = S.filter(s => s.sc !== 'base' && s.g === g); if (!xs.length) continue;
+    push(g, `<div class="gh"><span class="hl">${GNAME[g][0]}</span><p>${U.verb} ${GNAME[g][1]}</p></div>`);
+    xs.forEach((s, i) => { const v = s.vars[0], k = `s-${uid}-${s.sc}`;
+      push(g, `<div class="it">${fig(img(uid, s.sc, v.k), s.name, k, v.k, 'sm' + (i % 2 ? ' l' : ''))}<h3>${esc(s.name)}<small data-scene="${k}" data-v="${v.k}" data-cap="${esc(s.name)}">▶ 3D</small></h3><p>${esc(first(v.desc))}</p>${s.muscles.length ? `<p class="mus">💪 ${s.muscles.slice(0, 3).join(' · ')}</p>` : ''}</div>`, { key: k, name: s.name }); }); }
+});
+// 목차 데이터
+const IX = []; D.units.forEach(U => { if (U.kind === 'theory') U.items.forEach(it => IX.push([it.name, it.scene, U.verb, '기본', '전신', 0]));
+  else U.scenes.forEach(s => { const lv = D.lv[`${U.m}:${s.sc}`]; IX.push([s.sc === 'base' ? s.name : s.name, `s-${U.m}-${s.sc}`, U.verb, s.g === '원리' ? '응용' : s.g, lv ? lv[0] : (U.m === 'plank' ? '몸통' : U.m === 'pushup' || U.m === 'pull' ? '상체' : U.m === 'throw' ? '전신' : '하체'), lv ? lv[1] : 0]); }); });
+const MODES = { verb: ['동작별'], grp: ['묶음별'], part: ['부위별'] };
+const PART = { 하체: ['squat', 'lunge', 'hinge'], 상체: ['pushup', 'pull'], 몸통: ['plank'], 전신: ['throw'], 체력과_트레이닝: ['fitness', 'train'] };
+let tmode = 'verb'; try { tmode = localStorage.getItem('book-toc2') || 'verb'; } catch (e) { } if (!MODES[tmode]) tmode = 'verb';
+// ---------- 쪽 나누기 ----------
+const UNAME = Object.fromEntries(D.units.map((u, i) => [u.m, [`단원 ${i + 1} · ${u.verb}`, u.name, u.sec]]));
+let PAGES = [], T = 0, keyPage = {}, groupPage = {};
+const book = $('book'), portrait = () => matchMedia('(orientation: portrait)').matches;
+function shell(side, n, u) { const sec = u ? UNAME[u][2] : '움직임 교과서', uu = u ? UNAME[u][0] : '차례';
+  return `${side !== 'r' ? `<div class="hd"><span class="sec">${sec}</span><span class="u"><b>단원</b>${uu.replace(/^단원 \d+ · /, '')}</span></div>` : `<div class="hd r"><span class="u">📖 움직임 교과서 · ${uu}</span></div>`}<div class="body"></div><div class="ft${side === 'r' ? ' r' : ''}"><span>${n}</span></div>`; }
+function paginate(blocks, startN, numFn) {
+  const meas = document.createElement('div'); meas.className = 'measure'; const r = book.getBoundingClientRect(), P = portrait();
+  meas.style.width = (P ? r.width : r.width / 2) + 'px'; meas.style.height = (r.height * .97) + 'px'; document.body.appendChild(meas);
+  const pages = []; let pg = null, body = null;
+  const open = (u) => { const side = P ? '' : ((startN + pages.length) % 2 ? 'r' : 'l'); pg = { u, blocks: [], side }; pages.push(pg);
+    meas.innerHTML = `<section class="page ${side}" style="height:100%">${shell(side, numFn(pages.length - 1), u)}</section>`; body = meas.querySelector('.body'); };
+  for (const b of blocks) {
+    if (!pg) open(b.u);
+    const el = document.createElement('div'); el.className = 'w'; el.style.display = 'contents'; el.innerHTML = b.html; body.appendChild(el);
+    const over = body.scrollHeight > body.clientHeight + 1, lowTitle = b.title && body.childElementCount > 1 && body.scrollHeight > body.clientHeight * .6;
+    if ((over || lowTitle) && pg.blocks.length) { el.remove(); open(b.u); body.appendChild(el); }
+    pg.blocks.push(b); }
+  meas.remove(); return pages; }
+function tocBlocks() {
+  const out = [], gp = (u, g) => groupPage[u + '|' + g], chip = (label, pg) => pg != null ? `<button type="button" data-go-page="${pg}">${label}<em>${pg - T + 1}쪽</em></button>` : '';
+  const uidx = Object.fromEntries(D.units.map((u, i) => [u.m, i]));
+  out.push({ u: null, g: '', html: `<h1>차례</h1><div class="tm">${Object.entries(MODES).map(([m, [nm]]) => `<button type="button" data-tm="${m}" aria-pressed="${m === tmode}">${nm}</button>`).join('')}</div>` });
+  if (tmode === 'verb') D.units.forEach((U, i) => out.push({ u: null, g: '', html: `<div class="trow"><b>${i + 1}</b><span><strong>${U.verb}</strong> ${U.name}</span><div class="tchips">${['기본', '응용', '원리', '일상', '스포츠'].map(g => chip(g, gp(U.m, g))).join('')}</div></div>` }));
+  if (tmode === 'grp') ['기본', '응용', '일상', '스포츠'].forEach(g => out.push({ u: null, g: '', html: `<span class="tgh">${g}</span><div class="tchips">${D.units.map((U, i) => chip(`${i + 1}. ${U.verb}`, gp(U.m, g))).join('')}</div>` }));
+  if (tmode === 'part') Object.entries(PART).forEach(([pt, us]) => out.push({ u: null, g: '', html: `<span class="tgh">${pt.replace('_', '·')}</span><div class="tchips">${us.map(m => chip(`${uidx[m] + 1}. ${D.units[uidx[m]].verb}`, gp(m, '기본'))).join('')}</div>` }));
+  return out; }
+const ROM = i => ['ⅰ', 'ⅱ', 'ⅲ', 'ⅳ', 'ⅴ', 'ⅵ'][i] || '';
+function build() {
+  const P = portrait(); let content = null;
+  for (let guess = 2, k = 0; k < 4; k++) { // 차례 쪽 수를 맞출 때까지
+    T = guess; content = paginate(BL, T, i => i + 1);
+    keyPage = {}; groupPage = {}; content.forEach((p, i) => p.blocks.forEach(b => { if (b.key && keyPage[b.key] == null) keyPage[b.key] = i; const gk = b.u + '|' + b.g; if (b.u && groupPage[gk] == null) groupPage[gk] = T + i; }));
+    const toc = paginate(tocBlocks(), 0, ROM); let n = toc.length; if (!P && n % 2) n++;
+    if (n === guess) { PAGES = [...Array.from({ length: n }, (_, i) => ({ u: null, blocks: toc[i]?.blocks || [], num: ROM(i) })), ...content.map((p, i) => ({ ...p, num: i + 1 }))]; return; }
+    guess = n; }
+  PAGES = [...content.map((p, i) => ({ ...p, num: i + 1 }))]; T = 0;
+}
+let pi = 0;
+function render(anim) {
+  unzoom(); const P = portrait(), a = P ? pi : pi - (pi % 2), idx = P ? [pi] : [a, a + 1].filter(i => i < PAGES.length);
+  book.innerHTML = idx.map((i, k) => { const p = PAGES[i], side = P ? '' : k ? 'r' : 'l';
+    return `<section class="page ${side}">${shell(side, p.num, p.u)}</section>`; }).join('');
+  book.querySelectorAll('.body').forEach((b, k) => { b.innerHTML = PAGES[idx[k]].blocks.map(x => x.html).join(''); });
+  const cur = PAGES[idx[0]], u = cur.u || PAGES[idx[1]]?.u;
+  $('unitName').textContent = u ? UNAME[u][0] + ' · ' + UNAME[u][1] : '차례';
+  const gsHere = new Set(idx.flatMap(i => PAGES[i].blocks.map(b => b.g)));
+  $('tabs').querySelectorAll('button').forEach(b => { const g = b.dataset.g; b.disabled = !u || !BL.some(x => x.u === u && (x.g === g || (g === '응용' && x.g === '원리'))); b.setAttribute('aria-pressed', !!u && (gsHere.has(g) || (g === '응용' && gsHere.has('원리')))); });
+  const total = P ? PAGES.length : Math.ceil(PAGES.length / 2), n = P ? pi : a / 2;
+  $('pg').textContent = `${n + 1} / ${total}`; $('prev').disabled = n === 0; $('next').disabled = n === total - 1;
+  book.querySelectorAll('[data-tm]').forEach(b => b.onclick = e => { e.stopPropagation(); tmode = b.dataset.tm; try { localStorage.setItem('book-toc2', tmode); } catch (er) { } rebuild(''); go(0); });
+  if (anim) { book.classList.remove('flip'); void book.offsetWidth; book.classList.add('flip'); }
+  try { localStorage.setItem('book-pos', PAGES[pi]?.blocks[0]?.key || ''); const kb = idx.flatMap(i => PAGES[i].blocks).find(b => b.key && b.name);
+    if (kb) { const U = D.units.find(x => x.m === kb.u); localStorage.setItem('last-scene', JSON.stringify({ mode: 'book', k: kb.key, label: (U ? U.name + ' · ' : '') + kb.name })); } } catch (e) { }
+}
+const go = (i, jump) => { pi = Math.max(0, Math.min(PAGES.length - 1, i)); (jump ? history.pushState : history.replaceState).call(history, { pi }, ''); render(true); };
+const step = d => go(portrait() ? pi + d : pi - (pi % 2) + 2 * d);
+const goKey = k => { const i = keyPage[k]; if (i != null) go(T + i, 1); };
+$('prev').onclick = () => step(-1); $('next').onclick = () => step(1);
+$('tabs').querySelectorAll('button').forEach(b => b.onclick = () => { const u = PAGES[pi].u || PAGES[pi + 1]?.u, g = b.dataset.g;
+  const i = PAGES.findIndex(p => p.u === u && p.blocks.some(x => x.u === u && (x.g === g || (g === '응용' && x.g === '원리')))); if (i >= 0) go(i, 1); });
+$('tocBtn').onclick = () => go(0, 1);
+$('toStart').onclick = () => { if (parent !== window) parent.postMessage('start-screen', '*'); else location.href = 'index.html#start'; };
+const hashKey = () => { const k = decodeURIComponent(location.hash.slice(1)); return keyPage[k] != null ? k : null; };
+addEventListener('hashchange', () => { const k = hashKey(); if (k) goKey(k); });
+// 돋보기
+let zoomOn = false, zoomed = false;
+function setZoomMode(on) { zoomOn = on; $('zoomBtn').setAttribute('aria-pressed', on); document.body.classList.toggle('zoomMode', on); $('zhint').hidden = !on; $('zhint').textContent = '🔍 크게 볼 곳을 눌러요'; if (!on) unzoom(); }
+function unzoom() { zoomed = false; book.style.transform = ''; document.body.classList.remove('zoomed'); if (zoomOn) $('zhint').textContent = '🔍 크게 볼 곳을 눌러요'; }
+$('zoomBtn').onclick = () => setZoomMode(!zoomOn);
+book.addEventListener('click', e => {
+  const gpb = e.target.closest('[data-go-page]'); if (gpb && !zoomOn) { go(+gpb.dataset.goPage, 1); return; }
+  const gk = e.target.closest('[data-go-key]'); if (gk && !zoomOn) { const k = gk.dataset.goKey; if (keyPage[k] != null) goKey(k); else open3D({ dataset: { scene: k, v: 'good', cap: gk.firstChild.textContent } }); return; }
+  const t = e.target.closest('[data-scene]');
+  if (zoomOn && !zoomed) { const r = book.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * 100, y = (e.clientY - r.top) / r.height * 100;
+    book.style.transformOrigin = `${x}% ${y}%`; book.style.transform = 'scale(2.3)'; zoomed = true; document.body.classList.add('zoomed'); $('zhint').textContent = '다시 누르면 원래 크기 · 그림을 누르면 3D'; return; }
+  if (t) { open3D(t); return; }
+  if (zoomed) unzoom();
+});
+addEventListener('keydown', e => { if (!$('v3d').hidden) { if (e.key === 'Escape') close3D(); return; } if (e.key === 'Escape') unzoom(); if (e.key === 'ArrowRight') step(1); if (e.key === 'ArrowLeft') step(-1); });
+let sx = null; book.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive: true });
+book.addEventListener('touchend', e => { if (sx == null || zoomed) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 60) step(dx < 0 ? 1 : -1); sx = null; });
+function open3D(el) {
+  const sc = el.dataset.scene, fr = $('vFrame'); $('vTitle').textContent = el.dataset.cap; $('v3d').hidden = false;
+  fr.onload = () => { if (sc === 'principles') return; const w = fr.contentWindow, d = fr.contentDocument; let n = 0;
+    const t = setInterval(() => { n++; const nv = d.querySelector('#nvView'), tab = d.querySelector(`.tabs button[data-v="${el.dataset.v}"]`);
+      if (nv && w.__state) { d.querySelector('.rot-tip')?.remove(); const bb = d.getElementById('pbBookV'); if (bb) { bb.textContent = '📕 책으로'; bb.onclick = ev => { ev.preventDefault(); history.back(); }; } tab?.click(); d.querySelector('#nvView [data-vw="both"]')?.click(); clearInterval(t); } if (n > 60) clearInterval(t); }, 150); };
+  const url = new URL(sc === 'principles' ? 'principles.html' : 'hybrid.html#' + sc, location.href).href; try { fr.contentWindow.location.replace(url); } catch (e) { fr.src = url; }
+  history.pushState({ v3d: 1, pi }, '');
+}
+function close3D() { $('v3d').hidden = true; try { $('vFrame').contentWindow.location.replace('about:blank'); } catch (e) { } }
+addEventListener('popstate', e => { if (!$('v3d').hidden) { close3D(); return; } const st = e.state; if (st && st.pi != null) { pi = st.pi; render(false); } });
+$('vClose').onclick = close3D;
+// 찾기
+const FIND = []; D.units.forEach((U, i) => { FIND.push({ t: `${i + 1}. ${U.verb} · ${U.name}`, s: '단원', pg: () => groupPage[U.m + '|기본'] });
+  ['응용', '원리', '일상', '스포츠'].forEach(g => FIND.push({ t: `${U.verb} · ${GNAME[g]?.[0] || g}`, s: '묶음', pg: () => groupPage[U.m + '|' + g] }));
+  (U.items || []).forEach(it => FIND.push({ t: it.name, s: U.verb, k: it.scene }));
+  (U.scenes || []).forEach(sc => FIND.push({ t: sc.name, s: `${U.verb} · ${sc.g}`, k: `s-${U.m}-${sc.sc}`, m: sc.muscles.join(' ') })); });
+const norm = x => String(x).toLowerCase().replace(/\s/g, '');
+function find(q) { const n = norm(q); const xs = !n ? [] : FIND.filter(f => norm(f.t + f.s + (f.m || '')).includes(n)).slice(0, 30);
+  $('fres').innerHTML = !n ? '<p>이름 일부만 써도 찾아요.</p>' : xs.length ? xs.map((f, i) => { const pg = f.k ? (keyPage[f.k] != null ? T + keyPage[f.k] : null) : f.pg();
+    return pg == null && !f.k ? '' : `<button type="button" data-fi="${i}"><span>${esc(f.t)}</span><small>${f.s} · ${pg != null ? (pg - T + 1) + '쪽' : '▶ 3D'}</small></button>`; }).join('') : '<p>찾는 내용이 없어요.</p>';
+  $('fres').querySelectorAll('[data-fi]').forEach(b => b.onclick = () => { const f = xs[+b.dataset.fi]; $('find').hidden = true; const pg = f.k ? (keyPage[f.k] != null ? T + keyPage[f.k] : null) : f.pg();
+    if (pg != null) go(pg, 1); else open3D({ dataset: { scene: f.k, v: 'good', cap: f.t } }); }); }
+$('findBtn').onclick = () => { $('find').hidden = false; $('q').value = ''; find(''); setTimeout(() => $('q').focus(), 50); };
+$('q').oninput = e => find(e.target.value); $('fx').onclick = () => $('find').hidden = true; $('find').onclick = e => { if (e.target.id === 'find') $('find').hidden = true; };
+$('toScreen').onclick = () => { try { localStorage.setItem('book-mode', 'screen'); } catch (e) { } };
+// 화면 크기가 바뀌면 다시 나누고, 보던 곳으로
+let rt = 0; const rebuild = keep => { const old = pi, k = keep ?? PAGES[pi]?.blocks.find(b => b.key)?.key; build(); pi = 0; if (k && keyPage[k] != null) pi = T + keyPage[k]; else if (keep === undefined && old) pi = Math.min(old, PAGES.length - 1); render(false); };
+addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => rebuild(), 250); });
+const FONTS = ['400 16px "Noto Serif KR"', '700 16px "Noto Serif KR"', '400 16px "Black Han Sans"', '700 16px "IBM Plex Sans KR"', '600 16px "IBM Plex Sans KR"'];
+Promise.all(FONTS.map(f => document.fonts?.load(f, '가나다').catch(() => { }))).then(() => document.fonts?.ready).then(() => { build(); const hk = hashKey(); if (hk) pi = T + keyPage[hk]; history.replaceState({ pi }, ''); render(false); }).catch(() => { build(); render(false); });
+document.fonts?.addEventListener?.('loadingdone', () => { clearTimeout(rt); rt = setTimeout(() => rebuild(), 300); });
+</script>
+</body>
+</html>

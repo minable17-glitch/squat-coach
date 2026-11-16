@@ -1,0 +1,101 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
+<style>
+:root{--navy:#14284b;--lime:#d7f25a;--paper:#fbf5e6;--orange:#f28c38;--ink:#1c2434;--mute:#5c6475;--line:#e6dcc6;--red:#d9442b;--green:#2f8a4e}
+*{box-sizing:border-box;margin:0}
+body{width:1600px;height:1010px;background:#3b3226;font-family:'IBM Plex Sans KR',sans-serif;color:var(--ink);padding:14px}
+.book{display:grid;grid-template-columns:1fr 1fr;height:100%;background:#fffdf7;border-radius:10px;overflow:hidden;position:relative}
+.book::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:40px;transform:translateX(-50%);background:linear-gradient(90deg,transparent,rgba(0,0,0,.09),transparent);pointer-events:none}
+.pg{position:relative;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;padding:0 44px}
+.wave{position:absolute;left:0;top:0;width:62%;height:78px;background:var(--navy);border-radius:0 0 100% 0/0 0 100% 0}
+.pg.r .wave{left:auto;right:0;width:30%;border-radius:0 0 0 100%/0 0 0 100%;background:var(--lime);height:54px}
+.hd{position:relative;padding-top:26px;min-height:96px}
+.utag{display:inline-block;background:var(--lime);color:var(--navy);font-weight:700;font-size:15px;padding:4px 14px;border-radius:99px}
+h1{font:400 34px/1.2 'Black Han Sans';color:var(--navy);margin-top:34px}h1 em{font-style:normal;color:var(--orange)}
+.lead{font-size:16.5px;line-height:1.7;margin-top:8px}
+.open{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.box{border-radius:14px;padding:10px 14px;font-size:15px;line-height:1.6}
+.box b.t{display:block;font-size:14px;margin-bottom:2px}
+.q{background:#fff4e6;border:1.5px solid #f6c79b}.q b.t{color:#b9560f}
+.goal{background:#eef4fb;border:1.5px solid #bcd0ea}.goal b.t{color:#24508f}.goal li{margin-left:18px}
+.act{display:flex;align-items:center;gap:10px;margin-top:16px}
+.act i{font-style:normal;background:var(--navy);color:#fff;font:400 17px 'Black Han Sans';padding:4px 12px 3px;border-radius:99px 99px 99px 4px}
+.act h2{font:400 23px 'Black Han Sans';color:var(--navy)}
+.act .d3{margin-left:auto;background:var(--orange);color:#fff;font-weight:700;font-size:14px;padding:5px 14px;border-radius:99px}
+.a1{display:grid;grid-template-columns:270px 1fr;gap:18px;margin-top:10px}
+.fig{position:relative;border-radius:16px;overflow:hidden;background:#efe9da}.fig img{display:block;width:100%;height:100%;object-fit:cover}
+.fig .lb{position:absolute;left:8px;bottom:8px;background:rgba(20,40,75,.88);color:#fff;font-size:13px;font-weight:700;padding:2px 10px;border-radius:99px}
+.fig .tap{position:absolute;right:8px;top:8px;background:var(--orange);color:#fff;font-size:12px;font-weight:700;padding:2px 9px;border-radius:99px}
+.rows{display:grid;gap:7px;align-content:start;font-size:15.5px;line-height:1.55}
+.rw{display:grid;grid-template-columns:62px 1fr;gap:10px}.rw>b{justify-self:start;align-self:start;background:#f3ead2;border:1.5px solid #d9c99a;border-radius:8px 8px 8px 0;font-size:13.5px;padding:1px 9px;color:#6b5320}
+.rw ul{padding-left:16px}.mus em{font-style:normal;background:#fde3dc;color:#b03420;font-weight:700;padding:1px 8px;border-radius:99px;font-size:14px;margin-right:4px}
+.safe{border-top:2px solid var(--red);padding-top:5px;font-size:14px;line-height:1.5;color:#4a2a22}.safe b{color:var(--red)}
+.band{margin:14px -44px 0;padding:12px 44px 10px;background:#e9eef8;border-radius:60px 60px 0 0/22px 22px 0 0}
+.band .bt{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.band .bt i{font:400 18px 'Black Han Sans';font-style:normal;color:#fff;background:#2f6db5;padding:3px 14px 2px;border-radius:99px}
+.band .bt b{background:#fff;border-radius:99px;padding:2px 14px;font-size:15px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.st .im{height:150px;border-radius:12px;overflow:hidden;background:#d9d4cb}.st img{width:100%;height:100%;object-fit:cover;object-position:50% 40%}
+.st p{font-size:13.5px;line-height:1.45;margin-top:5px}.st p b{background:var(--lime);border-radius:6px;padding:0 6px;margin-right:4px}
+.ft{display:flex;align-items:center;gap:10px;height:40px;font-size:13px;color:var(--mute)}.ft b{font-size:18px;color:var(--navy)}.pg.r .ft{justify-content:flex-end}
+.conn{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+.cn{display:grid;grid-template-columns:150px 1fr;gap:12px;align-items:start}.cn .fig{height:128px}
+.cn h3{font-size:17px;color:var(--navy)}.cn h3 small{font-size:12.5px;font-weight:700;color:#fff;background:var(--green);border-radius:99px;padding:1px 9px;margin-right:6px;vertical-align:2px}.cn.s h3 small{background:var(--red)}
+.cn p{font-size:14.5px;line-height:1.55;margin-top:3px}
+.bad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
+.bd{border:1.5px solid #f3b9a8;background:#fff6f2;border-radius:14px;overflow:hidden}.bd .fig{height:112px;border-radius:0}
+.bd div.tx{padding:7px 10px 9px}.bd h3{font-size:15px;color:var(--red)}.bd p{font-size:13.5px;line-height:1.45;margin-top:2px}.bd p b{color:var(--green)}
+.r2{display:grid;grid-template-columns:1fr 250px;gap:16px;margin-top:4px;align-items:start}
+.self{border:2px solid #9db9e6;border-radius:18px;padding:22px 14px 12px;position:relative;font-size:15px;line-height:1.55;background:#fff;margin-top:26px}
+.self>b{position:absolute;left:14px;top:-14px;background:#2f6db5;color:#fff;font:400 16px 'Black Han Sans';padding:3px 14px;border-radius:99px}
+.self li{list-style:none;display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px dashed #d5dff0}.self li span{color:#c9cfdb;letter-spacing:2px;font-size:17px;white-space:nowrap}
+.quiz{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.qz{background:#fff;border-radius:12px;padding:9px 12px;font-size:14px;line-height:1.5}.qz b{color:#2f6db5}.qz .ox{display:flex;gap:6px;margin-top:6px}.qz .ox span{flex:1;text-align:center;border:1.5px solid #bcd0ea;border-radius:8px;font-weight:700;padding:2px 0}
+</style></head><body><div class="book">
+<section class="pg l"><div class="wave"></div>
+  <div class="hd"><span class="utag" style="position:relative;top:-4px">단원 1 · 앉기</span>
+    <h1><em>스쿼트</em>의 기본 자세를 익혀요</h1>
+    <p class="lead">스쿼트는 무릎과 고관절을 함께 굽혀 앉았다 일어나는 움직임입니다. 의자에 앉고 일어설 때도, 농구 수비 자세를 잡을 때도 쓰는 가장 기본이 되는 동작입니다.</p>
+    <div class="open"><div class="box q"><b class="t">💭 생각 열기</b>오늘 의자에 몇 번 앉았다 일어났나요? 그때 무릎과 엉덩이는 어떻게 움직였을까요?</div>
+      <div class="box goal"><b class="t">🎯 학습 목표</b><ul><li>바른 스쿼트 자세를 설명하고 할 수 있다.</li><li>잘못된 자세가 왜 위험한지 말할 수 있다.</li></ul></div></div>
+  </div>
+  <div><div class="act"><i>활동 1</i><h2>바른 자세로 앉았다 일어나기</h2><span class="d3">▶ 그림을 누르면 3D</span></div>
+    <div class="a1"><div class="fig"><img src="squat-base-good.png"><span class="tap">▶ 3D</span><span class="lb">바른 스쿼트</span></div>
+      <div class="rows">
+        <div class="rw"><b>자세</b><span>엉덩이를 뒤로 빼며 고관절을 접고, 무릎은 발끝 방향으로 굽혀요. 허벅지가 바닥과 수평이 될 때까지 앉아요.</span></div>
+        <div class="rw"><b>확인</b><ul><li>발 전체로 바닥 누르기</li><li>무릎은 발끝 방향</li><li>허리는 곧게(중립)</li></ul></div>
+        <div class="rw"><b>근육</b><span class="mus"><em>대퇴사두근</em><em>대둔근</em><em>햄스트링</em></span></div>
+        <p class="safe"><b>🚨 안전</b> 무릎이나 허리가 아프면 바로 멈춰요. 처음에는 의자를 뒤에 두고 연습하면 안전해요.</p>
+      </div></div></div>
+  <div class="band"><div class="bt"><i>기능 익히기</i><b>스쿼트를 잘하려면?</b></div>
+    <div class="steps">
+      <div class="st"><div class="im"><img src="step2.png" style="object-position:50% 20%"></div><p><b>준비</b>발은 어깨너비, 발끝은 살짝 바깥. 가슴 펴고 배에 힘.</p></div>
+      <div class="st"><div class="im"><img src="step3.png"></div><p><b>내려가기</b>엉덩이를 뒤로 빼며 의자에 앉듯이 내려가요.</p></div>
+      <div class="st"><div class="im"><img src="step4.png" style="object-position:50% 60%"></div><p><b>가장 낮은 자세</b>허벅지가 바닥과 수평. 허리는 곧게.</p></div>
+      <div class="st"><div class="im"><img src="step3.png" style="transform:scaleX(-1)"></div><p><b>일어서기</b>발바닥으로 바닥을 밀며 엉덩이와 무릎을 함께 펴요.</p></div>
+    </div></div>
+  <div class="ft"><b>8</b> Ⅰ. 몸의 움직임과 건강</div>
+</section>
+<section class="pg r"><div class="wave"></div>
+  <div class="hd" style="min-height:0;padding-top:30px"><div class="act" style="margin-top:0"><i>활동 2</i><h2>일상과 스포츠에서 찾아보기</h2></div>
+    <div class="conn">
+      <div class="cn"><div class="fig"><img src="squat-chair-good.png"><span class="tap">▶ 3D</span></div><div><h3><small>일상</small>의자에서 일어나기</h3><p>발을 무릎 아래로 당기고, 상체를 숙여 무게를 발 위로 옮긴 뒤 다리로 밀어 일어나요.</p></div></div>
+      <div class="cn s"><div class="fig"><img src="squat-defense-good.png"><span class="tap">▶ 3D</span></div><div><h3><small>스포츠</small>농구 수비 자세</h3><p>발을 어깨보다 넓게 벌리고 반 스쿼트로 낮게 앉아 어느 쪽으로든 빠르게 움직여요.</p></div></div>
+    </div></div>
+  <div><div class="act"><i style="background:var(--red)">주의</i><h2>이러면 다쳐요</h2></div>
+    <div class="bad">
+      <div class="bd"><div class="fig"><img src="squat-base-valgus.png"></div><div class="tx"><h3>⚠ 무릎이 안으로 모임</h3><p>무릎 안쪽 인대가 비틀려요.<br><b>→ 무릎을 둘째 발가락 쪽으로</b></p></div></div>
+      <div class="bd"><div class="fig"><img src="squat-base-round.png"></div><div class="tx"><h3>⚠ 허리가 굽음</h3><p>허리 디스크 앞쪽이 눌려요.<br><b>→ 숨 들이쉬고 배에 힘</b></p></div></div>
+      <div class="bd"><div class="fig"><img src="squat-base-heel.png"></div><div class="tx"><h3>⚠ 뒤꿈치가 들림</h3><p>무게가 무릎 앞으로 쏠려요.<br><b>→ 발 전체로 바닥 누르기</b></p></div></div>
+    </div>
+    <div class="r2"><div><div class="act"><i style="background:#6741d9">도전</i><h2>자세 코치로 10개 해 보기</h2></div><p class="lead" style="font-size:15px;margin-top:6px">폰 카메라 앞에서 스쿼트를 하면 바른 자세만 개수로 세어 줘요. 무릎이 앞으로 많이 나오면 빨갛게 알려 줘요.</p></div>
+      <div class="self"><b>스스로 확인</b><ul><li>발 전체로 바닥을 눌렀나요?<span>☆☆☆</span></li><li>무릎이 발끝 방향이었나요?<span>☆☆☆</span></li><li>허리를 곧게 지켰나요?<span>☆☆☆</span></li></ul></div></div>
+  </div>
+  <div class="band"><div class="bt"><i>단원 마무리</i><b>확인 문제 · 눌러서 답 확인</b></div>
+    <div class="quiz">
+      <div class="qz"><b>1.</b> 스쿼트로 앉을 때 무릎은 발끝과 같은 방향으로 굽힌다.<div class="ox"><span>O</span><span>X</span></div></div>
+      <div class="qz"><b>2.</b> 무릎이 안으로 모이면 무릎 안쪽 인대가 다치기 쉽다.<div class="ox"><span>O</span><span>X</span></div></div>
+      <div class="qz"><b>3.</b> 스쿼트에서 가장 많이 일하는 근육은 팔 근육이다.<div class="ox"><span>O</span><span>X</span></div></div>
+    </div></div>
+  <div class="ft">단원 1 · 앉기 <b>9</b></div>
+</section></div></body></html>
