@@ -1395,6 +1395,12 @@ body.v2 .pb[data-toc="1"] .pb-nav #sbS{display:none!important}
 body.v2 .v2-back{font-size:26px!important;background:#d7f25a!important;color:#14284b!important;font-weight:800}body.v2 .pb[data-toc="1"] .v2-back{display:none}
 body.v2 #pbToc[hidden]{display:none!important}
 @media (orientation:portrait){body.v2 #pbBookV{font-size:0!important;padding:0!important;width:40px;justify-content:center}body.v2 #pbBookV::before{content:"📕";font-size:18px}body.v2 .nv-home{width:38px;height:38px}}
+/* 3D 모형 크기: － 100% ＋ */
+body.v2 .v2-zoom{position:absolute;left:10px;bottom:44px;z-index:4;display:flex;align-items:center;background:rgba(255,255,255,.92);border-radius:99px;box-shadow:0 2px 8px rgba(60,40,10,.16);padding:2px}
+body.v2 .v2-zoom button{border:0;background:none;color:var(--v2n);font:700 20px/1 var(--f-body);width:40px;height:40px;border-radius:99px;cursor:pointer}
+body.v2 .v2-zoom button:active{background:var(--v2l)}body.v2 .v2-zoom button:disabled{opacity:.3}
+body.v2 .v2-zoom #v2Zr{width:auto;min-width:50px;padding:0 4px;font-size:13.5px}
+body.v2 .v2-rot{left:auto!important;right:12px}
 /* 3D·글 크기 조절: 경계를 끌어서 */
 @media (orientation:portrait){body.v2 .pb[data-vw="both"] .pb-book{grid-template-rows:calc(var(--spP,42)*1%) minmax(0,1fr)!important}}
 @media (orientation:landscape){body.v2 .pb[data-vw="both"] .pb-book{grid-template-columns:calc(var(--spL,53)*1%) minmax(0,1fr)!important}}
@@ -3840,7 +3846,9 @@ function syncPlay() { playBtn.textContent = PAPER ? (state.playing ? '⏸' : '�
 function syncGhost() { ghostBtn.setAttribute('aria-pressed', state.ghost); ghost.g.visible = state.ghost; }
 let camGoal = null;
 const VIEWDIR = { diag: V(.62, .42, .66), side: V(1, .28, .02), front: V(0, .3, 1), back: V(.01, .36, -1) };
-function camFor(k) { const c = state.def.variants[state.v]?.cam || state.def.cam, tg = V(c.x || 0, c.y, c.z), narrow = stage.clientWidth < 560;
+let userZoom = 1; // 사용자가 고른 3D 크기(1보다 크면 모형이 크게)
+function camFor(k) { const r = camFor0(k); if (userZoom !== 1) r[0] = r[1].clone().add(r[0].clone().sub(r[1]).multiplyScalar(1 / userZoom)); return r; }
+function camFor0(k) { const c = state.def.variants[state.v]?.cam || state.def.cam, tg = V(c.x || 0, c.y, c.z), narrow = stage.clientWidth < 560;
   const fit = c.fitW ? clamp((c.fitW / 2) / (Math.tan(camera.fov * D / 2) * camera.aspect), 8, 30) : 0; // 가로로 fitW(m)가 다 보이는 거리
   controls.maxDistance = Math.max(7, (fit || c.dist) * 1.5); scene.fog.far = Math.max(PAPER ? 22 : 16, (fit || c.dist) * 2.6); scene.fog.near = Math.max(PAPER ? 9 : 7, (fit || c.dist) * 1.1);
   if (fit) return [tg.clone().addScaledVector((c.dirs?.[k] || VIEWDIR[k]).clone().normalize(), k === 'side' ? fit : fit * .8), tg];
@@ -4459,6 +4467,13 @@ if (READER) {
       else { if (state.v !== 'good') setVariant('good'); $('pgText').dataset.at = t; }
       setTimeout(() => { window.__sbarSync?.(); const fl = $('pgFlow'), tgt = t === 'steps' ? $('vsteps') : null; fl.scrollTop = tgt ? tgt.offsetTop - fl.offsetTop - 6 : 0; tabsSync(); }, 60); });
     setInterval(tabsSync, 500);
+    // 3D 모형 크기 조절: － / ＋ , 가운데 숫자를 누르면 100%
+    $('stage').insertAdjacentHTML('beforeend', '<div class="v2-zoom" role="group" aria-label="3D 모형 크기"><button type="button" id="v2Zm" aria-label="모형 작게">－</button><button type="button" id="v2Zr" aria-label="처음 크기로">100%</button><button type="button" id="v2Zp" aria-label="모형 크게">＋</button></div>');
+    { const ZS = [.6, .7, .85, 1, 1.2, 1.45, 1.75, 2.1]; let zi = ZS.indexOf(ls('v2-zoom', 1)); if (zi < 0) zi = 3;
+      const zset = (i, go) => { zi = Math.max(0, Math.min(ZS.length - 1, i)); userZoom = ZS[zi]; $('v2Zr').textContent = Math.round(userZoom * 100) + '%'; $('v2Zm').disabled = zi === 0; $('v2Zp').disabled = zi === ZS.length - 1;
+        lss('v2-zoom', userZoom); if (go) { controls.minDistance = Math.min(controls.minDistance, .8); setView(state.view); } };
+      zset(zi, false); controls.minDistance = Math.min(controls.minDistance, .8);
+      $('v2Zm').onclick = () => zset(zi - 1, true); $('v2Zp').onclick = () => zset(zi + 1, true); $('v2Zr').onclick = () => zset(3, true); }
     // 경계를 끌어 3D·글 크기 조절(세로: 위아래, 가로: 좌우) · 톡 누르면 3D+글 → 글만 → 3D만 · 두 번 누르면 처음 크기
     $('pgText').insertAdjacentHTML('afterbegin', '<button type="button" class="v2-grip" id="v2Grip" aria-label="끌어서 3D와 글 크기 조절"><i></i></button>');
     { const bk = $('pbBook'), port = () => matchMedia('(orientation:portrait)').matches, sp = ls('v2-split', {});
