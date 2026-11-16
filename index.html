@@ -126,6 +126,7 @@ body.battling .cue{top:calc(172px + env(safe-area-inset-top,0px))}
 [hidden]{display:none!important}
 @media (max-width:640px){header h1{font-size:20px}.chips{left:10px;bottom:12px;gap:4px}.chip{min-width:0;font-size:12px;padding:4px 9px;gap:8px}.meter{left:10px;width:20px}.meter-lbl{display:none}}
 @media (prefers-reduced-motion:reduce){.pop.show{animation:none;opacity:1}}
+[data-mode="battle"][disabled]{opacity:.45;cursor:not-allowed} [data-mode="battle"] small{font-size:.72em;opacity:.85}
 </style>
 </head>
 <body>
@@ -140,7 +141,7 @@ body.battling .cue{top:calc(172px + env(safe-area-inset-top,0px))}
       <button type="button" data-mode="practice" aria-pressed="true">연습</button>
       <button type="button" data-mode="game" aria-pressed="false">게임</button>
       <button type="button" data-mode="test" aria-pressed="false">평가</button>
-      <button type="button" data-mode="battle" aria-pressed="false">대결</button>
+      <button type="button" data-mode="battle" aria-pressed="false" disabled title="준비 중">대결 <small>준비 중</small></button>
     </div>
     <div class="seg" role="group" aria-label="찍는 방향">
       <button type="button" data-view="side" aria-pressed="true">옆에서</button>
@@ -170,7 +171,7 @@ body.battling .cue{top:calc(172px + env(safe-area-inset-top,0px))}
         <button type="button" data-mode="practice" aria-pressed="true">연습</button>
         <button type="button" data-mode="game" aria-pressed="false">게임</button>
         <button type="button" data-mode="test" aria-pressed="false">평가</button>
-        <button type="button" data-mode="battle" aria-pressed="false">대결</button>
+        <button type="button" data-mode="battle" aria-pressed="false" disabled title="준비 중">대결 <small>준비 중</small></button>
       </div>
       <span class="grow"></span>
       <button type="button" class="tb" id="fsBtn" aria-label="전체 화면">⛶</button>
@@ -297,9 +298,9 @@ const ang = (a, b, c) => { const v1x = a.x - b.x, v1y = a.y - b.y, v2x = c.x - b
 function analyze(raw, W, H) {
   // 화면 비율을 맞춘 좌표로 바꿔서 각도를 잼
   const lm = E.smooth(raw).map(p => ({ x: p.x * W, y: p.y * H, v: p.visibility ?? 1 }));
-  return S.ex === 'pushup' ? analyzePush(lm) : analyzeSquat(lm);
+  return S.ex === 'pushup' ? analyzePush(lm) : analyzeSquat(lm, W, H);
 }
-function analyzeSquat(lm) {
+function analyzeSquat(lm, W0 = 1e9, H0 = 1e9) {
   const visOf = s => ['sh', 'hip', 'knee', 'ankle'].reduce((a, k) => a + lm[IDX[s][k]].v, 0) / 4;
   const side = visOf('L') >= visOf('R') ? 'L' : 'R', J = k => lm[IDX[side][k]], Jo = k => lm[IDX[side === 'L' ? 'R' : 'L'][k]];
   const need = S.view === 'side' ? visOf(side) : Math.min(visOf('L'), visOf('R'));
@@ -312,8 +313,12 @@ function analyzeSquat(lm) {
   const leg = Math.hypot(hip.x - ankle.x, hip.y - ankle.y);
   // 똑바로 서서 1초 멈추면 기준 잡기
   const now = performance.now();
-  if (M.knee > 160) { if (!E.stillSince) E.stillSince = now; if (now - E.stillSince > 900 && (!E.calib || E.phase === 'up'))
-      E.calib = { hipY: hip.y, kneeY: knee.y, leg, heelY: J('heel').y, footDy: J('toe').y - J('heel').y }; }
+  // 머리부터 발끝까지 관절이 다 보여야 측정 시작 (옆: 보이는 쪽 7개, 앞: 양쪽 13개)
+  const keys = ['sh', 'hip', 'knee', 'ankle', 'heel', 'toe'], sides = S.view === 'side' ? [side] : ['L', 'R'];
+  const pts = [lm[0], ...sides.flatMap(sd => keys.map(k => lm[IDX[sd][k]]))]; M.jAll = pts.length; M.jOk = pts.filter(p => p.v > .5 && p.y > 0 && p.y < H0 && p.x > 0 && p.x < W0).length;
+  if (M.knee > 160 && (E.calib || M.jOk === M.jAll)) { if (!E.stillSince) E.stillSince = now; if (now - E.stillSince > 900 && (!E.calib || E.phase === 'up')) {
+      const first = !E.calib; E.calib = { hipY: hip.y, kneeY: knee.y, leg, heelY: J('heel').y, footDy: J('toe').y - J('heel').y };
+      if (first) { setCue('✓ 인식됐어요! 이제 시작해요', 'good', 1800); pop('인식 완료', '#3ddc84'); } } }
   else E.stillSince = 0;
   M.ready = !!E.calib;
   if (!E.calib) return M;
@@ -396,7 +401,7 @@ function liveCue(M) {
   if (performance.now() < E.cueUntil) return null;
   const push = S.ex === 'pushup', down = E.phase === 'down';
   if (!M.visible) return [push ? (S.view === 'side' ? '몸 전체가 옆으로 보이게 해요' : '얼굴과 두 손이 보이게 해요') : '몸 전체가 보이게 뒤로 가요', 'warn'];
-  if (!M.ready) return [push ? '팔을 펴고 엎드려 잠깐 멈춰요' : '똑바로 서서 잠깐 멈춰요', 'warn'];
+  if (!M.ready) return [push ? '팔을 펴고 엎드려 잠깐 멈춰요' : M.jOk < M.jAll ? `머리부터 발끝까지 보이게 서요 · 관절 ${M.jOk}/${M.jAll}` : '똑바로 서서 잠깐 멈춰요', 'warn'];
   if (push) {
     if (!down) return ['내려가 볼까요?', ''];
     if (M.sag) return ['허리가 처졌어요! 배에 힘', 'bad'];
@@ -572,7 +577,7 @@ function applyExercise(ex, keepView) { // 운동 바꾸기: 기준을 새로 잡
 }
 function setView(v) { S.view = v; document.querySelectorAll('[data-view]').forEach(x => x.setAttribute('aria-pressed', x.dataset.view === v)); }
 document.querySelectorAll('[data-ex]').forEach(b => b.onclick = () => { applyExercise(b.dataset.ex); if (B.st === 'lobby' && canHost()) { B.cfg.ex = S.ex; sendState(); } setMode(S.mode); });
-document.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { sheet(false); setMode(b.dataset.mode); });
+document.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { if (b.dataset.mode === 'battle') return; sheet(false); setMode(b.dataset.mode); }); // 대결은 준비 중
 document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => { setView(b.dataset.view); E.reset(); if (S.mode !== 'battle') setMode(S.mode); });
 document.querySelectorAll('[data-depth]').forEach(b => b.onclick = () => { S.target = +b.dataset.depth; document.querySelectorAll('[data-depth]').forEach(x => x.setAttribute('aria-pressed', x === b)); });
 document.querySelectorAll('[data-sec]').forEach(b => b.onclick = () => { S.game.sec = +b.dataset.sec; document.querySelectorAll('[data-sec]').forEach(x => x.setAttribute('aria-pressed', x === b));
@@ -677,8 +682,8 @@ document.querySelectorAll('[data-bsec]').forEach(b => b.onclick = () => { if (!c
 // 주소로 바로 열기. 예: ?ex=pushup&mode=game&view=side, ?room=1234
 applyExercise(['squat', 'pushup'].includes(QS.get('ex')) ? QS.get('ex') : 'squat');
 if (['side', 'front'].includes(QS.get('view'))) setView(QS.get('view'));
-if (['practice', 'game', 'test', 'battle'].includes(QS.get('mode'))) S.mode = QS.get('mode');
-if (/^\d{4}$/.test(QS.get('room') || '')) { S.mode = 'battle'; $('roomCode').value = QS.get('room'); }
+if (['practice', 'game', 'test'].includes(QS.get('mode'))) S.mode = QS.get('mode'); // 대결은 준비 중이라 주소로도 열지 않음
+
 document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === S.mode));
 
 // ---------- 카메라와 모델 ----------
