@@ -162,3 +162,42 @@ p { word-break: keep-all } mark { background: var(--lime); color: inherit; paddi
   .sp-steps { grid-template-columns: 1fr 1fr } .sp-bad, .sp-quiz { grid-template-columns: 1fr }
   .sp-bad .bd { flex-direction: row } .sp-bad .sfig { width: 38%; height: auto; min-height: 6.5em; flex: none }
 }
+/* ---------- 이론 단원 펼침쪽 ---------- */
+.sp-act i.grn { background: #2f7a47 }
+.th-items { display: grid; grid-template-columns: 1fr 1fr; gap: .55em .9em }
+.th-items .ti { display: grid; grid-template-columns: 34% 1fr; gap: .55em; align-items: start }
+.th-items .ti:last-child:nth-child(odd) { grid-column: 1 / -1; grid-template-columns: 17% 1fr }
+.th-items .sfig { height: 5.4em }
+.th-items h3 { font-size: 1em; color: var(--navy); line-height: 1.3 } .th-items h3 span { display: inline-grid; place-items: center; width: 1.35em; height: 1.35em; margin-right: .3em; border-radius: 50%; background: var(--lime2); font-size: .85em }
+.th-items p { font-size: .84em; line-height: 1.5; margin-top: .1em; word-break: keep-all }
+.th-cols { display: grid; grid-template-columns: repeat(var(--n, 2), 1fr); gap: .6em }
+.th-cols .tc { background: #fff; border-radius: .7em; padding: .45em .65em } .th-cols b { color: var(--navy); font-size: .95em } .th-cols p { font-size: .82em; line-height: 1.45; margin-top: .1em; word-break: keep-all }
+.th-tbl { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .86em; line-height: 1.45; border: 1.5px solid var(--line); border-radius: .8em; overflow: hidden; background: #fff }
+.th-tbl th, .th-tbl td { padding: .4em .6em; text-align: left; vertical-align: top; word-break: keep-all; border-top: 1px solid var(--line) }
+.th-tbl thead th { background: var(--navy); color: #fff; border-top: 0; font-weight: 700 } .th-tbl tbody th { color: var(--navy); white-space: nowrap; background: #f6f9e6 }
+.th-warn { list-style: none; display: grid; gap: .3em; padding: 0 } .th-warn li { background: #fff6f2; border: 1.5px solid #f3b9a8; border-radius: .7em; padding: .35em .7em; font-size: .9em; line-height: 1.45; word-break: keep-all } .th-warn li::before { content: "⚠ "; color: #b33a0c }
+.th-lab { margin-top: .45em; border: 0; background: #5b3cc4; color: #fff; font: 700 .92em var(--sans); border-radius: 99px; padding: .4em 1em; cursor: pointer }
+/* ---------- 응용·일상·스포츠·원리 카드 ---------- */
+.xg { display: grid; gap: .3em; margin-bottom: .2em }
+.xq { background: #fff8e1; border-left: .3em solid var(--orange); border-radius: 0 .6em .6em 0; padding: .3em .7em; font-size: .9em; word-break: keep-all } .xq b { color: #a14a0b }
+.xc { border: 1.5px solid #d9e2f2; background: #fbfcff; border-radius: 1em; overflow: hidden; margin-top: .55em }
+.xc.d { border-color: #bfe0c9; background: #f8fdf9 } .xc.s { border-color: #f3c9b0; background: #fffaf6 } .xc.p { border-color: #d6ccf5; background: #fbf9ff }
+.xh { display: flex; align-items: center; gap: .5em; padding: .35em .8em; background: #e9eef8 }
+.xc.d .xh { background: #e2f3e7 } .xc.s .xh { background: #fdeadf } .xc.p .xh { background: #ece6fb }
+.xh small { font-size: .75em; font-weight: 700; color: #fff; background: var(--navy); border-radius: 99px; padding: .05em .6em } .xc.d .xh small { background: #2f7a47 } .xc.s .xh small { background: #c2410c } .xc.p .xh small { background: #5b3cc4 }
+.xh h3 { font: 400 1.15em/1.3 var(--disp); color: var(--navy) }
+.xh .lv { margin-left: auto; color: var(--orange); letter-spacing: .05em; font-size: .9em } .xh .lv i { font-style: normal; color: #cfc6b4 }
+.xb { display: grid; grid-template-columns: 34% 1fr; gap: .75em; padding: .6em .8em .65em } .xb.nf { grid-template-columns: 1fr }
+.xb .sfig { height: 100%; min-height: 8.5em }
+.xt { display: grid; gap: .3em; align-content: start; min-width: 0 }
+.xn { font-weight: 700; color: #23683d; font-size: .9em } .xd { font-size: .9em; line-height: 1.55; word-break: keep-all }
+.xk { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: .15em .6em; font-size: .84em; line-height: 1.4 } .xk li { word-break: keep-all } .xk li::before { content: "✓ "; color: #2f7a47; font-weight: 700 }
+.xw { font-size: .84em; line-height: 1.45; background: #fff1ea; border-radius: .5em; padding: .3em .55em; word-break: keep-all } .xw b { color: #b33a0c } .xw span { color: #23683d; font-weight: 700 }
+.xv { display: flex; flex-wrap: wrap; gap: .3em; align-items: center; font-size: .84em } .xv b { color: #5b3cc4; margin-right: .2em }
+.xv button { border: 1.5px solid #d6ccf5; background: #fff; color: #3f2a99; border-radius: 99px; padding: .1em .6em; font: 700 .95em var(--sans); cursor: pointer }
+.xm { font-size: .84em } .xm em { font-style: normal; display: inline-block; background: var(--lime); border-radius: .4em; padding: 0 .4em; margin: 0 .25em .15em 0 }
+@media (orientation: portrait) {
+  .th-items { grid-template-columns: 1fr } .th-items .ti:last-child:nth-child(odd) { grid-template-columns: 34% 1fr }
+  .th-cols { grid-template-columns: 1fr }
+  .xb { grid-template-columns: 1fr } .xb .sfig { height: 11em } .xk { grid-template-columns: 1fr }
+}

@@ -81,6 +81,44 @@ function spreadL(U, ui, base, bg, sk) { const P = U.spread, uid = U.m;
   <div class="sp-band"><div class="bt"><i>기능 익히기</i><b>${esc(P.stepTitle || base.name + ' 잘하려면?')} · ${P.stepImg ? '그림을' : '단계를'} 누르면 3D</b></div>
     <div class="sp-steps" style="--n:${base.steps.length}">${base.steps.map(([t, x], i) => `<button type="button" class="st${P.stepImg ? '' : ' no'}" data-scene="${sk}" data-v="good" data-cap="${esc(t)}">${P.stepImg ? `<span class="im"><img src="${P.stepImg[i]}" alt="${esc(t)}" style="object-position:${P.stepPos[i]}${P.stepFlip[i] ? ';transform:scaleX(-1)' : ''}"></span>` : ''}<span class="sp-tx"><b>${i + 1}. ${esc(t)}</b>${esc(first(x))}</span></button>`).join('')}</div></div>
 </div>`; }
+const spSelf = (P, uid) => `<div class="sp-self"><b>스스로 확인</b><ul>${P.self.map((t, i) => `<li><span>${esc(t)}</span><span class="stars" role="group" aria-label="${esc(t)} 별점">${[1, 2, 3].map(n => `<button type="button" data-star="${uid}:${i}:${n}" aria-label="별 ${n}개" aria-pressed="false">★</button>`).join('')}</span></li>`).join('')}</ul></div>`;
+const spQuiz = P => `<div class="sp-band"><div class="bt"><i>단원 마무리</i><b>확인 문제 · 눌러서 답 확인</b></div>
+    <div class="sp-quiz">${P.quiz.map((z, i) => `<div class="qz" data-a="${z.a}" data-why="${esc(z.why)}"><p><b>${i + 1}.</b> ${esc(z.q)}</p><div class="ox"><button type="button" data-ox="O" aria-label="${i + 1}번 O, 맞다">O</button><button type="button" data-ox="X" aria-label="${i + 1}번 X, 틀리다">X</button></div><p class="why" aria-live="polite"></p></div>`).join('')}</div></div>`;
+function thL(U, ui) { const P = U.spread;
+  return `<div class="sp-l">
+  <span class="unit-tag">단원 ${ui + 1} · ${U.verb}</span>
+  <h1 class="sp-h"><em>${esc(P.em)}</em>${esc(P.rest)}</h1>
+  <p class="sp-lead">${esc(U.intro)}</p>
+  <div class="sp-open"><div class="sp-box q"><b>💭 생각 열기</b>${esc(P.think)}</div><div class="sp-box goal"><b>🎯 학습 목표</b><ul>${P.goals.map(g => `<li>${esc(g)}</li>`).join('')}</ul></div></div>
+  <div class="sp-act"><i>활동 1</i><h2>${esc(P.act1)}</h2><span class="sp-d3">▶ 그림을 누르면 3D</span></div>
+  <div class="th-items">${U.items.map((it, i) => `<div class="ti">${spFig(it.img, it.name, it.scene, 'good')}<div><h3><span>${i + 1}</span>${esc(it.name)}</h3><p>${esc(it.text)}</p></div></div>`).join('')}</div>
+  <div class="sp-band"><div class="bt"><i>${esc(P.band.tag)}</i><b>${esc(P.band.title)}</b></div>
+    <div class="th-cols" style="--n:${P.band.cols.length}">${P.band.cols.map(c => `<div class="tc"><b>${esc(c.h)}</b><p>${esc(c.t)}</p></div>`).join('')}</div></div>
+</div>`; }
+function thR(U) { const P = U.spread, uid = U.m;
+  return `<div class="sp-r">
+  <div class="sp-act"><i>활동 2</i><h2>${esc(P.act2)}</h2></div>
+  ${P.act2lead ? `<p class="sp-lead">${esc(P.act2lead)}</p>` : ''}
+  <table class="th-tbl"><thead><tr>${P.table.head.map(h => `<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${P.table.rows.map(r => `<tr>${r.map((c, i) => i ? `<td>${esc(c)}</td>` : `<th scope="row">${esc(c)}</th>`).join('')}</tr>`).join('')}</tbody></table>
+  <div class="sp-act"><i class="red">주의</i><h2>${esc(P.cautionTitle)}</h2></div>
+  <ul class="th-warn">${P.caution.map(c => `<li>${esc(c)}</li>`).join('')}</ul>
+  <div class="sp-r2"><div><div class="sp-act"><i class="pur">도전</i><h2>${esc(P.challenge.title)}</h2></div><p class="sp-lead">${esc(P.challenge.text)}</p>${U.lab ? `<button type="button" class="th-lab" data-scene="principles" data-v="good" data-cap="트레이닝 원리 실험실">🧪 트레이닝 원리 실험실 열기</button>` : ''}</div>
+    ${spSelf(P, uid)}</div>
+  ${spQuiz(P)}
+</div>`; }
+const XQ = { 응용: '기본 동작과 무엇이 달라졌나요? 어디가 더 힘들까요?', 원리: '3D로 돌려 보며 공이 어디로 갈지 먼저 예상해 봐요.', 일상: '오늘 하루 이 동작을 몇 번 했는지 떠올려 봐요.', 스포츠: '좋아하는 경기에서 이 동작이 나오는 순간을 찾아봐요.' };
+function xcard(U, s, g) { const uid = U.m, k = `s-${uid}-${s.sc}`, v = s.vars[0], lv = D.lv[`${uid}:${s.sc}`], bad = g === '원리' ? null : s.vars.find(x => !x.ok), cmp = !bad && s.vars.length > 1;
+  const desc = v.desc.replace(/🧩\s*/, ''), src = img(uid, s.sc, v.k);
+  return `<div class="xc${g === '스포츠' ? ' s' : g === '일상' ? ' d' : g === '원리' ? ' p' : ''}">
+  <div class="xh"><small>${esc(g)}</small><h3>${esc(s.name)}</h3>${lv && lv[1] ? `<span class="lv" aria-label="난이도 ${lv[1]}">${'★'.repeat(lv[1])}<i>${'★'.repeat(Math.max(0, 3 - lv[1]))}</i></span>` : ''}</div>
+  <div class="xb${src ? '' : ' nf'}">${src ? spFig(src, s.name, k, v.k, 'xf') : ''}<div class="xt">
+    ${v.name && v.name !== s.name ? `<p class="xn">${esc(v.name)}</p>` : ''}<p class="xd">${esc(desc)}</p>
+    ${v.checks.length ? `<ul class="xk">${v.checks.slice(0, 4).map(c => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}
+    ${bad ? `<p class="xw"><b>⚠ ${esc(bad.name)}</b> ${esc(first(bad.why || bad.desc))}${bad.fix.length ? ` <span>→ ${esc(bad.fix[0])}</span>` : ''}</p>` : ''}
+    ${cmp ? `<p class="xv"><b>비교해 보기</b>${s.vars.map(x => `<button type="button" data-scene="${k}" data-v="${x.k}" data-cap="${esc(x.name)}">▶ ${esc(x.name)}</button>`).join('')}</p>` : ''}
+    ${s.muscles.length ? `<p class="xm">💪 ${s.muscles.slice(0, 4).map(m => `<em>${esc(m)}</em>`).join('')}</p>` : ''}
+    </div></div>
+</div>`; }
 function spreadR(U, ui, base, sk) { const P = U.spread, uid = U.m, S = U.scenes;
   const bads = [...base.vars.filter(v => !v.ok).map(v => ({ v, sc: 'base' })), ...(P.bad || []).map(b => ({ v: S.find(s => s.sc === b.sc).vars.find(v => v.k === b.k), sc: b.sc }))].slice(0, 3);
   return `<div class="sp-r">
@@ -90,14 +128,17 @@ function spreadR(U, ui, base, sk) { const P = U.spread, uid = U.m, S = U.scenes;
   <div class="sp-act"><i class="red">주의</i><h2>${esc(P.badTitle || '이러면 다쳐요')}</h2></div>
   <div class="sp-bad">${bads.map(({ v, sc }) => { const k = `s-${uid}-${sc}`, src = img(uid, sc, v.k); return `<div class="bd">${spFig(src, v.name, k, v.k)}<div class="sp-tx"><h3><span aria-hidden="true">⚠</span> ${esc(v.name)}</h3>${src ? '' : `<button type="button" class="sp-3d" data-scene="${k}" data-v="${v.k}" data-cap="${esc(v.name)}">▶ 3D로 보기</button>`}<p>${esc(first(v.why || v.desc))}</p>${v.fix.length ? `<p class="fx">→ ${esc(v.fix[0])}</p>` : ''}</div></div>`; }).join('')}</div>
   <div class="sp-r2"><div><div class="sp-act"><i class="pur">도전</i><h2>${esc(P.challenge.title)}</h2></div><p class="sp-lead">${esc(P.challenge.text)}</p></div>
-    <div class="sp-self"><b>스스로 확인</b><ul>${P.self.map((t, i) => `<li><span>${esc(t)}</span><span class="stars" role="group" aria-label="${esc(t)} 별점">${[1, 2, 3].map(n => `<button type="button" data-star="${uid}:${i}:${n}" aria-label="별 ${n}개" aria-pressed="false">★</button>`).join('')}</span></li>`).join('')}</ul></div></div>
-  <div class="sp-band"><div class="bt"><i>단원 마무리</i><b>확인 문제 · 눌러서 답 확인</b></div>
-    <div class="sp-quiz">${P.quiz.map((z, i) => `<div class="qz" data-a="${z.a}" data-why="${esc(z.why)}"><p><b>${i + 1}.</b> ${esc(z.q)}</p><div class="ox"><button type="button" data-ox="O" aria-label="${i + 1}번 O, 맞다">O</button><button type="button" data-ox="X" aria-label="${i + 1}번 X, 틀리다">X</button></div><p class="why" aria-live="polite"></p></div>`).join('')}</div></div>
+    ${spSelf(P, uid)}</div>
+  ${spQuiz(P)}
 </div>`; }
 // ---------- 내용 블록 만들기 ----------
 const BL = []; // { u, g, html, title?, key? }
 D.units.forEach((U, ui) => {
   const uid = U.m, push = (g, html, extra = {}) => BL.push({ u: uid, g, html, ...extra });
+  if (U.kind === 'theory' && U.spread) {
+    push('기본', thL(U, ui), { title: true, key: U.items[0].scene, keys: U.items.map(it => it.scene), name: U.name, fixed: 'l' });
+    push('기본', thR(U), { fixed: 'r' });
+    return; }
   if (U.kind === 'theory') {
     push('기본', `<span class="unit-tag">단원 ${ui + 1} · ${U.verb}</span><h1>${U.name}</h1><p>${U.intro}</p>`, { title: true });
     U.items.forEach(it => push('기본', `<div class="it">${it.img ? fig(it.img, it.name, it.scene, 'good', 'sm card') : ''}<h3>${it.name}<small data-scene="${it.scene}" data-v="good" data-cap="${it.name}">▶ 3D</small></h3><p>${it.text}</p></div>`, { key: it.scene, name: it.name }));
@@ -118,9 +159,8 @@ D.units.forEach((U, ui) => {
   bads.forEach(v => push('기본', `<div class="it">${fig(img(uid, 'base', v.k), v.name, sk, v.k, 'sm card warn')}<h3>⚠ ${esc(v.name)}</h3><p>${esc(v.why || v.desc)}</p>${v.fix.length ? `<p class="fixl">${esc(v.fix.join(' · '))}</p>` : ''}</div>`));
   }
   for (const g of GO.slice(1)) { const xs = S.filter(s => s.sc !== 'base' && s.g === g); if (!xs.length) continue;
-    push(g, `<div class="gh"><span class="hl">${GNAME[g][0]}</span><p>${U.verb} ${GNAME[g][1]}</p></div>`);
-    xs.forEach((s, i) => { const v = s.vars[0], k = `s-${uid}-${s.sc}`;
-      push(g, `<div class="it">${fig(img(uid, s.sc, v.k), s.name, k, v.k, 'sm' + (i % 2 ? ' l' : ''))}<h3>${esc(s.name)}<small data-scene="${k}" data-v="${v.k}" data-cap="${esc(s.name)}">▶ 3D</small></h3><p>${esc(first(v.desc))}</p>${s.muscles.length ? `<p class="mus">💪 ${s.muscles.slice(0, 3).join(' · ')}</p>` : ''}</div>`, { key: k, name: s.name }); }); }
+    const gh = `<div class="xg"><div class="sp-act"><i${g === '스포츠' ? ' class="red"' : g === '일상' ? ' class="grn"' : g === '원리' ? ' class="pur"' : ''}>${GNAME[g][0]}</i><h2>${U.verb} · ${xs.length}가지</h2></div><p class="sp-lead">${GNAME[g][1]}</p><p class="xq"><b>💭 생각해 보기</b> ${XQ[g]}</p></div>`;
+    xs.forEach((s, i) => push(g, (i ? '' : gh) + xcard(U, s, g), { key: `s-${uid}-${s.sc}`, name: s.name })); }
 });
 // 목차 데이터
 const IX = []; D.units.forEach(U => { if (U.kind === 'theory') U.items.forEach(it => IX.push([it.name, it.scene, U.verb, '기본', '전신', 0]));
@@ -164,7 +204,7 @@ function build() {
   const P = portrait(); let content = null;
   for (let guess = 2, k = 0; k < 4; k++) { // 차례 쪽 수를 맞출 때까지
     T = guess; content = paginate(BL, T, i => i + 1);
-    keyPage = {}; groupPage = {}; content.forEach((p, i) => p.blocks.forEach(b => { if (b.key && keyPage[b.key] == null) keyPage[b.key] = i; const gk = b.u + '|' + b.g; if (b.u && groupPage[gk] == null) groupPage[gk] = T + i; }));
+    keyPage = {}; groupPage = {}; content.forEach((p, i) => p.blocks.forEach(b => { if (b.key && keyPage[b.key] == null) keyPage[b.key] = i; (b.keys || []).forEach(k => { if (keyPage[k] == null) keyPage[k] = i; }); const gk = b.u + '|' + b.g; if (b.u && groupPage[gk] == null) groupPage[gk] = T + i; }));
     const toc = paginate(tocBlocks(), 0, ROM); let n = toc.length; if (!P && n % 2) n++;
     if (n === guess) { PAGES = [...Array.from({ length: n }, (_, i) => ({ u: null, blocks: toc[i]?.blocks || [], num: ROM(i) })), ...content.map((p, i) => ({ ...p, num: i + 1 }))]; return; }
     guess = n; }

@@ -27,6 +27,8 @@ units.append({'m':'train','kind':'theory','lab':True,'verb':'트레이닝 원리
  {'name':'반복성의 원리','scene':'s-train-repeat','img':'bookdemo/ill_repeat.webp','text':'꾸준히 되풀이해야 효과가 쌓여요. 운동을 멈추면 늘었던 체력도 다시 줄어요.'},
  {'name':'개별성의 원리','scene':'s-train-indiv','img':'bookdemo/ill_indiv.webp','text':'사람마다 체력과 몸이 달라서 알맞은 무게와 횟수도 달라요. 친구와 비교하지 말고 내 몸에 맞춰요.'},
  {'name':'특이성의 원리','scene':'s-train-speci','img':'bookdemo/ill_speci.webp','text':'운동한 부위와 체력만 좋아져요. 달리기를 잘하고 싶으면 달리기를, 팔 힘을 기르고 싶으면 팔 운동을 해요.'}]})
+for u in units:
+    if u['m'] in d.get('theory',{}): u['spread']=d['theory'][u['m']]
 data={'units':units,'img':img,'lv':d['lv']}
 t=open(B+'tpl.html').read().replace('/*STYLE*/',open(B+'style.css').read()).replace('/*DATA*/',json.dumps(data,ensure_ascii=False))
 open(O+'book_demo.html','w').write(t); print('ok', len(img), len(t)//1024,'KB')
