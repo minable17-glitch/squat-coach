@@ -1247,6 +1247,55 @@ body.lab .page,body.lab .pb{display:none!important}
 .rd-page>.rd-grp{margin-left:max(0px,calc((100% - 680px) / 2))!important}
 .toc-contact{order:10;margin:4px 0 0;font-size:13px;color:#5c6475;text-align:center}.toc-contact a{color:#14284b;font-weight:700;text-decoration:none}
 .nv-bookv{text-decoration:none;display:inline-flex;align-items:center;background:#f2e3c2!important;color:#14284b!important}
+/* ===== 새 앱 화면 v2 ===== */
+body.v2 .pb{--v2p:#fbf5e6;--v2l:#d7f25a;--v2o:#f28c38;--v2n:#14284b;gap:8px}
+body.v2 .pb-nav{gap:6px;align-items:center}
+body.v2 #nvView,body.v2 #txFold,body.v2 #stFull,body.v2 .stage .ctrl,body.v2 #stCam,body.v2 .st-cover,body.v2 .tx-cover{display:none!important}
+body.v2 .nv-home{width:40px;height:40px;border-radius:12px;font-size:19px}
+body.v2 #pbRead,body.v2 #pbBookV{height:40px!important;padding:0 10px!important;font-size:14px!important;border-radius:12px!important}
+body.v2 #pbRead{font-size:0!important;width:40px;justify-content:center}body.v2 #pbRead::before{content:"📖";font-size:18px}
+body.v2 .nv-title{display:flex;flex-direction:column;justify-content:center;min-width:0;flex:1 1 auto;color:#fff;font:400 22px/1.1 'Black Han Sans',var(--f-body)!important;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+body.v2 .v2-unit{flex:none;background:rgba(255,255,255,.14);color:#e9eefb;font:700 12.5px var(--f-body);border-radius:99px;padding:4px 10px;white-space:nowrap}
+body.v2 .nv-yt{height:40px!important;border-radius:99px!important;background:var(--v2o)!important;padding:0 14px!important;font-size:14px!important}
+body.v2 .pb-nav #sbS{order:9;flex:1 1 100%;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;margin:0;padding:0;position:static}
+body.v2 .pb-nav #sbS .sb{flex:0 0 auto;height:34px;border-radius:99px;background:rgba(255,255,255,.12);color:#dfe6f5;border:0;font-weight:700;font-size:13.5px;padding:0 14px;display:inline-flex;align-items:center}
+body.v2 .pb-nav #sbS .sb.on{background:var(--v2l);color:var(--v2n)}
+/* 3D */
+body.v2 .plate,body.v2 .stage{border-radius:22px!important}
+body.v2 .stage{background:linear-gradient(#f6f1e4,#ece4d1)!important}
+body.v2 #sbar{left:12px!important;top:12px!important;right:auto!important;width:auto!important;background:none!important;padding:0!important;box-shadow:none!important}
+body.v2 #sbV{display:flex!important;flex-direction:column;align-items:flex-start;gap:8px}
+body.v2 #sbV .sb{height:40px;border-radius:99px;font-weight:700;font-size:15px;padding:0 16px;display:inline-flex;align-items:center;box-shadow:0 2px 8px rgba(60,40,10,.12)}
+body.v2 #sbV .sb.good{background:#fff;color:#2f7a47;border:2px solid #bfe3c8}body.v2 #sbV .sb.good.on{background:var(--v2l);border-color:#b9d53f;color:var(--v2n)}
+body.v2 #sbV .sb.bad{background:#fff;color:#c2410c;border:2px solid #f6b48a}body.v2 #sbV .sb.bad.on{background:#fff2e8;border-color:var(--v2o)}
+body.v2 .v2-fab{position:absolute;right:10px;top:12px;z-index:4;display:grid;gap:8px}
+body.v2 .v2-fab>*{width:56px;min-height:56px;border-radius:18px;border:0;background:#fff;color:var(--v2n);box-shadow:0 3px 10px rgba(60,40,10,.18);display:grid;place-items:center;align-content:center;gap:1px;text-decoration:none;font:700 10.5px/1.15 var(--f-body);padding:4px 2px;cursor:pointer}
+body.v2 .v2-fab i{font-style:normal;font-size:19px;line-height:1}body.v2 .v2-fab span{text-align:center}
+body.v2 .v2-fab [aria-pressed="true"]{background:var(--v2l)}
+body.v2 .v2-rot{position:absolute;left:12px;bottom:46px;font:700 13px var(--f-body);color:#6b6457;pointer-events:none;z-index:2}
+body.v2 .mini{left:8px!important;right:8px!important;width:auto!important;bottom:8px!important;top:auto!important;background:rgba(255,255,255,.8)!important;border-radius:12px!important}
+/* 글 시트 */
+body.v2 .pg-text{background:var(--v2p)!important;border:0!important;border-radius:22px 22px 0 0!important;padding:4px 14px 10px!important;display:flex!important;flex-direction:column;box-shadow:0 -4px 16px rgba(0,0,0,.12)}
+body.v2 .v2-handle{flex:none;align-self:center;border:0;background:none;padding:6px 30px;cursor:pointer}body.v2 .v2-handle i{display:block;width:44px;height:5px;border-radius:9px;background:#cbbf9f}
+body.v2 .v2-tabs{flex:none;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 0 8px}
+body.v2 .v2-tabs button{flex:0 0 auto;height:38px;border-radius:99px;border:0;background:#efe7d3;color:var(--v2n);font:700 14px var(--f-body);padding:0 14px}
+body.v2 .v2-tabs button[data-t="good"][aria-pressed="true"]{background:var(--v2l);box-shadow:0 2px 8px rgba(150,180,40,.4)}
+body.v2 .v2-tabs button[data-t="steps"][aria-pressed="true"]{background:var(--v2n);color:#fff}
+body.v2 .v2-tabs button[data-t="bad"]{background:#fff2e8;color:#c2410c}body.v2 .v2-tabs button[data-t="bad"][aria-pressed="true"]{background:var(--v2o);color:#fff}
+body.v2 .pg-flow{flex:1;min-height:0}
+/* 아래 넘기기 */
+body.v2 .pb-pager .turn{height:42px;border-radius:99px;background:transparent;color:#fff!important;border:1.5px solid rgba(255,255,255,.5)}
+body.v2 .pb-pager .turn.nx{background:var(--v2l);color:var(--v2n)!important;border-color:var(--v2l)}
+/* 가로: 3D 왼쪽, 글 오른쪽 */
+@media (orientation:landscape){
+  body.v2 #pgR{order:-1}
+  body.v2 .pg-text{border-radius:22px!important}
+  body.v2 .pb-nav #sbS{flex:0 1 auto;order:0}
+  body.v2 .nv-title{font-size:19px!important}
+}
+body.v2 .pb-nav #sbS:not([hidden]){display:flex!important}
+body.v2 .mi{white-space:nowrap}body.v2 .mi span{overflow:hidden;text-overflow:ellipsis}
+@media (orientation:portrait){body.v2 #pbBookV{font-size:13px!important;padding:0 8px!important}body.v2 .v2-unit{display:none}body.v2 .nv-yt{padding:0 11px!important}}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -4017,6 +4066,7 @@ if (PAPER) {
   $('pbPlate').append($('stage')); $('stage').append($('tabs'));
   $('stage').insertAdjacentHTML('beforeend', '<div class="sbar" id="sbar"><div class="sb-row" id="sbV"></div><div class="sb-row" id="sbS"></div></div>');
   const selHtml = (cls, label, on, opts) => `<label class="sb sel ${cls}${on ? ' on' : ''}"><span>${label} ▾</span><select aria-label="${label}"><option value="" disabled${on ? '' : ' selected'} hidden>${label}</option>${opts}</select></label>`;
+  window.__sbarSync = () => sbarSync();
   function sbarSync() { const M = state.def, vs = Object.entries(M.variants), p = SEQ[cur]; let hv = '', hs = '';
     if (vs.length > 1) { if (M.variants.good) { const rest = vs.filter(([k]) => k !== 'good'), allBad = rest.every(([, v]) => !v.ok), curBad = state.v !== 'good';
         hv = `<button type="button" class="sb good${curBad ? '' : ' on'}" data-v="good">✓ 바른 자세</button>` + selHtml('bad', curBad ? '⚠ ' + (M.variants[state.v].short || M.variants[state.v].name.split(' → ')[0]) : allBad ? '⚠ 옳지 않은 자세' : '비교 자세', curBad, rest.map(([k, v]) => `<option value="${k}"${k === state.v ? ' selected' : ''}>${v.name}</option>`).join(''));
@@ -4249,6 +4299,37 @@ if (READER) {
     $('rdToc').onclick = () => { root.hidden = true; window.__pbToc(null); };
     show3D = (m, sc, v, btn, openIt) => { if (openIt) hyOpen(m, sc, v); };
     open3D = b => hyOpen(b.dataset.m, b.dataset.sc, b.dataset.v);
+    // ===== 새 앱 화면(v2): 3D 크게 + 오른쪽 둥근 버튼 + 아래 끌어올리는 글 시트 =====
+    document.body.classList.add('v2');
+    const UNITN = { squat: '1 · 앉기', lunge: '2 · 한 발 딛기', hinge: '3 · 숙이기', pushup: '4 · 밀기', pull: '5 · 당기기', plank: '6 · 버티기', throw: '7 · 던지기', fitness: '체력 요소', train: '트레이닝 원리', body: '몸 지도' };
+    $('nvTitle').insertAdjacentHTML('beforebegin', '<span class="v2-unit" id="v2Unit"></span>');
+    const v2Unit = () => { const u = UNITN[state.m]; $('v2Unit').textContent = u ? (/^\d/.test(u) ? '단원 ' + u : u) : ''; $('v2Unit').hidden = !u; };
+    new MutationObserver(v2Unit).observe($('nvTitle'), { childList: true, characterData: true, subtree: true }); v2Unit();
+    $('pb').querySelector('.pb-nav').appendChild($('sbS'));
+    // 3D 오른쪽 둥근 버튼: 재생 · 시점 · 겹쳐 보기 · 카메라 평가
+    const VIEWS = ['diag', 'side', 'front', 'back'], VN = { diag: '비스듬히', side: '옆', front: '앞', back: '뒤' };
+    $('stage').insertAdjacentHTML('beforeend', `<div class="v2-fab" id="v2Fab">
+      <button type="button" id="v2Play"><i>⏸</i><span>멈춤</span></button><button type="button" id="v2View"><i>⟲</i><span>비스듬히</span></button>
+      <button type="button" id="v2Ghost"><i>⧉</i><span>겹쳐 보기</span></button><a id="v2Cam" href="#"><i>📷</i><span>카메라 평가</span></a></div><span class="v2-rot">↻ 360°</span>`);
+    const syncFab = () => { $('v2Play').querySelector('i').textContent = state.playing ? '⏸' : '▶'; $('v2Play').querySelector('span').textContent = state.playing ? '멈춤' : '재생';
+      $('v2View').querySelector('span').textContent = VN[state.view] || '시점'; const g = $('ghost'); $('v2Ghost').hidden = !g || g.disabled; $('v2Ghost').setAttribute('aria-pressed', g?.getAttribute('aria-pressed'));
+      const c = $('stCam'); $('v2Cam').hidden = !c || c.hidden; if (c) $('v2Cam').href = c.href; };
+    $('v2Play').onclick = () => { $('play').click(); setTimeout(syncFab, 30); };
+    $('v2View').onclick = () => { const i = (VIEWS.indexOf(state.view) + 1) % 4; setView(VIEWS[i]); syncFab(); };
+    $('v2Ghost').onclick = () => { $('ghost').click(); setTimeout(syncFab, 30); };
+    setInterval(syncFab, 600);
+    // 글 시트: 손잡이 + 탭(바른 자세 · 따라 해 보기 · 문제점과 고치는 법)
+    $('pgText').insertAdjacentHTML('afterbegin', `<button type="button" class="v2-handle" id="v2Handle" aria-label="글 크게·작게"><i></i></button>
+      <div class="v2-tabs" id="v2Tabs"><button type="button" data-t="good">✓ 바른 자세</button><button type="button" data-t="steps">🏃 따라 해 보기</button><button type="button" data-t="bad">⚠ 문제점과 고치는 법</button></div>`);
+    const tabsSync = () => { const bad = state.v !== 'good', hasBad = Object.keys(state.def.variants || {}).some(k => k !== 'good'), hasSteps = !$('vsteps').hidden;
+      $('v2Tabs').querySelector('[data-t="bad"]').hidden = !hasBad || !state.def.variants?.good; $('v2Tabs').querySelector('[data-t="steps"]').hidden = !hasSteps && !(bad && state.def.variants?.good);
+      $('v2Tabs').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.t === (bad ? 'bad' : ($('pgText').dataset.at || 'good')))); };
+    $('v2Tabs').querySelectorAll('button').forEach(b => b.onclick = () => { const t = b.dataset.t, M = state.def;
+      if (t === 'bad') { const k = Object.keys(M.variants).find(k => k !== 'good' && !M.variants[k].ok) || Object.keys(M.variants).find(k => k !== 'good'); if (state.v === 'good') setVariant(k); $('pgText').dataset.at = 'bad'; }
+      else { if (state.v !== 'good') setVariant('good'); $('pgText').dataset.at = t; }
+      setTimeout(() => { window.__sbarSync?.(); const fl = $('pgFlow'), tgt = t === 'steps' ? $('vsteps') : null; fl.scrollTop = tgt ? tgt.offsetTop - fl.offsetTop - 6 : 0; tabsSync(); }, 60); });
+    setInterval(tabsSync, 500);
+    $('v2Handle').onclick = () => { const cur = pb.dataset.vw, nx = cur === 'both' ? 'text' : cur === 'text' ? '3d' : 'both'; setVw(nx); };
     // 따라 해 보기 단계: 장면을 열고 그 단계에서 멈춤
     $('rdPage').addEventListener('click', e => { const b = e.target.closest('.rd-step'); if (!b) return; e.stopImmediatePropagation(); hyOpen(b.dataset.m, b.dataset.sc, b.dataset.v, +b.dataset.t); }, true);    // 주소 #s-동작-장면 으로 바로 그 장면 열기 (훈련장의 "자세 보기")
     const hashGo = () => { const h = location.hash.match(/^#s-([a-z]+)-([a-z_0-9]+)$/); if (!h || !MOVES[h[1]]?.scenes?.some(x => x[0] === h[2])) return; const v = Object.keys(MOVES[h[1]].scenes.find(x => x[0] === h[2])[2].variants || {})[0]; hyOpen(h[1], h[2], v); };
