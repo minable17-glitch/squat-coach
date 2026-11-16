@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
 <style>
 /* 레이아웃: 화면 대부분은 지금 탭의 페이지, 세로는 아래 탭 줄 · 가로는 왼쪽 탭 기둥 */
-:root { --navy: #14284b; --lime: #d7f25a; --ink: #f3f5fa; --dim: #9fb0cc; --bar: 58px; --rail: 72px;
+:root { --navy: #14284b; --lime: #d7f25a; --ink: #f3f5fa; --dim: #9fb0cc; --bar: 44px; --rail: 58px;
   --f-body: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif; color-scheme: dark }
 * { box-sizing: border-box }
 html, body { height: 100%; margin: 0; overflow: hidden; background: var(--navy); color: var(--ink); font-family: var(--f-body) }
@@ -31,9 +31,9 @@ html, body { height: 100%; margin: 0; overflow: hidden; background: var(--navy);
 .frames iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; background: #fbf5e6 }
 .load { position: absolute; inset: 0; display: grid; place-items: center; color: #14284b; font-weight: 700; font-size: 15px }
 nav { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--navy); border-top: 1px solid rgba(255,255,255,.08);
-  padding: 4px max(6px, env(safe-area-inset-right, 0px)) max(4px, env(safe-area-inset-bottom, 0px)) max(6px, env(safe-area-inset-left, 0px)) }
-nav button { display: grid; justify-items: center; align-content: center; gap: 2px; min-height: var(--bar); border: 0; background: none; color: var(--dim); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 12px }
-nav svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round }
+  padding: 3px max(6px, env(safe-area-inset-right, 0px)) max(3px, env(safe-area-inset-bottom, 0px)) max(6px, env(safe-area-inset-left, 0px)) }
+nav button { display: flex; justify-content: center; align-items: center; gap: 5px; min-height: var(--bar); border: 0; background: none; color: var(--dim); font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; border-radius: 10px }
+nav svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round }
 nav button[aria-selected="true"] { color: var(--navy); background: var(--lime) }
 nav button:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px }
 .inst { position: fixed; z-index: 5; right: max(10px, env(safe-area-inset-right, 0px)); bottom: calc(var(--bar) + 18px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 6px;
@@ -47,7 +47,7 @@ nav button:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px }
   .app { grid-template-rows: none; grid-template-columns: auto minmax(0, 1fr) }
   nav { grid-template-columns: none; grid-auto-rows: min-content; align-content: center; gap: 6px; width: calc(var(--rail) + env(safe-area-inset-left, 0px)); border-top: 0; border-right: 1px solid rgba(255,255,255,.08);
     padding: max(6px, env(safe-area-inset-top, 0px)) 6px max(6px, env(safe-area-inset-bottom, 0px)) max(6px, env(safe-area-inset-left, 0px)) }
-  nav button { min-height: 60px }
+  nav button { min-height: 48px; flex-direction: column; gap: 1px; font-size: 10.5px }
   .frames { grid-column: 2; grid-row: 1 }
   nav { grid-column: 1; grid-row: 1 }
 }
