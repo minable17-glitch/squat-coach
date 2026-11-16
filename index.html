@@ -59,8 +59,8 @@ video,#ov{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .big{font-family:var(--f-big);font-size:24px;border:0;border-radius:14px;padding:14px 22px;background:var(--good);color:#0b1a10}
 .err{color:var(--bad);font-weight:600}
 /* 실시간 HUD */
-.cue{position:absolute;left:50%;top:calc(64px + env(safe-area-inset-top,0px));transform:translateX(-50%);max-width:calc(100% - 24px);text-align:center;font-family:var(--f-big);font-size:clamp(26px,5.4vw,56px);line-height:1.1;padding:8px 22px;border-radius:16px;background:rgba(10,14,16,.72);transition:background .2s,color .2s;width:max-content;text-wrap:balance}
-.cue.good{color:var(--good)} .cue.bad{color:var(--bad)} .cue.warn{color:var(--warn)}
+.cue{position:absolute;left:50%;top:calc(64px + env(safe-area-inset-top,0px));transform:translateX(-50%);max-width:calc(100% - 24px);text-align:center;font-family:var(--f-big);font-size:clamp(36px,9.5vw,84px);line-height:1.12;padding:12px 26px;border-radius:20px;background:rgba(10,14,16,.72);transition:background .2s,color .2s;width:max-content;text-wrap:balance;word-break:keep-all}
+.cue.good{color:var(--good)} .cue.bad{color:#fff;background:rgba(214,40,28,.92);box-shadow:0 0 0 4px rgba(255,255,255,.85),0 10px 30px rgba(0,0,0,.4);font-size:clamp(40px,10.5vw,96px)} .cue.warn{color:var(--warn)}
 .count{position:absolute;right:18px;bottom:16px;text-align:right;font-family:var(--f-big);line-height:.9;text-shadow:0 4px 18px rgba(0,0,0,.6)}
 .count b{display:block;font-weight:400;font-size:clamp(70px,14vw,150px);color:var(--ink)}
 .count small{font-family:var(--f-body);font-weight:700;font-size:15px;color:var(--muted)}
@@ -151,8 +151,8 @@ body.battling .cue{top:calc(172px + env(safe-area-inset-top,0px))}
       <button type="button" data-depth="0.7" aria-pressed="false">깊이 초보</button>
     </div>
     <div class="seg" id="kneeSeg" role="group" aria-label="무릎 위치 판정">
-      <button type="button" data-kf="38" aria-pressed="false">무릎 엄격</button>
-      <button type="button" data-kf="45" aria-pressed="true">무릎 보통</button>
+      <button type="button" data-kf="28" aria-pressed="false">무릎 엄격</button>
+      <button type="button" data-kf="35" aria-pressed="true">무릎 보통</button>
       <button type="button" data-kf="0" aria-pressed="false">무릎 판정 끄기</button>
     </div>
     <span class="grow"></span>
@@ -263,7 +263,7 @@ const EXN = { squat: '스쿼트', pushup: '푸시업' };
 const QS = new URLSearchParams(location.search);
 
 // ---------- 설정과 상태 ----------
-const S = { ex: 'squat', mode: 'practice', view: 'side', target: 1, kneeLimit: 45, // 정강이가 수직에서 이 각도보다 더 기울면 '무릎이 나옴'
+const S = { ex: 'squat', mode: 'practice', view: 'side', target: 1, kneeLimit: 35, // 정강이가 수직에서 이 각도보다 더 기울면 '무릎이 나옴'
   facing: 'user', running: false,
   game: { sec: 30, on: false, end: 0, score: 0, combo: 0, best: 0 }, test: { n: 5 } };
 const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
@@ -325,7 +325,13 @@ function analyzeSquat(lm) {
   M.lean = S.view === 'side' && M.torso > 50;
   if (S.view === 'side') { // 정강이(발목→무릎)가 앞으로 기운 각도. 많이 기울수록 무릎이 발끝보다 앞으로 나간 것
     const dir = Math.sign(J('toe').x - J('heel').x) || 1, shin = Math.atan2((J('knee').x - J('ankle').x) * dir, J('ankle').y - J('knee').y) * DEG;
-    M.kneeFwdVal = shin; E.kfRun = S.kneeLimit && M.depth > .3 && shin > S.kneeLimit ? (E.kfRun || 0) + 1 : 0; M.kneeOver = E.kfRun >= 3; }
+    // 무릎이 발끝보다 얼마나 앞에 있나 (발 길이 기준). 정강이 각도와 둘 중 하나라도 넘으면 '무릎이 나옴'
+    const foot = Math.max(Math.abs(J('toe').x - J('heel').x), .08 * C.leg), past = (J('knee').x - J('toe').x) * dir / foot;
+    M.kneeFwdVal = shin; M.kneePast = past; M.toe = J('toe'); M.kneePt = J('knee');
+    const over = S.kneeLimit && M.depth > .2 && shin > S.kneeLimit; // 발끝 위치(past)는 흔들림이 커서 참고값으로만
+    E.kfRun = over ? (E.kfRun || 0) + 1 : 0; M.kneeOver = E.kfRun >= 2;
+    if (M.kneeOver && !E.kfBuzz) { E.kfBuzz = 1; try { navigator.vibrate?.(120); } catch (e) { } } if (!over) E.kfBuzz = 0; }
+  window.__M = M;
   return M;
 }
 function analyzePush(lm) {
@@ -395,9 +401,9 @@ function liveCue(M) {
     if (M.pike) return ['엉덩이를 내려 일직선으로!', 'bad'];
     return M.depth >= S.target ? ['좋아요! 밀어 올려요', 'good'] : ['가슴을 더 내려요', ''];
   }
+  if (M.kneeOver) return ['무릎이 발끝 앞으로! 엉덩이를 뒤로', 'bad']; // 내려가는 중에도 바로 알려 줌
   if (!down) return ['앉아 볼까요?', ''];
   if (M.valgus) return ['무릎을 바깥으로!', 'bad'];
-  if (M.kneeOver) return ['무릎이 나왔어요! 엉덩이를 뒤로', 'bad'];
   if (M.heelLift) return ['뒤꿈치를 붙여요', 'warn'];
   if (M.lean) return ['가슴을 들어요!', 'bad'];
   return M.depth >= S.target ? ['좋아요! 이제 일어나요', 'good'] : ['엉덩이를 뒤로, 더 앉아요', ''];
@@ -438,7 +444,10 @@ function draw(M) {
     for (const i of [7, 2, 0, 5, 8]) { const p = lm[i]; if (p.v < .35) { st = false; continue; } st ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y); st = true; } g.stroke();
     for (const i of [0, 2, 5, 7, 8, 9, 10]) { const p = lm[i]; if (p.v < .35) continue; g.fillStyle = '#fff'; g.beginPath(); g.arc(p.x, p.y, lw * 1.1, 0, 7); g.fill(); }
     if (E.calib && M.head) { const wy = (lm[15].y + lm[16].y) / 2, y = wy - E.calib.headH * (1 - .55 * S.target); g.setLineDash([lw * 3, lw * 2]); g.strokeStyle = '#ffc53d'; g.lineWidth = lw * .6; g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); g.setLineDash([]); } }
-  for (const i of [11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28, 29, 30]) { const p = lm[i]; if (p.v < .4 || hide.has(i)) continue; g.fillStyle = '#4dabf7'; g.beginPath(); g.arc(p.x, p.y, lw * 1.3, 0, 7); g.fill(); }
+  const redJ = new Set(M.kneeOver ? [25, 26, 27, 28, 31, 32] : M.valgus ? [25, 26] : []);
+  for (const i of [11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]) { const p = lm[i]; if (p.v < .4 || hide.has(i) || (i > 30 && !redJ.has(i))) continue; const r = redJ.has(i);
+    g.fillStyle = r ? '#ff3b30' : '#4dabf7'; g.beginPath(); g.arc(p.x, p.y, lw * (r ? 2.4 : 1.3), 0, 7); g.fill();
+    if (r && (i === 25 || i === 26)) { g.strokeStyle = '#ff3b30'; g.lineWidth = lw * .7; g.beginPath(); g.arc(p.x, p.y, lw * 4.2, 0, 7); g.stroke(); } }
   if (S.ex === 'squat' && E.calib && M.visible && S.view === 'front') { // 엉덩이가 내려가야 할 높이
     const y = E.calib.hipY + .38 * E.calib.leg * S.target; g.setLineDash([lw * 3, lw * 2]); g.strokeStyle = '#ffc53d'; g.lineWidth = lw * .6;
     g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); g.setLineDash([]); }
