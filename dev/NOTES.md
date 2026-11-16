@@ -5,7 +5,7 @@
 - `dev/app.html` : 앱 껍데기(탭 + 시작 화면) → `textbook/index.html`
 - `dev/bk/` : 책 화면. `build.py`(tpl.html + style.css + data.json + shots) → `textbook/book_demo.html`
 - 빌드 스크립트 안의 경로(OUT, three 위치 등)는 작업 환경에 맞게 고쳐 써야 함
-- 바꿀 때마다 `textbook/sw.js`의 캐시 번호 올리기 (지금 v39)
+- 바꿀 때마다 `textbook/sw.js`의 캐시 번호 올리기 (지금 v40)
 
 ## 끝난 것 (최근)
 - 시작 화면: 교과서로 보기 / 앱 화면으로 보기, 바로가기 3개, 이어서 보기(`last-scene`), 건너뛰기(`start-skip`)

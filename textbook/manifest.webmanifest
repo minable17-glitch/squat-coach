@@ -18,9 +18,9 @@
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "교과서", "url": "./#book", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
-    { "name": "움직임 실험실", "url": "./#lab", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
-    { "name": "훈련장", "url": "./#train", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
-    { "name": "자세 코치", "url": "./#coach", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
+    { "name": "교과서", "url": "./?go=book", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "움직임 실험실", "url": "./?go=lab", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "훈련장", "url": "./?go=train", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "자세 코치", "url": "./?go=coach", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
   ]
 }

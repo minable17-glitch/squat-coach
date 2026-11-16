@@ -215,8 +215,10 @@ function go(tab, url) {
 document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => go(b.dataset.tab));
 const start = location.hash.slice(1); let last = null; try { last = localStorage.getItem('app-tab'); } catch (e) { }
 let skip0 = null; try { skip0 = localStorage.getItem('start-skip'); } catch (e) { }
-const ASK = start === 'start' || !(MODE && skip0 === '1') && !['lab', 'train', 'coach'].includes(start);
-if (!ASK) go(SRC[start] ? start : SRC[last] ? last : 'book');
+const GO = new URLSearchParams(location.search).get('go'); // 앱 아이콘을 길게 눌러 고르는 바로가기만 시작 화면을 건너뜀
+const ASK = start === 'start' || !SRC[GO] && !(MODE && skip0 === '1');
+if (!ASK) go(SRC[GO] ? GO : SRC[start] ? start : SRC[last] ? last : 'book');
+if (GO) history.replaceState(history.state, '', location.pathname + location.hash);
 // 시작 화면: 보기 방식 고르기 · 바로가기 · 이어서 보기 · 건너뛰기
 const LS = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) { } } };
 function lastScene() { try { const o = JSON.parse(LS.get('last-scene')); return o && o.k && /^s-[\w-]+$/.test(o.k) ? o : null; } catch (e) { return null; } }
@@ -235,6 +237,10 @@ $('stGo').onclick = () => { const L = lastScene(); if (!L) return; openMode(L.mo
 addEventListener('message', e => { if (e.origin === location.origin && e.data === 'start-screen' && $('start').hidden) { showStart(); history.pushState({ start: 1 }, '', '#start'); } });
 addEventListener('keydown', e => { if (e.key === 'Escape' && !$('start').hidden && MODE) hideStart(); });
 if (ASK) { showStart(); history.replaceState(null, '', location.pathname); }
+// 오래(30분 넘게) 덮어 뒀다가 다시 열면 시작 화면부터
+let hidAt = 0; document.addEventListener('visibilitychange', () => { if (document.hidden) hidAt = Date.now();
+  else if (hidAt && Date.now() - hidAt > 30 * 60e3 && $('start').hidden && cur !== 'coach' && !(MODE && LS.get('start-skip') === '1')) showStart(); });
+addEventListener('pageshow', e => { if (e.persisted && $('start').hidden && !(MODE && LS.get('start-skip') === '1')) showStart(); });
 addEventListener('popstate', () => { if (location.hash === '#start') { showStart(); return; } if (!$('start').hidden && cur) { $('start').hidden = true; } const t = location.hash.slice(1); if (SRC[t] && t !== cur) { fromPop = true; go(t); fromPop = false; } });
 // 앱 설치: 안드로이드·크롬은 설치 버튼, 아이폰 Safari는 방법 안내
 const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
