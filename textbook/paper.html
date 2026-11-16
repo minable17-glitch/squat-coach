@@ -1296,6 +1296,30 @@ body.v2 .pb-pager .turn.nx{background:var(--v2l);color:var(--v2n)!important;bord
 body.v2 .pb-nav #sbS:not([hidden]){display:flex!important}
 body.v2 .mi{white-space:nowrap}body.v2 .mi span{overflow:hidden;text-overflow:ellipsis}
 @media (orientation:portrait){body.v2 #pbBookV{font-size:13px!important;padding:0 8px!important}body.v2 .v2-unit{display:none}body.v2 .nv-yt{padding:0 11px!important}}
+/* v2 다듬기 */
+body.v2 #vmove{display:none!important}
+body.v2 .v2-tabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
+body.v2 .v2-tabs button{padding:0 6px;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.v2 .v2-fab>*{width:50px;min-height:50px;border-radius:16px}
+@media (orientation:portrait){
+  body.v2 .pb[data-vw="both"] .pb-book{grid-template-rows:minmax(0,42fr) minmax(0,58fr)!important}
+  body.v2 #sbV .sb{height:34px;font-size:13.5px;padding:0 12px}
+  body.v2 .v2-fab{gap:6px}body.v2 .v2-fab>*{width:46px;min-height:46px;font-size:10px}body.v2 .v2-fab i{font-size:16px}
+}
+@media (orientation:landscape){
+  body.v2 .pb-nav{flex-wrap:nowrap!important;min-width:0}
+  body.v2 #pbBookV{font-size:0!important;padding:0 8px!important;width:40px}body.v2 #pbBookV::before{content:"📕";font-size:18px}
+  body.v2 .nv-title{flex:0 1 auto!important;max-width:9em;font-size:17px!important}
+  body.v2 .pb-nav #sbS{flex:1 1 0!important;min-width:0}
+  body.v2 .pb-nav #sbS .sb{height:32px;font-size:12.5px;padding:0 10px}
+  body.v2 .nv-yt{padding:0 10px!important;font-size:13px!important;height:36px!important}
+  body.v2 .pb-pager .turn{height:36px;padding:0 10px;font-size:13px}
+  body.v2 .pb-book{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)!important}
+  body.v2 .v2-fab{right:6px;top:8px;gap:5px}body.v2 .v2-fab>*{width:44px;min-height:44px;border-radius:14px;font-size:9.5px}body.v2 .v2-fab i{font-size:15px}
+  body.v2 #sbV .sb{height:32px;font-size:12.5px;padding:0 10px}body.v2 #sbar{left:8px!important;top:8px!important}
+  body.v2 .mi span{max-width:4.5em}
+}
+@media (orientation:landscape) and (max-width:1000px){body.v2 .v2-unit{display:none}}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -4320,7 +4344,7 @@ if (READER) {
     setInterval(syncFab, 600);
     // 글 시트: 손잡이 + 탭(바른 자세 · 따라 해 보기 · 문제점과 고치는 법)
     $('pgText').insertAdjacentHTML('afterbegin', `<button type="button" class="v2-handle" id="v2Handle" aria-label="글 크게·작게"><i></i></button>
-      <div class="v2-tabs" id="v2Tabs"><button type="button" data-t="good">✓ 바른 자세</button><button type="button" data-t="steps">🏃 따라 해 보기</button><button type="button" data-t="bad">⚠ 문제점과 고치는 법</button></div>`);
+      <div class="v2-tabs" id="v2Tabs"><button type="button" data-t="good">✓ 바른 자세</button><button type="button" data-t="steps">🏃 따라 하기</button><button type="button" data-t="bad">⚠ 문제·고치기</button></div>`);
     const tabsSync = () => { const bad = state.v !== 'good', hasBad = Object.keys(state.def.variants || {}).some(k => k !== 'good'), hasSteps = !$('vsteps').hidden;
       $('v2Tabs').querySelector('[data-t="bad"]').hidden = !hasBad || !state.def.variants?.good; $('v2Tabs').querySelector('[data-t="steps"]').hidden = !hasSteps && !(bad && state.def.variants?.good);
       $('v2Tabs').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.t === (bad ? 'bad' : ($('pgText').dataset.at || 'good')))); };
