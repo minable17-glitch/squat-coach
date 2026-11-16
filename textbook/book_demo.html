@@ -3,166 +3,197 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#3a2a1c">
+<meta name="theme-color" content="#14284b">
 <title>움직임 교과서 · 펼친 책 시안</title>
 <link rel="icon" href="icon-192.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=IBM+Plex+Sans+KR:wght@400;600;700&family=Black+Han+Sans&display=swap">
 <style>
-/* 시안: 가로 = 펼친 책 두 쪽, 세로 = 한 쪽씩. 그림을 누르면 3D만 크게 */
-:root { --desk: #3a2a1c; --paper: #fdf8ec; --paper2: #f6eedb; --ink: #2a2620; --mute: #6d665a; --navy: #14284b; --red: #c2410c; --good: #2f7a47; --lime: #d7f25a;
-  --serif: 'Noto Serif KR', 'Batang', serif; --sans: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', sans-serif }
+/* 시안: 위 = 메뉴(차례·기본·응용·일상·스포츠·돋보기), 가운데 = 펼친 책(가로 두 쪽 / 세로 한 쪽), 그림·버튼을 누르면 3D */
+:root { --desk: #3a2a1c; --paper: #f8f2e4; --ink: #24211c; --mute: #6b6457; --navy: #14284b; --lime: #e4f36b; --lime2: #d7f25a; --orange: #f08a3c; --red: #d9480f; --line: #e6dcc5;
+  --serif: 'Noto Serif KR', 'Batang', serif; --sans: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', sans-serif; --disp: 'Black Han Sans', var(--sans) }
 * { box-sizing: border-box; margin: 0 }
 html, body { height: 100%; overflow: hidden }
-body { background: radial-gradient(ellipse at 50% 40%, #5a4330, var(--desk) 70%); font-family: var(--serif); color: var(--ink) }
+body { background: radial-gradient(ellipse at 50% 45%, #5a4330, var(--desk) 72%); font-family: var(--serif); color: var(--ink) }
 [hidden] { display: none !important }
-.stage { position: fixed; inset: 0; display: grid; place-items: center; padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(54px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); perspective: 2600px }
-.book { position: relative; height: min(calc(100vh - 70px), calc((100vw - 24px) / 1.42)); height: min(calc(100svh - 70px), calc((100vw - 24px) / 1.42)); aspect-ratio: 1.42; display: grid; grid-template-columns: 1fr 1fr;
-  filter: drop-shadow(0 18px 30px rgba(0,0,0,.55)) }
-/* 쌓인 종이 두께 */
-.book::before, .book::after { content: ""; position: absolute; top: 4px; bottom: -6px; width: 50%; background: repeating-linear-gradient(0deg, #e9dfc6 0 1px, #f8f1df 1px 3px); z-index: -1; border-radius: 4px }
+button { font: inherit; color: inherit; cursor: pointer }
+.top { position: fixed; left: 0; right: 0; top: 0; z-index: 4; display: flex; align-items: center; gap: 8px; background: var(--navy); color: #fff;
+  padding: max(6px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) 6px max(10px, env(safe-area-inset-left)); font-family: var(--sans) }
+.top .tb { border: 0; border-radius: 10px; background: #fff; color: var(--navy); font-weight: 700; font-size: 14px; padding: 6px 12px; white-space: nowrap }
+.top .tb[aria-pressed="true"] { background: var(--orange); color: #fff }
+.top .unit { font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0 }
+.tabs { display: flex; gap: 4px; margin-left: auto; background: rgba(255,255,255,.12); border-radius: 11px; padding: 3px }
+.tabs button { border: 0; background: none; color: #c9d4ea; font-weight: 700; font-size: 13.5px; padding: 5px 12px; border-radius: 8px; white-space: nowrap }
+.tabs button[aria-pressed="true"] { background: var(--lime2); color: var(--navy) }
+.tabs button:disabled { opacity: .35; cursor: default }
+.stage { position: fixed; inset: 0; display: grid; place-items: center; perspective: 2600px; overflow: hidden;
+  padding: calc(52px + env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) calc(52px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)) }
+.book { position: relative; height: min(calc(100vh - 112px), calc((100vw - 24px) / 1.6)); height: min(calc(100svh - 112px), calc((100vw - 24px) / 1.6)); aspect-ratio: 1.6;
+  display: grid; grid-template-columns: 1fr 1fr; filter: drop-shadow(0 16px 26px rgba(0,0,0,.55)); transition: transform .35s ease }
+.book::before, .book::after { content: ""; position: absolute; top: 4px; bottom: -6px; width: 50%; background: repeating-linear-gradient(0deg, #e5dac0 0 1px, #f6efdc 1px 3px); z-index: -1; border-radius: 5px }
 .book::before { left: -6px } .book::after { right: -6px }
-.page { position: relative; background: var(--paper); overflow: hidden; padding: 4.2% 5.2% 3.4%; display: flex; flex-direction: column; gap: 1.4%; font-size: clamp(8px, min(1.25vw, 2.4vh), 18px); line-height: 1.55 }
-.page.l { border-radius: 6px 0 0 6px; background: linear-gradient(90deg, var(--paper) 0 86%, #efe5cd 97%, #d9cba8 100%) }
-.page.r { border-radius: 0 6px 6px 0; background: linear-gradient(270deg, var(--paper) 0 86%, #efe5cd 97%, #d9cba8 100%) }
-.run { display: flex; justify-content: space-between; font: 600 .72em var(--sans); color: var(--mute); letter-spacing: .04em; border-bottom: 1px solid #e3d8bf; padding-bottom: .5em }
-.pno { margin-top: auto; text-align: center; font: 600 .75em var(--sans); color: var(--mute) }
-h1 { font: 400 2.1em/1.15 'Black Han Sans', var(--sans); color: var(--navy) }
-h1 small { display: block; font: 700 .38em var(--sans); color: var(--red); letter-spacing: .12em; margin-bottom: .4em }
-h2 { font: 700 1.18em var(--sans); color: var(--navy); display: flex; align-items: center; gap: .4em }
-h2 i { font-style: normal; font-size: .72em; color: #fff; background: var(--navy); border-radius: 4px; padding: .05em .45em }
-p { text-align: left; word-break: keep-all }
-p b { background: linear-gradient(transparent 60%, #ffe9a3 60%) }
-.fig { position: relative; cursor: pointer; border: 1px solid #e0d4b8; background: #f4ecda; border-radius: 4px; overflow: hidden; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; transition: transform .2s, box-shadow .2s }
-.fig:hover, .fig:focus-visible { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(60,40,10,.25); outline: none }
-.fig img { width: 100%; flex: 1; min-height: 0; object-fit: cover; display: block }
-.fig figcaption { font: 600 .74em var(--sans); color: var(--mute); padding: .45em .7em; background: var(--paper2); display: flex; justify-content: space-between; gap: .5em }
-.fig figcaption em { font-style: normal; color: var(--navy); white-space: nowrap }
-.fig .badge { position: absolute; right: .6em; top: .6em; font: 700 .72em var(--sans); color: #fff; background: rgba(20,40,75,.86); padding: .3em .7em; border-radius: 99px }
-.fig.bad { border-color: #e9b9a0 } .fig.bad .badge { background: rgba(194,65,12,.92) }
-.figs { display: grid; grid-template-columns: 1fr 1fr; gap: 3%; flex: 1 1 auto; min-height: 0 }
-.box { border-left: 4px solid var(--good); background: #eef6ef; padding: .6em .9em; font-size: .92em; border-radius: 0 4px 4px 0 }
-.box.warn { border-color: var(--red); background: #fdf0e8 }
-.box b { font-family: var(--sans) }
-ol { padding-left: 1.3em; font-size: .94em } ol li { margin: .15em 0 }
-.links { display: flex; flex-wrap: wrap; gap: .4em; font: 600 .78em var(--sans) }
-.links span { border: 1px solid #d8cba9; border-radius: 99px; padding: .15em .7em; background: #fff }
-.fig.s { float: right; width: 38%; margin: .2em 0 .5em .9em; flex: none; aspect-ratio: 4 / 3.3 }
-.fig.s.left { float: left; margin: .2em .9em .5em 0 }
-.fig.s figcaption { font-size: .66em; padding: .3em .5em }
-.fig.s figcaption em { display: none }
-.fig.s .badge { font-size: .62em; padding: .2em .55em; right: .4em; top: .4em }
-.flow { overflow: hidden }
-.flow p + p { margin-top: .5em }
-.ch { margin-top: .6em; padding-top: .5em; border-top: 2px solid var(--navy) }
-h1.sm { font-size: 1.6em }
-/* 쪽 넘기기 */
-.flip { animation: flip .55s ease-in-out }
-@keyframes flip { 0% { transform: rotateY(0) } 50% { transform: rotateY(-7deg) scale(.985) } 100% { transform: rotateY(0) } }
-.nav { position: fixed; left: 0; right: 0; bottom: max(8px, env(safe-area-inset-bottom)); display: flex; justify-content: center; align-items: center; gap: 12px; font-family: var(--sans) }
-.nav button { border: 0; border-radius: 99px; background: rgba(253,248,236,.92); color: var(--navy); font: 700 15px var(--sans); padding: 8px 18px; cursor: pointer }
-.nav button:disabled { opacity: .35 }
-.nav span { color: #f3e7cc; font-size: 13px; font-weight: 600 }
-.tip { position: fixed; top: max(10px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); background: rgba(253,248,236,.95); color: var(--navy); font: 700 13px var(--sans); padding: 6px 14px; border-radius: 99px; z-index: 3; white-space: nowrap }
-/* 세로: 한 쪽씩 */
-@media (orientation: portrait) {
-  .book { height: auto; width: min(100%, calc((100vh - 80px) * .7)); aspect-ratio: .7; grid-template-columns: 1fr }
-  .book.showR .page.l, .book:not(.showR) .page.r { display: none }
-  .page { font-size: clamp(11px, min(3.4vw, 1.9vh), 18px); border-radius: 6px !important; background: var(--paper) !important }
-  .book::before { left: 4px; width: calc(100% - 8px) } .book::after { display: none }
-}
-/* 3D만 보기 */
+.zoomMode .book { cursor: zoom-in } .zoomed .book { cursor: zoom-out } .zoomed .nav { display: none }
+.page { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 1.8%; padding: 0 5% 2.6%;
+  font-size: clamp(8px, min(1.12vw, 2.05vh), 17px); line-height: 1.6; background-color: var(--paper);
+  background-image: radial-gradient(rgba(120,90,40,.035) 1px, transparent 1px); background-size: 4px 4px }
+.page.l { border-radius: 6px 0 0 6px; box-shadow: inset -26px 0 30px -18px rgba(90,60,20,.38) }
+.page.r { border-radius: 0 6px 6px 0; box-shadow: inset 26px 0 30px -18px rgba(90,60,20,.38) }
+.hd { display: flex; align-items: stretch; gap: 1.2em; font: 700 .82em var(--sans); color: var(--navy); border-bottom: 2px solid var(--navy); margin: 0 -5.3%; padding: 0 5.3% }
+.hd .sec { background: var(--navy); color: #fff; padding: .55em 1.1em; border-radius: 0 0 8px 0; font-family: var(--serif) }
+.hd .u { padding: .55em 0 } .hd .u b { margin-right: .5em } .hd.r { justify-content: flex-end } .hd.r .u { font-weight: 600 }
+.ft { margin-top: auto; display: flex; align-items: center; gap: 1em; font: 700 1.05em var(--sans); color: var(--navy) }
+.ft::after { content: ""; flex: 1; height: 1.5px; background: var(--navy); order: 1 } .ft.r { flex-direction: row-reverse }
+.unit-tag { align-self: flex-start; display: inline-flex; align-items: center; gap: .4em; background: var(--lime); border-radius: 1.4em 1.4em 1.4em .4em; padding: .1em .9em .1em .5em; font: 400 1.2em var(--disp); margin-top: 2% }
+.unit-tag img { width: 1.6em; height: 1.6em; object-fit: contain }
+h1 { font: 400 2.7em/1 var(--disp); color: var(--navy); position: relative; padding-bottom: .2em }
+h1::after { content: ""; position: absolute; left: 0; bottom: 0; width: 2.4em; height: .14em; border-radius: 99px; background: linear-gradient(90deg, var(--lime2), rgba(215,242,90,0)) }
+.hl { align-self: flex-start; background: var(--lime); border-radius: .5em; padding: .08em .5em; font: 400 1.35em var(--disp) }
+.row { display: flex; align-items: center; gap: .8em; flex-wrap: wrap } .row > span { color: var(--mute); font-size: .95em }
+p { word-break: keep-all } mark { background: var(--lime); color: inherit; padding: 0 .15em; border-radius: .2em; font-weight: 700 }
+.flow { overflow: hidden; flex: none } .page > * { flex-shrink: 0 } .flow p + p { margin-top: .4em }
+.fig { position: relative; float: right; width: 29%; margin: -.4em 0 .4em .8em; cursor: pointer; border: 0; background: none; padding: 0; text-align: center }
+.fig img { width: 100%; display: block; mix-blend-mode: multiply }
+.fig .b3 { position: absolute; right: 0; top: 0; font: 700 .78em var(--sans); color: #fff; background: var(--navy); border-radius: .4em; padding: .15em .55em }
+.fig.card { width: 32%; border: 1.5px solid var(--line); border-radius: .8em; background: #fbf7ee; padding: .5em .5em .6em; margin-top: 0 }
+.fig.card .b3 { right: .5em; top: .5em } .fig.warn { border-color: var(--orange); background: #fff6ee }
+.fig .warnI { position: absolute; left: .5em; top: .4em; font-size: 1.5em; color: var(--red); line-height: 1 }
+.fig .cap { display: block; margin-top: .3em; font: 700 .78em/1.35 var(--sans); color: var(--mute) }
+.fig.warn .cap { background: var(--orange); color: #fff; border-radius: .5em; padding: .3em .4em }
+.fig:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; border-radius: .6em }
+.steps { display: grid; gap: .3em; list-style: none; padding: 0 }
+.steps li { display: grid; grid-template-columns: 7.2em 1fr; align-items: center; gap: .7em; background: #fffdf7; border: 1px solid var(--line); border-radius: .9em; padding: .2em .7em .2em .25em; line-height: 1.4 }
+.steps b { display: flex; align-items: center; gap: .4em; background: var(--lime); border-radius: .8em; padding: .25em .6em; font: 400 1.05em var(--disp); white-space: nowrap }
+.steps b i { font-style: normal; display: inline-grid; place-items: center; width: 1.45em; height: 1.45em; border-radius: 50%; background: var(--navy); color: #fff; font: 700 .85em var(--sans) }
+.steps span { font-size: .92em }
+.dots { border: 0; border-top: 2px dotted #cdbf9e; margin: .4em 0 }
+.mv { display: grid; gap: .35em }
+.mv button { display: grid; grid-template-columns: 1fr auto; gap: .2em .8em; align-items: center; text-align: left; border: 1px solid var(--line); background: #fffdf7; border-radius: .8em; padding: .3em .7em; font-family: var(--serif); line-height: 1.4 }
+.mv button strong { font: 700 1.05em var(--sans); color: var(--navy) } .mv button small { grid-column: 1; color: var(--mute); font-size: .9em }
+.mv button em { grid-row: 1 / 3; grid-column: 2; font: 700 .8em var(--sans); font-style: normal; color: #fff; background: var(--navy); border-radius: .4em; padding: .2em .6em }
+.nav { position: fixed; left: 0; right: 0; bottom: max(8px, env(safe-area-inset-bottom)); display: flex; justify-content: center; align-items: center; gap: 12px; font-family: var(--sans); z-index: 3 }
+.nav button { border: 0; border-radius: 99px; background: rgba(253,248,236,.94); color: var(--navy); font-weight: 700; font-size: 14px; padding: 7px 16px }
+.nav button:disabled { opacity: .35 } .nav span { color: #f3e7cc; font-size: 13px; font-weight: 600 }
+.zhint { position: fixed; top: calc(56px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 3; background: var(--orange); color: #fff; font: 700 13px var(--sans); padding: 6px 14px; border-radius: 99px; white-space: nowrap }
+.flip { animation: flip .5s ease-in-out } @keyframes flip { 50% { transform: rotateY(-6deg) scale(.985) } }
+.tocp { position: fixed; inset: 0; z-index: 8; background: rgba(10,16,28,.55); display: flex }
+.tocp .in { width: min(92vw, 420px); height: 100%; overflow-y: auto; background: var(--paper); padding: max(16px, env(safe-area-inset-top)) 18px 24px max(18px, env(safe-area-inset-left)); font-family: var(--sans); display: grid; align-content: start; gap: 14px }
+.tocp h2 { font: 400 26px var(--disp); color: var(--navy); display: flex; justify-content: space-between; align-items: center }
+.tocp h2 button { border: 0; background: var(--navy); color: #fff; border-radius: 8px; font: 700 14px var(--sans); padding: 5px 10px }
+.tocp .u { display: grid; gap: 6px } .tocp .u > b { font-size: 17px; color: var(--navy) }
+.tocp .g { display: flex; flex-wrap: wrap; gap: 6px }
+.tocp .g button { border: 1.5px solid var(--line); background: #fff; border-radius: 99px; padding: 5px 12px; font-weight: 700; font-size: 14px }
+.tocp .g button span { color: var(--mute); font-weight: 600; margin-left: 4px; font-size: 12px }
 .v3d { position: fixed; inset: 0; z-index: 10; background: #10141a; display: grid; grid-template-rows: auto 1fr }
 .v3d header { display: flex; align-items: center; gap: 10px; padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left)); font-family: var(--sans); color: #fff }
 .v3d header b { flex: 1; font-size: 16px }
-.v3d header button { border: 0; border-radius: 10px; background: var(--lime); color: var(--navy); font: 700 15px var(--sans); padding: 8px 14px; cursor: pointer }
+.v3d header button { border: 0; border-radius: 10px; background: var(--lime2); color: var(--navy); font-weight: 700; font-size: 15px; padding: 8px 14px }
 .v3d iframe { width: 100%; height: 100%; border: 0; background: #f4eedf }
-.v3d.open { animation: rise .35s ease-out }
-@keyframes rise { from { opacity: 0; transform: scale(.94) } to { opacity: 1; transform: none } }
-@media (prefers-reduced-motion: reduce) { .flip, .v3d.open { animation: none } }
+@media (orientation: portrait) {
+  .book { height: auto; width: min(100%, calc((100svh - 112px) * .68)); aspect-ratio: .68; grid-template-columns: 1fr }
+  .page { font-size: clamp(10px, min(3.05vw, 1.75vh), 16px); border-radius: 6px !important; box-shadow: none !important }
+  .book::after { display: none } .book::before { left: 4px; width: calc(100% - 8px) }
+  .top .unit { display: none } .tabs button { padding: 5px 8px; font-size: 13px } .top .tb { padding: 6px 9px }
+}
+@media (prefers-reduced-motion: reduce) { .flip { animation: none } .book { transition: none } }
 </style>
 </head>
 <body>
-<div class="tip" id="tip">📖 시안 · 그림을 누르면 3D로 봐요</div>
-<div class="stage"><div class="book" id="book">
-  <section class="page l" id="pl"></section><section class="page r" id="pr"></section>
-</div></div>
+<header class="top"><button type="button" class="tb" id="tocBtn">☰ 차례</button><span class="unit" id="unitName"></span>
+  <div class="tabs" id="tabs"><button type="button" data-g="기본">기본</button><button type="button" data-g="응용">응용</button><button type="button" data-g="일상">일상</button><button type="button" data-g="스포츠">스포츠</button></div>
+  <button type="button" class="tb" id="zoomBtn" aria-pressed="false" aria-label="돋보기">🔍</button></header>
+<div class="stage" id="stage"><div class="book" id="book"></div></div>
+<p class="zhint" id="zhint" hidden></p>
 <nav class="nav"><button type="button" id="prev">‹ 앞쪽</button><span id="pg"></span><button type="button" id="next">뒤쪽 ›</button></nav>
+<div class="tocp" id="tocp" hidden><div class="in" id="tocIn"></div></div>
 <div class="v3d" id="v3d" hidden><header><b id="vTitle"></b><button type="button" id="vClose">✕ 책으로 돌아가기</button></header><iframe id="vFrame" title="3D 보기"></iframe></div>
 <script>
 const $ = id => document.getElementById(id);
-const fig = (img, cap, scene, v = 'good', bad = false, badge = '▶ 3D', cls = 's') => `<figure class="fig ${cls}${bad ? ' bad' : ''}" tabindex="0" role="button" data-scene="${scene}" data-v="${v}" data-cap="${cap}"><img src="bookdemo/${img}.webp" alt="${cap}"><span class="badge">${badge}</span><figcaption>${cap}<em>눌러서 3D ›</em></figcaption></figure>`;
-const run = (a, b) => `<div class="run"><span>${a}</span><span>${b}</span></div>`;
-// 쪽 내용: [왼쪽, 오른쪽]
-const SP = [
-  [ `${run('Ⅰ. 기본 움직임', '앉기')}<h1><small>단원 1 · 앉기</small>스쿼트</h1>
-     <div class="flow">${fig('squat_good', '그림 1-1 바른 스쿼트', 's-squat-base')}
-     <p>스쿼트는 <b>무릎과 고관절을 함께 굽혀</b> 앉았다 일어서는 움직임이에요. 의자에 앉고, 바닥의 물건을 줍고, 높이 뛰기 전에 몸을 낮추는 모든 순간에 쓰여요.</p>
-     <p>엉덩이를 뒤로 빼며 두 관절을 <b>같이</b> 굽혀야 큰 근육이 무게를 나눠 받아요.</p></div>
-     <h2><i>1</i>따라 해 보기</h2>
-     <ol><li><b>준비</b> 발을 어깨너비로, 발끝은 살짝 바깥으로.</li><li><b>내려가기</b> 엉덩이를 뒤로 빼며 의자에 앉듯.</li><li><b>가장 낮은 자세</b> 허벅지가 바닥과 수평.</li><li><b>일어서기</b> 발바닥 전체로 바닥을 밀어요.</li></ol>
-     <p class="pno">12</p>`,
-    `${run('앉기', '이러면 다쳐요')}<div class="box"><b>✓ 확인</b> 무릎은 발끝 방향, 등은 곧게, 뒤꿈치는 바닥에.</div>
-     <h2><i>2</i>무릎이 안으로 모이면</h2>
-     <div class="flow">${fig('squat_valgus', '그림 1-2 무릎이 모임', 's-squat-base', 'valgus', true, '⚠ 3D')}
-     <p>엉덩이 옆 근육(중둔근)이 무릎을 바깥으로 잡아 주지 못하면 무릎이 안쪽으로 무너져요. 그 비틀림을 <b>무릎 인대</b>가 고스란히 받아요. 무릎을 발끝 방향으로 밀어내며 앉아요.</p></div>
-     <h2><i>3</i>물건 들 때도 같아요</h2>
-     <div class="flow">${fig('hinge_round', '그림 1-3 등이 굽음', 's-hinge-base', 'round', true, '⚠ 3D', 's left')}
-     <p>바닥의 상자를 등을 굽혀 들면, 무게를 받쳐 줄 허벅지 뒤·엉덩이 근육 대신 <b>허리 디스크</b>가 버텨요. 상자는 몸에 붙여 들어요.</p></div>
-     <p class="pno">13</p>` ],
-  [ `${run('앉기', '생활과 경기 속으로')}<h2><i>4</i>일상에서, 스포츠에서</h2>
-     <div class="flow">${fig('chair', '일상 · 의자에서 일어나기', 's-squat-chair')}
-     <p><b>일상에서는</b> 의자에서 일어날 때 스쿼트를 써요. 상체를 앞으로 숙여 무게를 발 위로 옮긴 뒤, 엉덩이와 허벅지 힘으로 일어서요.</p></div>
-     <div class="flow">${fig('defense', '스포츠 · 농구 수비', 's-squat-defense', 'good', false, '▶ 3D', 's left')}
-     <p><b>스포츠에서는</b> 농구 수비 자세, 배구 리시브, 야구 포수가 모두 반쯤 앉은 스쿼트예요. 무게를 발 앞쪽에 두어 어느 쪽으로든 빨리 움직일 수 있어요.</p></div>
-     <div class="links"><span>쪼그려 앉기</span><span>배구 리시브</span><span>야구 포수</span><span>점프 스쿼트</span></div>
-     <p class="pno">14</p>`,
-    `${run('Ⅰ. 기본 움직임', '한 발 딛기')}<p>앉기를 익혔으면 한 발씩 해 볼 차례예요.</p>
-     <div class="ch"><h1 class="sm"><small>단원 2 · 한 발 딛기</small>런지</h1>
-     <div class="flow">${fig('lunge', '그림 2-1 바른 런지', 's-lunge-base')}
-     <p>런지는 한 발을 앞으로 크게 딛고 몸을 곧게 내렸다 올라오는 움직임이에요. 두 무릎이 모두 90°쯤 굽혀지면 충분해요.</p>
-     <p>한 발로 버티니 <b>균형</b>이 필요하고, 엉덩이 옆 근육이 무릎이 흔들리지 않게 잡아 줘요. 계단 오르기, 배드민턴 앞으로 뻗기, 펜싱 찌르기가 모두 런지예요.</p></div></div>
-     <p class="pno">15</p>` ],
-  [ `${run('Ⅰ. 기본 움직임', '밀기')}<h1 class="sm"><small>단원 3 · 밀기</small>푸시업</h1>
-     <div class="flow">${fig('pushup', '그림 3-1 바른 푸시업', 's-pushup-base', 'good', false, '▶ 3D', 's left')}
-     <p>푸시업은 팔로 바닥을 밀어 몸을 들어 올리는 움직임이에요. 머리부터 발뒤꿈치까지 <b>한 줄</b>을 지킨 채 가슴이 먼저 내려가요.</p>
-     <p>허리가 처지면 허리가, 팔꿈치가 옆으로 벌어지면 어깨가 다쳐요. 어려우면 무릎을 대거나 벽을 밀며 시작해요.</p></div>
-     <p>무거운 문을 밀 때, 넘어지며 손을 짚을 때, 농구 체스트 패스를 할 때도 같은 밀기를 써요.</p>
-     <p class="pno">20</p>`,
-    `${run('Ⅳ. 체력과 트레이닝', '트레이닝 원리')}<h1 class="sm"><small>단원 4 · 원리</small>과부하의 원리</h1>
-     <div class="flow">${fig('ov_after', '그림 4-1 4주 뒤 팔 근육 135%', 'principles', 'good', false, '▶ 실험실')}
-     <p>근육은 <b>평소보다 조금 더 무거운 무게</b>를 만났을 때 자라요. 너무 가벼우면 변화가 없고, 너무 무거우면 바른 자세가 무너져 다쳐요.</p>
-     <p>같은 무게로 1년을 해도 근육은 처음 몇 주만 자라요. 커진 만큼 무게를 조금씩 올리는 것이 <b>점진성의 원리</b>예요.</p></div>
-     <div class="box"><b>실험</b> 그림을 눌러 알맞은 4 kg을 고르고 "4주 운동하기"를 눌러 보세요.</div>
-     <p class="pno">42</p>` ],
+const UNITS = { sit: ['단원 1 · 앉기', '스쿼트'], step: ['단원 2 · 한 발 딛기', '런지'], push: ['단원 3 · 밀기', '푸시업'], prin: ['단원 4 · 트레이닝 원리', '원리'] };
+const fig = (img, cap, scene, v = 'good', opt = '') => `<button type="button" class="fig ${opt}" data-scene="${scene}" data-v="${v}" data-cap="${cap}">${opt.includes('warn') ? '<span class="warnI">⚠</span>' : ''}<img src="bookdemo/${img}.webp" alt="${cap}"><span class="b3">▶ 3D</span>${opt.includes('card') ? `<span class="cap">${cap}</span>` : ''}</button>`;
+const mv = (name, sub, scene, v = 'good') => `<button type="button" data-scene="${scene}" data-v="${v}" data-cap="${name}"><strong>${name}</strong><small>${sub}</small><em>▶ 3D</em></button>`;
+const hd = (side, sec = 'Ⅰ. 몸의 움직임과 건강', u = '<b>단원</b>생활 속 기본 움직임') => side === 'l' ? `<div class="hd"><span class="sec">${sec}</span><span class="u">${u}</span></div>` : `<div class="hd r"><span class="u">📖 중학교 체육 (디지털 교과서)</span></div>`;
+const ft = (n, side) => `<div class="ft${side === 'r' ? ' r' : ''}"><span>${n}</span></div>`;
+const PAGES = [
+  { u: 'sit', g: '기본', html: `${hd('l')}<span class="unit-tag"><img src="bookdemo/g_icon.webp" alt="">단원 1 · 앉기</span><h1>스쿼트</h1>
+    <div class="flow">${fig('g_squat', '바른 스쿼트', 's-squat-base')}<p>스쿼트는 무릎과 고관절을 함께 굽혀 앉았다가 다시 일어나는 기본 운동으로, <mark>하체 근력</mark>을 키우고 자세를 안정시키는 데 도움이 돼요. 엉덩이와 허벅지의 큰 근육을 써요.</p></div>
+    <div class="row"><span class="hl">따라 해 보기</span><span>다음 순서에 따라 바른 자세로 해 보세요.</span></div>
+    <ol class="steps"><li><b><i>1</i>준비하기</b><span>발을 어깨너비로 벌리고, 발끝은 약간 바깥으로.</span></li><li><b><i>2</i>내려가기</b><span>엉덩이를 뒤로 빼며 천천히 앉아요. 무릎은 발끝 방향.</span></li>
+    <li><b><i>3</i>유지하기</b><span>허벅지가 바닥과 거의 평행이 될 때까지 앉아 1~2초.</span></li><li><b><i>4</i>올라오기</b><span>발바닥으로 바닥을 밀며 일어나요.</span></li></ol>${ft(12)}` },
+  { u: 'sit', g: '기본', html: `${hd('r')}<span class="hl" style="margin-top:3%">무릎이 안으로 모이면</span>
+    <div class="flow">${fig('g_valgus', '무릎이 안으로 모인 자세 (잘못된 자세)', 's-squat-base', 'valgus', 'card warn')}<p>스쿼트할 때 무릎이 안으로 모이면(무릎이 X자 형태가 되면) 무릎 관절에 불필요한 부하가 커져 <mark>다칠 위험</mark>이 있어요. 항상 무릎이 발끝과 같은 방향을 향하도록 하며, 다리가 안쪽으로 무너지지 않게 주의해요.</p></div>
+    <hr class="dots"><span class="hl">물건 들 때도 같아요</span>
+    <div class="flow">${fig('g_lift', '등을 굽혀 드는 자세', 's-hinge-base', 'round', 'card')}<p>무거운 물건을 들 때도 스쿼트와 같은 원리로 움직여요. 허리를 굽혀 상체만 숙여 들면 <mark>허리에 큰 부담</mark>이 가고 다칠 수 있어요. 먼저 무릎을 굽혀 몸을 낮추고, 물건을 몸 가까이 두고, 다리 힘으로 천천히 일어나 들어요.</p></div>${ft(13, 'r')}` },
+  { u: 'sit', g: '응용', html: `${hd('l')}<span class="hl" style="margin-top:3%">응용 동작</span>
+    <p>기본 스쿼트를 익혔다면 무게를 들거나, 발 너비를 바꾸거나, 점프를 더해 볼 수 있어요. 버튼을 누르면 3D로 바로 봐요.</p>
+    <div class="mv">${mv('고블릿 스쿼트', '가슴 앞에 무게를 안고 앉아 상체를 세우기 쉬워요', 's-squat-goblet')}${mv('와이드 스쿼트', '발을 넓게, 허벅지 안쪽 근육을 더 써요', 's-squat-wide')}${mv('점프 스쿼트 착지', '착지할 때 무릎이 모이지 않게 부드럽게', 's-squat-jump')}${mv('벽 스쿼트', '벽에 기대 버티며 허벅지 근지구력을', 's-squat-wall')}</div>${ft(14)}` },
+  { u: 'sit', g: '일상', g2: '스포츠', html: `${hd('r')}<span class="hl" style="margin-top:3%">일상에서는</span>
+    <div class="flow">${fig('chair', '의자에서 일어나기', 's-squat-chair', 'good', 'card')}<p>의자에서 일어날 때, 바닥의 물건을 주울 때 스쿼트를 써요. 상체를 앞으로 숙여 무게를 발 위로 옮긴 뒤 엉덩이와 허벅지 힘으로 일어서요.</p></div>
+    <hr class="dots"><span class="hl">스포츠에서는</span>
+    <p>농구 수비, 배구 리시브, 야구 포수가 모두 반쯤 앉은 스쿼트예요.</p>
+    <div class="mv">${mv('농구 수비 자세', '낮게, 넓게, 발 앞쪽에 무게', 's-squat-defense')}${mv('배구 리시브', '무릎을 굽혀 공 밑으로', 's-squat-receive')}</div>${ft(15, 'r')}` },
+  { u: 'step', g: '기본', html: `${hd('l')}<span class="unit-tag">단원 2 · 한 발 딛기</span><h1>런지</h1>
+    <div class="flow">${fig('lunge', '바른 런지', 's-lunge-base')}<p>런지는 한 발을 앞으로 크게 딛고 몸을 곧게 내렸다 올라오는 움직임이에요. 두 무릎이 모두 90°쯤 굽혀지면 충분해요.</p>
+    <p>한 발로 버티니 <mark>균형</mark>이 필요하고, 엉덩이 옆 근육이 무릎이 흔들리지 않게 잡아 줘요.</p></div>
+    <div class="mv">${mv('뒤로 런지', '무릎 부담이 적어 처음 하기 좋아요', 's-lunge-reverse')}${mv('계단 오르기', '일상 속 한 발 딛기', 's-lunge-stairs')}${mv('배드민턴 앞으로 뻗기', '스포츠 속 런지', 's-lunge-badminton')}</div>${ft(16)}` },
+  { u: 'push', g: '기본', html: `${hd('r')}<span class="unit-tag" style="margin-top:3%">단원 3 · 밀기</span><h1>푸시업</h1>
+    <div class="flow">${fig('pushup', '바른 푸시업', 's-pushup-base')}<p>푸시업은 팔로 바닥을 밀어 몸을 들어 올리는 움직임이에요. 머리부터 발뒤꿈치까지 <mark>한 줄</mark>을 지킨 채 가슴이 먼저 내려가요.</p>
+    <p>허리가 처지면 허리가, 팔꿈치가 옆으로 벌어지면 어깨가 다쳐요.</p></div>
+    <div class="mv">${mv('무릎 대고 푸시업', '처음에는 여기부터', 's-pushup-kneepu')}${mv('무거운 문 밀기', '일상 속 밀기', 's-pushup-door')}${mv('농구 체스트 패스', '스포츠 속 밀기', 's-pushup-chestpass')}</div>${ft(17, 'r')}` },
+  { u: 'prin', g: '기본', html: `${hd('l', 'Ⅳ. 체력과 트레이닝', '<b>단원</b>트레이닝 원리')}<span class="unit-tag">단원 4 · 원리</span><h1>과부하의 원리</h1>
+    <div class="flow">${fig('ov_after', '4주 뒤 팔 근육 135%', 'principles', 'good', 'card')}<p>근육은 <mark>평소보다 조금 더 무거운 무게</mark>를 만났을 때 자라요. 너무 가벼우면 변화가 없고, 너무 무거우면 바른 자세가 무너져 다쳐요.</p>
+    <p>그림을 눌러 알맞은 4 kg을 고르고 "4주 운동하기"를 눌러 보세요.</p></div>${ft(42)}` },
+  { u: 'prin', g: '기본', html: `${hd('r')}<span class="hl" style="margin-top:3%">점진성의 원리</span>
+    <p>같은 무게로 1년을 해도 근육은 처음 몇 주만 자라요. 커진 만큼 무게를 <mark>조금씩</mark> 올려야 계속 자라요.</p>
+    <div class="mv">${mv('트레이닝 원리 실험실', '과부하·점진성·반복성·개별성·특이성을 3D로 실험', 'principles')}</div>${ft(43, 'r')}` },
 ];
-let cur = 0, side = 0; const book = $('book');
+const portrait = () => matchMedia('(orientation: portrait)').matches;
+const inG = (p, g) => p.g === g || p.g2 === g;
+let pi = 0; const book = $('book');
 function render(anim) {
-  $('pl').innerHTML = SP[cur][0]; $('pr').innerHTML = SP[cur][1];
-  const portrait = matchMedia('(orientation: portrait)').matches; book.classList.toggle('showR', portrait && side === 1);
-  const total = portrait ? SP.length * 2 : SP.length, idx = portrait ? cur * 2 + side : cur;
-  $('pg').textContent = `${idx + 1} / ${total}`; $('prev').disabled = idx === 0; $('next').disabled = idx === total - 1;
+  unzoom();
+  const P = portrait(), a = P ? pi : pi - (pi % 2), idx = P ? [pi] : [a, a + 1].filter(i => i < PAGES.length);
+  book.innerHTML = idx.map((i, k) => `<section class="page ${P ? '' : k ? 'r' : 'l'}">${PAGES[i].html}</section>`).join('');
+  const cur = PAGES[idx[0]], all = idx.map(i => PAGES[i]);
+  $('unitName').textContent = UNITS[cur.u][0] + ' · ' + UNITS[cur.u][1];
+  $('tabs').querySelectorAll('button').forEach(b => { b.disabled = !PAGES.some(p => p.u === cur.u && inG(p, b.dataset.g)); b.setAttribute('aria-pressed', all.some(p => inG(p, b.dataset.g))); });
+  const total = P ? PAGES.length : Math.ceil(PAGES.length / 2), n = P ? pi : a / 2;
+  $('pg').textContent = `${n + 1} / ${total}`; $('prev').disabled = n === 0; $('next').disabled = n === total - 1;
   if (anim) { book.classList.remove('flip'); void book.offsetWidth; book.classList.add('flip'); }
-  book.querySelectorAll('.fig').forEach(f => { f.onclick = () => open3D(f); f.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open3D(f); } }; });
 }
-function step(d) { const portrait = matchMedia('(orientation: portrait)').matches;
-  if (portrait) { let i = cur * 2 + side + d; i = Math.max(0, Math.min(SP.length * 2 - 1, i)); cur = i >> 1; side = i & 1; } else cur = Math.max(0, Math.min(SP.length - 1, cur + d));
-  render(true); }
+const go = i => { pi = Math.max(0, Math.min(PAGES.length - 1, i)); render(true); };
+const step = d => go(portrait() ? pi + d : pi - (pi % 2) + 2 * d);
 $('prev').onclick = () => step(-1); $('next').onclick = () => step(1);
-addEventListener('keydown', e => { if (!$('v3d').hidden) { if (e.key === 'Escape') close3D(); return; } if (e.key === 'ArrowRight') step(1); if (e.key === 'ArrowLeft') step(-1); });
+$('tabs').querySelectorAll('button').forEach(b => b.onclick = () => { const i = PAGES.findIndex(p => p.u === PAGES[pi].u && inG(p, b.dataset.g)); if (i >= 0) go(i); });
+// 돋보기: 켜고 지면을 누르면 그 자리를 2.3배로 크게, 다시 누르면 원래대로
+let zoomOn = false, zoomed = false;
+function setZoomMode(on) { zoomOn = on; $('zoomBtn').setAttribute('aria-pressed', on); document.body.classList.toggle('zoomMode', on); $('zhint').hidden = !on; $('zhint').textContent = '🔍 크게 볼 곳을 눌러요'; if (!on) unzoom(); }
+function unzoom() { zoomed = false; book.style.transform = ''; document.body.classList.remove('zoomed'); if (zoomOn) $('zhint').textContent = '🔍 크게 볼 곳을 눌러요'; }
+$('zoomBtn').onclick = () => setZoomMode(!zoomOn);
+book.addEventListener('click', e => {
+  const t = e.target.closest('[data-scene]');
+  if (zoomOn && !zoomed) { const r = book.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * 100, y = (e.clientY - r.top) / r.height * 100;
+    book.style.transformOrigin = `${x}% ${y}%`; book.style.transform = 'scale(2.3)'; zoomed = true; document.body.classList.add('zoomed'); $('zhint').textContent = '다시 누르면 원래 크기 · 그림을 누르면 3D'; return; }
+  if (t) { open3D(t); return; }
+  if (zoomed) unzoom();
+});
+// 차례
+$('tocIn').innerHTML = `<h2>차례<button type="button" id="tocX">닫기</button></h2>` + Object.entries(UNITS).map(([u, [tt, nm]]) => {
+  const gs = ['기본', '응용', '일상', '스포츠'].filter(g => PAGES.some(p => p.u === u && inG(p, g)));
+  return `<div class="u"><b>${tt} · ${nm}</b><div class="g">${gs.map(g => { const i = PAGES.findIndex(p => p.u === u && inG(p, g)); return `<button type="button" data-i="${i}">${g}<span>${PAGES[i].html.match(/class="ft[^"]*"><span>(\d+)/)[1]}쪽</span></button>`; }).join('')}</div></div>`; }).join('');
+$('tocBtn').onclick = () => $('tocp').hidden = false; $('tocX').onclick = () => $('tocp').hidden = true;
+$('tocp').onclick = e => { if (e.target === $('tocp')) $('tocp').hidden = true; const b = e.target.closest('[data-i]'); if (b) { $('tocp').hidden = true; go(+b.dataset.i); } };
+addEventListener('keydown', e => { if (!$('v3d').hidden) { if (e.key === 'Escape') close3D(); return; } if (e.key === 'Escape') unzoom(); if (e.key === 'ArrowRight') step(1); if (e.key === 'ArrowLeft') step(-1); });
 let sx = null; book.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive: true });
-book.addEventListener('touchend', e => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 60) step(dx < 0 ? 1 : -1); sx = null; });
+book.addEventListener('touchend', e => { if (sx == null || zoomed) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 60) step(dx < 0 ? 1 : -1); sx = null; });
 matchMedia('(orientation: portrait)').addEventListener('change', () => render(false));
-// 그림 → 3D만 크게 (교과서 3D 화면을 '3D만' 보기로 열기)
-function open3D(f) {
-  const sc = f.dataset.scene, fr = $('vFrame'); $('vTitle').textContent = f.dataset.cap; $('v3d').hidden = false; $('v3d').classList.add('open');
+function open3D(el) {
+  const sc = el.dataset.scene, fr = $('vFrame'); $('vTitle').textContent = el.dataset.cap; $('v3d').hidden = false;
   fr.onload = () => { if (sc === 'principles') return; const w = fr.contentWindow, d = fr.contentDocument; let n = 0;
-    const t = setInterval(() => { n++; const b3 = d.querySelector('#nvView [data-vw="3d"]'), tab = d.querySelector(`.tabs button[data-v="${f.dataset.v}"]`);
-      if (b3 && tab && w.__state) { d.querySelector('.rot-tip')?.remove(); tab.click(); b3.click(); setTimeout(() => w.dispatchEvent(new Event('resize')), 100); clearInterval(t); } if (n > 60) clearInterval(t); }, 150); };
+    const t = setInterval(() => { n++; const b3 = d.querySelector('#nvView [data-vw="3d"]'), tab = d.querySelector(`.tabs button[data-v="${el.dataset.v}"]`);
+      if (b3 && w.__state) { d.querySelector('.rot-tip')?.remove(); tab?.click(); b3.click(); clearInterval(t); } if (n > 60) clearInterval(t); }, 150); };
   fr.src = sc === 'principles' ? 'principles.html' : 'hybrid.html#' + sc;
 }
 function close3D() { $('v3d').hidden = true; $('vFrame').src = 'about:blank'; }
 $('vClose').onclick = close3D;
-setTimeout(() => $('tip').hidden = true, 5000);
 render(false);
 </script>
 </body>
