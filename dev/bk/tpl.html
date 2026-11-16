@@ -64,6 +64,36 @@ const first = t => (String(t).replace(/🧩\s*/, '').match(/^.*?(?:요|다)\.(?=
 const GO = ['기본', '응용', '원리', '일상', '스포츠'], GNAME = { 응용: ['응용 동작', '기본 동작을 익혔다면 도구를 들거나 모양을 바꿔 더 해 봐요.'], 원리: ['원리', '공과 궤적으로 원리를 이해해요.'], 일상: ['일상에서는', '생활 속 이런 장면에서 이 동작을 써요.'], 스포츠: ['스포츠에서는', '경기 속 이런 장면에서 이 동작을 써요.'] };
 const img = (m, sc, v) => D.img[`${m}-${sc}-${v}`];
 const fig = (src, cap, scene, v, cls) => src ? `<button type="button" class="fig ${cls}" data-scene="${scene}" data-v="${v}" data-cap="${esc(cap)}">${cls.includes('warn') ? '<span class="warnI">⚠</span>' : ''}<img src="${src}" alt="${esc(cap)}"><span class="b3">▶ 3D</span>${cls.includes('card') ? `<span class="cap">${esc(cap)}</span>` : ''}</button>` : '';
+// ---------- 단원 첫 펼침쪽 (data.json 의 units[].spread) ----------
+const spFig = (src, cap, scene, v, cls = '') => src ? `<button type="button" class="sfig ${cls}" data-scene="${scene}" data-v="${v}" data-cap="${esc(cap)}"><img src="${src}" alt="${esc(cap)}"><span class="tap">▶ 3D</span>${cls.includes('lbl') ? `<span class="lb">${esc(cap)}</span>` : ''}</button>` : '';
+function spreadL(U, ui, base, bg, sk) { const P = U.spread, uid = U.m;
+  return `<div class="sp-l">
+  <span class="unit-tag">단원 ${ui + 1} · ${U.verb}</span>
+  <h1 class="sp-h"><em>${esc(P.em)}</em>${esc(P.rest)}</h1>
+  <p class="sp-lead">${esc(P.lead)}</p>
+  <div class="sp-open"><div class="sp-box q"><b>💭 생각 열기</b>${esc(P.think)}</div><div class="sp-box goal"><b>🎯 학습 목표</b><ul>${P.goals.map(g => `<li>${esc(g)}</li>`).join('')}</ul></div></div>
+  <div class="sp-act"><i>활동 1</i><h2>${esc(P.act1)}</h2><span class="sp-d3">▶ 그림을 누르면 3D</span></div>
+  <div class="sp-a1">${spFig(img(uid, 'base', bg.k), '바른 ' + base.name, sk, bg.k, 'big lbl')}
+    <div class="sp-rows"><div class="rw"><b>자세</b><span>${esc(P.pose)}</span></div>
+      <div class="rw"><b>확인</b><ul>${bg.checks.filter(c => !/고관절/.test(c)).slice(0, 3).map(c => `<li>${esc(c)}</li>`).join('')}</ul></div>
+      <div class="rw"><b>근육</b><span class="sp-mus">${base.muscles.slice(0, 3).map(m => `<em>${esc(m)}</em>`).join('')}</span></div>
+      <p class="sp-safe"><b>🚨 안전</b> ${esc(P.safe)}</p></div></div>
+  <div class="sp-band"><div class="bt"><i>기능 익히기</i><b>스쿼트를 잘하려면? · 그림을 누르면 3D</b></div>
+    <div class="sp-steps">${base.steps.map(([t, x], i) => `<button type="button" class="st" data-scene="${sk}" data-v="good" data-cap="${esc(t)}"><span class="im"><img src="${P.stepImg[i]}" alt="${esc(t)}" style="object-position:${P.stepPos[i]}${P.stepFlip[i] ? ';transform:scaleX(-1)' : ''}"></span><span class="sp-tx"><b>${i + 1}. ${esc(t)}</b>${esc(first(x))}</span></button>`).join('')}</div></div>
+</div>`; }
+function spreadR(U, ui, base, sk) { const P = U.spread, uid = U.m, S = U.scenes;
+  const bads = base.vars.filter(v => !v.ok).slice(0, 3);
+  return `<div class="sp-r">
+  <div class="sp-act"><i>활동 2</i><h2>일상과 스포츠에서 찾아보기</h2></div>
+  <div class="sp-conn">${P.life.map(L => { const s = S.find(x => x.sc === L.sc); if (!s) return ''; const k = `s-${uid}-${s.sc}`;
+    return `<div class="cn${L.tag === '스포츠' ? ' s' : ''}">${spFig(img(uid, s.sc, s.vars[0].k), s.name, k, s.vars[0].k)}<div><h3><small>${esc(L.tag)}</small>${esc(s.name)}</h3><p>${esc(L.text)}</p></div></div>`; }).join('')}</div>
+  <div class="sp-act"><i class="red">주의</i><h2>이러면 다쳐요</h2></div>
+  <div class="sp-bad">${bads.map(v => `<div class="bd">${spFig(img(uid, 'base', v.k), v.name, sk, v.k)}<div class="sp-tx"><h3><span aria-hidden="true">⚠</span> ${esc(v.name)}</h3><p>${esc(first(v.why || v.desc))}</p>${v.fix.length ? `<p class="fx">→ ${esc(v.fix[0])}</p>` : ''}</div></div>`).join('')}</div>
+  <div class="sp-r2"><div><div class="sp-act"><i class="pur">도전</i><h2>${esc(P.challenge.title)}</h2></div><p class="sp-lead">${esc(P.challenge.text)}</p></div>
+    <div class="sp-self"><b>스스로 확인</b><ul>${P.self.map((t, i) => `<li><span>${esc(t)}</span><span class="stars" role="group" aria-label="${esc(t)} 별점">${[1, 2, 3].map(n => `<button type="button" data-star="${uid}:${i}:${n}" aria-label="별 ${n}개" aria-pressed="false">★</button>`).join('')}</span></li>`).join('')}</ul></div></div>
+  <div class="sp-band"><div class="bt"><i>단원 마무리</i><b>확인 문제 · 눌러서 답 확인</b></div>
+    <div class="sp-quiz">${P.quiz.map((z, i) => `<div class="qz" data-a="${z.a}" data-why="${esc(z.why)}"><p><b>${i + 1}.</b> ${esc(z.q)}</p><div class="ox"><button type="button" data-ox="O" aria-label="${i + 1}번 O, 맞다">O</button><button type="button" data-ox="X" aria-label="${i + 1}번 X, 틀리다">X</button></div><p class="why" aria-live="polite"></p></div>`).join('')}</div></div>
+</div>`; }
 // ---------- 내용 블록 만들기 ----------
 const BL = []; // { u, g, html, title?, key? }
 D.units.forEach((U, ui) => {
@@ -74,6 +104,10 @@ D.units.forEach((U, ui) => {
     if (U.lab) push('기본', `<div class="mv"><button type="button" data-scene="principles" data-v="good" data-cap="트레이닝 원리 실험실"><strong>🧪 트레이닝 원리 실험실</strong><small>무게를 고르고 "4주 운동하기"로 직접 실험해요</small><em>▶ 3D</em></button></div>`);
     return; }
   const S = U.scenes, base = S.find(s => s.sc === 'base'), bg = base.vars[0], sk = `s-${uid}-base`;
+  if (U.spread) { // 단원 첫 두 쪽: 교과서 펼침쪽 고정 배치
+    push('기본', spreadL(U, ui, base, bg, sk), { title: true, key: sk, name: '바른 ' + base.name, fixed: 'l' });
+    push('기본', spreadR(U, ui, base, sk), { fixed: 'r' });
+  } else {
   push('기본', `<span class="unit-tag">단원 ${ui + 1} · ${U.verb}</span><h1>${base.name}</h1>
     <div class="flow">${fig(img(uid, 'base', bg.k), '바른 ' + base.name, sk, bg.k, '')}<p><b>${U.pattern}.</b> ${esc(bg.desc.replace(/🧩\s*/, ''))}</p></div>`, { title: true, key: sk, name: '바른 ' + base.name });
   if (base.steps.length) push('기본', `<div class="row"><span class="hl">따라 해 보기</span><span>순서대로 바른 자세로 해 보세요.</span></div><ol class="steps">${base.steps.map(([t, x], i) => `<li><b><i>${i + 1}</i>${esc(t)}</b><span>${esc(x)}</span></li>`).join('')}</ol>`);
@@ -82,6 +116,7 @@ D.units.forEach((U, ui) => {
   const bads = base.vars.filter(v => !v.ok).slice(0, 3);
   if (bads.length) push('기본', `<div class="gh"><span class="hl">이러면 다쳐요</span></div>`);
   bads.forEach(v => push('기본', `<div class="it">${fig(img(uid, 'base', v.k), v.name, sk, v.k, 'sm card warn')}<h3>⚠ ${esc(v.name)}</h3><p>${esc(v.why || v.desc)}</p>${v.fix.length ? `<p class="fixl">${esc(v.fix.join(' · '))}</p>` : ''}</div>`));
+  }
   for (const g of GO.slice(1)) { const xs = S.filter(s => s.sc !== 'base' && s.g === g); if (!xs.length) continue;
     push(g, `<div class="gh"><span class="hl">${GNAME[g][0]}</span><p>${U.verb} ${GNAME[g][1]}</p></div>`);
     xs.forEach((s, i) => { const v = s.vars[0], k = `s-${uid}-${s.sc}`;
@@ -106,7 +141,11 @@ function paginate(blocks, startN, numFn) {
   const open = (u) => { const side = P ? '' : ((startN + pages.length) % 2 ? 'r' : 'l'); pg = { u, blocks: [], side }; pages.push(pg);
     meas.innerHTML = `<section class="page ${side}" style="height:100%">${shell(side, numFn(pages.length - 1), u)}</section>`; body = meas.querySelector('.body'); };
   for (const b of blocks) {
-    if (!pg) open(b.u);
+    if (b.fixed) { // 고정 쪽: 한 쪽을 통째로 차지. 가로 화면에서 왼쪽 고정 쪽은 반드시 왼쪽에 오게 빈 쪽을 끼움
+      if (!pg || pg.blocks.length) open(b.u);
+      if (!P && b.fixed === 'l' && pg.side === 'r') open(b.u);
+      pg.blocks.push(b); pg.fixed = true; continue; }
+    if (!pg || pg.fixed) open(b.u);
     const el = document.createElement('div'); el.className = 'w'; el.style.display = 'contents'; el.innerHTML = b.html; body.appendChild(el);
     const over = body.scrollHeight > body.clientHeight + 1, lowTitle = b.title && body.childElementCount > 1 && body.scrollHeight > body.clientHeight * .6;
     if ((over || lowTitle) && pg.blocks.length) { el.remove(); open(b.u); body.appendChild(el); }
@@ -135,8 +174,11 @@ let pi = 0;
 function render(anim) {
   unzoom(); const P = portrait(), a = P ? pi : pi - (pi % 2), idx = P ? [pi] : [a, a + 1].filter(i => i < PAGES.length);
   book.innerHTML = idx.map((i, k) => { const p = PAGES[i], side = P ? '' : k ? 'r' : 'l';
-    return `<section class="page ${side}">${shell(side, p.num, p.u)}</section>`; }).join('');
+    return `<section class="page ${side}${p.fixed ? ' sp' : ''}">${shell(side, p.num, p.u)}</section>`; }).join('');
   book.querySelectorAll('.body').forEach((b, k) => { b.innerHTML = PAGES[idx[k]].blocks.map(x => x.html).join(''); });
+  book.querySelectorAll('.page.sp .body').forEach(b => { // 고정 쪽이 넘치면 글자를 조금씩 줄여 맞춤(가로 최소 0.72배, 세로 폰은 0.88배까지만 — 글씨를 너무 줄이지 않음), 그래도 넘치면 쪽 안에서 스크롤
+    let f = 1, lo = P ? .9 : .74; b.style.fontSize = ''; while (b.scrollHeight > b.clientHeight + 1 && f > lo) { f -= .04; b.style.fontSize = f + 'em'; } });
+  book.querySelectorAll('[data-star]').forEach(s => { const [u, i, n] = s.dataset.star.split(':'); let v = 0; try { v = +localStorage.getItem(`self-${u}-${i}`) || 0; } catch (e) { } s.setAttribute('aria-pressed', +n <= v); });
   const cur = PAGES[idx[0]], u = cur.u || PAGES[idx[1]]?.u;
   $('unitName').textContent = u ? UNAME[u][0] + ' · ' + UNAME[u][1] : '차례';
   const gsHere = new Set(idx.flatMap(i => PAGES[i].blocks.map(b => b.g)));
@@ -165,6 +207,12 @@ function unzoom() { zoomed = false; book.style.transform = ''; document.body.cla
 $('zoomBtn').onclick = () => setZoomMode(!zoomOn);
 book.addEventListener('click', e => {
   const gpb = e.target.closest('[data-go-page]'); if (gpb && !zoomOn) { go(+gpb.dataset.goPage, 1); return; }
+  const ox = e.target.closest('[data-ox]'); if (ox && !zoomOn) { const q = ox.closest('.qz'), ok = ox.dataset.ox === q.dataset.a;
+    q.querySelectorAll('[data-ox]').forEach(b => b.setAttribute('aria-pressed', b === ox)); q.classList.toggle('ok', ok); q.classList.toggle('no', !ok);
+    q.querySelector('.why').textContent = (ok ? '✓ 맞았어요! ' : `✗ 정답은 ${q.dataset.a}예요. `) + q.dataset.why; return; }
+  const sb = e.target.closest('[data-star]'); if (sb && !zoomOn) { const [u, i, n] = sb.dataset.star.split(':'); let v = 0; try { v = +localStorage.getItem(`self-${u}-${i}`) || 0; } catch (er) { }
+    v = v === +n ? 0 : +n; try { localStorage.setItem(`self-${u}-${i}`, v); } catch (er) { }
+    sb.parentElement.querySelectorAll('[data-star]').forEach(s => s.setAttribute('aria-pressed', +s.dataset.star.split(':')[2] <= v)); return; }
   const gk = e.target.closest('[data-go-key]'); if (gk && !zoomOn) { const k = gk.dataset.goKey; if (keyPage[k] != null) goKey(k); else open3D({ dataset: { scene: k, v: 'good', cap: gk.firstChild.textContent } }); return; }
   const t = e.target.closest('[data-scene]');
   if (zoomOn && !zoomed) { const r = book.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * 100, y = (e.clientY - r.top) / r.height * 100;

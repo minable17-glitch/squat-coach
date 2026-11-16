@@ -92,3 +92,71 @@ p { word-break: keep-all } mark { background: var(--lime); color: inherit; paddi
 .ti:hover { background: rgba(215,242,90,.35) } .ti i { flex: 1; border-bottom: 1.5px dotted #b9ab88; transform: translateY(-.3em) } .ti em { font: 700 .8em var(--sans); font-style: normal; color: var(--navy) }
 .tnote { margin-top: auto; font-size: .85em; color: var(--mute) }
 @media (orientation: portrait) { .page .hd.r { display: none } }
+
+/* ===== 단원 첫 펼침쪽 (.page.sp) — 캡틴 시안(dev/sample/spread.html) + 코덱스 개선안 ===== */
+.page.sp { background-image: none; background-color: #fffdf7 }
+.page.sp .body { gap: 0; overflow-y: auto; scrollbar-width: thin }
+.sp-l, .sp-r { display: flex; flex-direction: column; gap: .7em; min-height: 100%; line-height: 1.6; font-family: var(--sans) }
+.sp-l .unit-tag { margin-top: .4em; font-size: 1.05em; padding: .15em .9em }
+.sp-h { font: 400 2.2em/1.2 var(--disp); color: var(--navy); padding: 0 } .sp-h::after { display: none } .sp-h em { font-style: normal; color: var(--orange) }
+.sp-lead { font-size: 1.03em; line-height: 1.7; word-break: keep-all }
+.sp-open { display: grid; grid-template-columns: 1fr 1fr; gap: .75em }
+.sp-box { border-radius: .9em; padding: .6em .9em; font-size: .95em; line-height: 1.6; word-break: keep-all }
+.sp-box > b { display: block; font-size: .95em; margin-bottom: .1em }
+.sp-box.q { background: #fff4e6; border: 1.5px solid #f6c79b } .sp-box.q > b { color: #9c4a0c }
+.sp-box.goal { background: #eef4fb; border: 1.5px solid #bcd0ea } .sp-box.goal > b { color: #24508f } .sp-box.goal ul { padding-left: 1.1em }
+.sp-act { display: flex; align-items: center; gap: .6em; flex-wrap: wrap }
+.sp-act i { font: 400 1.05em var(--disp); font-style: normal; background: var(--navy); color: #fff; padding: .2em .75em .15em; border-radius: 99px 99px 99px .25em }
+.sp-act i.red { background: #c2410c } .sp-act i.pur { background: #5b3cc4 }
+.sp-act h2 { font: 400 1.45em/1.25 var(--disp); color: var(--navy) }
+.sp-d3 { margin-left: auto; background: var(--orange); color: #1c1205; font-weight: 700; font-size: .85em; padding: .3em .9em; border-radius: 99px }
+.sfig { position: relative; display: block; border: 0; padding: 0; border-radius: 1em; overflow: hidden; background: #efe9da; cursor: pointer; width: 100% }
+.sfig img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; mix-blend-mode: normal; aspect-ratio: auto } /* 그림이 늦게 불러와져도 쪽 높이가 바뀌지 않게 */
+.sfig .tap { position: absolute; right: .5em; top: .5em; background: var(--orange); color: #1c1205; font-size: .75em; font-weight: 700; padding: .15em .6em; border-radius: 99px }
+.sfig .lb { position: absolute; left: .5em; bottom: .5em; background: rgba(20,40,75,.9); color: #fff; font-size: .8em; font-weight: 700; padding: .1em .65em; border-radius: 99px }
+.sfig:focus-visible, .sp-steps .st:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px }
+.sp-a1 { display: grid; grid-template-columns: 38% 1fr; gap: 1.1em; align-items: stretch }
+.sp-a1 .sfig.big { min-height: 13em; background: #f4f1ea } .sp-a1 .sfig.big img { object-fit: contain }
+.sp-rows { display: grid; gap: .45em; align-content: start; font-size: .97em; line-height: 1.6; word-break: keep-all }
+.sp-rows .rw { display: grid; grid-template-columns: 3.6em 1fr; gap: .6em }
+.sp-rows .rw > b { justify-self: start; align-self: start; background: #f3ead2; border: 1.5px solid #d9c99a; border-radius: .5em .5em .5em 0; font-size: .85em; padding: .05em .55em; color: #5b4618 }
+.sp-rows ul { padding-left: 1.1em }
+.sp-mus em { display: inline-block; font-style: normal; background: #fde3dc; color: #9f2f1c; font-weight: 700; padding: .05em .55em; border-radius: 99px; font-size: .9em; margin: 0 .3em .2em 0 }
+.sp-safe { border-top: 2px solid var(--red); padding-top: .35em; font-size: .9em; line-height: 1.55; color: #4a2a22 } .sp-safe b { color: #b33a0c }
+.sp-band { margin: auto -5.3% 0; padding: .7em 5.3% .6em; background: #e9eef8; border-radius: 3.5em 3.5em 0 0 / 1.4em 1.4em 0 0 }
+.sp-band .bt { display: flex; align-items: center; gap: .6em; margin-bottom: .5em; flex-wrap: wrap }
+.sp-band .bt i { font: 400 1.1em var(--disp); font-style: normal; color: #fff; background: #2f6db5; padding: .15em .85em .1em; border-radius: 99px }
+.sp-band .bt b { background: #fff; border-radius: 99px; padding: .1em .85em; font-size: .9em }
+.sp-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: .7em }
+.sp-steps .st { display: grid; gap: .3em; border: 0; background: none; padding: 0; text-align: left; cursor: pointer; font-family: var(--sans) }
+.sp-steps .im { display: block; height: 7.5em; border-radius: .75em; overflow: hidden; background: #d9d4cb }
+.sp-steps .im img { width: 100%; height: 100%; object-fit: cover; display: block }
+.sp-steps .sp-tx { font-size: .85em; line-height: 1.45; word-break: keep-all } .sp-steps .sp-tx b { display: inline-block; background: var(--lime2); border-radius: .4em; padding: 0 .4em; margin-right: .3em }
+.sp-conn { display: grid; grid-template-columns: 1fr 1fr; gap: .9em }
+.sp-conn .cn { display: grid; grid-template-columns: 42% 1fr; gap: .7em; align-items: start }
+.sp-conn .sfig { height: 7.5em }
+.sp-conn h3 { font-size: 1.05em; color: var(--navy); line-height: 1.35 } .sp-conn h3 small { font-size: .78em; font-weight: 700; color: #fff; background: #2f7a47; border-radius: 99px; padding: .05em .55em; margin-right: .35em; vertical-align: .1em } .sp-conn .cn.s h3 small { background: #c2410c }
+.sp-conn p { font-size: .9em; line-height: 1.55; margin-top: .15em; word-break: keep-all }
+.sp-bad { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75em }
+.sp-bad .bd { border: 1.5px solid #f3b9a8; background: #fff6f2; border-radius: .9em; overflow: hidden; display: flex; flex-direction: column }
+.sp-bad .sfig { height: 7em; border-radius: 0 }
+.sp-bad .sp-tx { padding: .45em .65em .55em } .sp-bad h3 { font-size: .95em; color: #b33a0c } .sp-bad p { font-size: .85em; line-height: 1.45; margin-top: .1em; word-break: keep-all } .sp-bad p.fx { color: #23683d; font-weight: 700 }
+.sp-r2 { display: grid; grid-template-columns: 1fr 15.5em; gap: 1em; align-items: start }
+.sp-r2 .sp-lead { font-size: .95em; margin-top: .35em }
+.sp-self { border: 2px solid #9db9e6; border-radius: 1.1em; padding: 1.2em .8em .6em; position: relative; font-size: .92em; line-height: 1.5; background: #fff; margin-top: .9em }
+.sp-self > b { position: absolute; left: .8em; top: -.85em; background: #2f6db5; color: #fff; font: 400 1.05em var(--disp); padding: .15em .85em; border-radius: 99px }
+.sp-self ul { list-style: none; padding: 0 } .sp-self li { display: flex; justify-content: space-between; align-items: center; gap: .4em; padding: .15em 0; border-bottom: 1px dashed #d5dff0 }
+.stars { display: flex; flex: none } .stars button { border: 0; background: none; font-size: 1.15em; line-height: 1; color: #c9cfdb; min-width: 1.6em; min-height: 1.9em; padding: 0; cursor: pointer }
+.stars button[aria-pressed="true"] { color: #f2a900 }
+.sp-quiz { display: grid; grid-template-columns: repeat(3, 1fr); gap: .7em }
+.qz { background: #fff; border-radius: .75em; padding: .5em .7em; font-size: .88em; line-height: 1.5; border: 2px solid transparent; word-break: keep-all } .qz b { color: #2f6db5 }
+.qz .ox { display: flex; gap: .4em; margin-top: .35em } .qz .ox button { flex: 1; min-height: 2.4em; border: 1.5px solid #bcd0ea; border-radius: .5em; background: #fff; font: 700 1em var(--sans); color: var(--navy) }
+.qz .ox button[aria-pressed="true"] { background: var(--navy); color: #fff; border-color: var(--navy) }
+.qz .why { font-size: .9em; margin-top: .3em } .qz.ok { border-color: #2f7a47 } .qz.ok .why { color: #23683d; font-weight: 700 } .qz.no { border-color: #c2410c } .qz.no .why { color: #9f2f1c; font-weight: 700 }
+.qz .why:empty { display: none }
+@media (orientation: portrait) {
+  .sp-open, .sp-conn, .sp-r2 { grid-template-columns: 1fr }
+  .sp-a1 { grid-template-columns: 1fr } .sp-a1 .sfig.big { min-height: 0; height: 16em } .sp-a1 .sfig.big img { object-fit: contain }
+  .sp-steps { grid-template-columns: 1fr 1fr } .sp-bad, .sp-quiz { grid-template-columns: 1fr }
+  .sp-bad .bd { flex-direction: row } .sp-bad .sfig { width: 38%; height: auto; min-height: 6.5em; flex: none }
+}
