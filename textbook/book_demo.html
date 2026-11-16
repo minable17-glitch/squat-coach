@@ -21,19 +21,19 @@ button { font: inherit; color: inherit; cursor: pointer }
 .top .tb { border: 0; border-radius: 10px; background: #fff; color: var(--navy); font-weight: 700; font-size: 14px; padding: 6px 12px; white-space: nowrap }
 .top .tb[aria-pressed="true"] { background: var(--orange); color: #fff }
 .top .unit { font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0 }
-.tabs { display: flex; gap: 4px; margin-left: auto; background: rgba(255,255,255,.12); border-radius: 11px; padding: 3px }
+.tabs { display: flex; gap: 4px; margin-left: auto; margin-right: 4px; background: rgba(255,255,255,.12); border-radius: 11px; padding: 3px }
 .tabs button { border: 0; background: none; color: #c9d4ea; font-weight: 700; font-size: 13.5px; padding: 5px 12px; border-radius: 8px; white-space: nowrap }
 .tabs button[aria-pressed="true"] { background: var(--lime2); color: var(--navy) }
 .tabs button:disabled { opacity: .35; cursor: default }
 .stage { position: fixed; inset: 0; display: grid; place-items: center; perspective: 2600px; overflow: hidden;
-  padding: calc(52px + env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) calc(52px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)) }
-.book { position: relative; height: min(calc(100vh - 112px), calc((100vw - 24px) / 1.6)); height: min(calc(100svh - 112px), calc((100vw - 24px) / 1.6)); aspect-ratio: 1.6;
+  padding: calc(50px + env(safe-area-inset-top)) max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left)) }
+.book { position: relative; width: 100%; height: 100%;
   display: grid; grid-template-columns: 1fr 1fr; filter: drop-shadow(0 16px 26px rgba(0,0,0,.55)); transition: transform .35s ease }
 .book::before, .book::after { content: ""; position: absolute; top: 4px; bottom: -6px; width: 50%; background: repeating-linear-gradient(0deg, #e5dac0 0 1px, #f6efdc 1px 3px); z-index: -1; border-radius: 5px }
 .book::before { left: -6px } .book::after { right: -6px }
 .zoomMode .book { cursor: zoom-in } .zoomed .book { cursor: zoom-out } .zoomed .nav { display: none }
 .page { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 1.8%; padding: 0 5% 2.6%;
-  font-size: clamp(8px, min(1.12vw, 2.05vh), 17px); line-height: 1.6; background-color: var(--paper);
+  font-size: clamp(8px, min(1.05vw, 2.25vh), 18px); line-height: 1.6; background-color: var(--paper);
   background-image: radial-gradient(rgba(120,90,40,.035) 1px, transparent 1px); background-size: 4px 4px }
 .page.l { border-radius: 6px 0 0 6px; box-shadow: inset -26px 0 30px -18px rgba(90,60,20,.38) }
 .page.r { border-radius: 0 6px 6px 0; box-shadow: inset 26px 0 30px -18px rgba(90,60,20,.38) }
@@ -50,7 +50,7 @@ h1::after { content: ""; position: absolute; left: 0; bottom: 0; width: 2.4em; h
 .row { display: flex; align-items: center; gap: .8em; flex-wrap: wrap } .row > span { color: var(--mute); font-size: .95em }
 p { word-break: keep-all } mark { background: var(--lime); color: inherit; padding: 0 .15em; border-radius: .2em; font-weight: 700 }
 .flow { overflow: hidden; flex: none } .page > * { flex-shrink: 0 } .flow p + p { margin-top: .4em }
-.fig { position: relative; float: right; width: 29%; margin: -.4em 0 .4em .8em; cursor: pointer; border: 0; background: none; padding: 0; text-align: center }
+.fig { position: relative; float: right; width: 29%; max-width: 11em; margin: -.4em 0 .4em .8em; cursor: pointer; border: 0; background: none; padding: 0; text-align: center }
 .fig img { width: 100%; display: block; mix-blend-mode: multiply }
 .fig .b3 { position: absolute; right: 0; top: 0; font: 700 .78em var(--sans); color: #fff; background: var(--navy); border-radius: .4em; padding: .15em .55em }
 .fig.card { width: 32%; border: 1.5px solid var(--line); border-radius: .8em; background: #fbf7ee; padding: .5em .5em .6em; margin-top: 0 }
@@ -69,9 +69,9 @@ p { word-break: keep-all } mark { background: var(--lime); color: inherit; paddi
 .mv button { display: grid; grid-template-columns: 1fr auto; gap: .2em .8em; align-items: center; text-align: left; border: 1px solid var(--line); background: #fffdf7; border-radius: .8em; padding: .3em .7em; font-family: var(--serif); line-height: 1.4 }
 .mv button strong { font: 700 1.05em var(--sans); color: var(--navy) } .mv button small { grid-column: 1; color: var(--mute); font-size: .9em }
 .mv button em { grid-row: 1 / 3; grid-column: 2; font: 700 .8em var(--sans); font-style: normal; color: #fff; background: var(--navy); border-radius: .4em; padding: .2em .6em }
-.nav { position: fixed; left: 0; right: 0; bottom: max(8px, env(safe-area-inset-bottom)); display: flex; justify-content: center; align-items: center; gap: 12px; font-family: var(--sans); z-index: 3 }
-.nav button { border: 0; border-radius: 99px; background: rgba(253,248,236,.94); color: var(--navy); font-weight: 700; font-size: 14px; padding: 7px 16px }
-.nav button:disabled { opacity: .35 } .nav span { color: #f3e7cc; font-size: 13px; font-weight: 600 }
+.nav { position: fixed; left: 0; right: 0; top: 50%; display: flex; justify-content: space-between; align-items: center; pointer-events: none; font-family: var(--sans); z-index: 3; padding: 0 max(2px, env(safe-area-inset-right)) 0 max(2px, env(safe-area-inset-left)) }
+.nav button { pointer-events: auto; border: 0; width: 34px; height: 54px; border-radius: 10px; background: rgba(20,40,75,.55); color: #fff; font-weight: 700; font-size: 22px; padding: 0 }
+.nav button:disabled { opacity: 0 } .nav span { display: none } .pgn { font-size: 12.5px; color: #c9d4ea; font-weight: 600; white-space: nowrap }
 .zhint { position: fixed; top: calc(56px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 3; background: var(--orange); color: #fff; font: 700 13px var(--sans); padding: 6px 14px; border-radius: 99px; white-space: nowrap }
 .flip { animation: flip .5s ease-in-out } @keyframes flip { 50% { transform: rotateY(-6deg) scale(.985) } }
 .tocp { position: fixed; inset: 0; z-index: 8; background: rgba(10,16,28,.55); display: flex }
@@ -88,10 +88,10 @@ p { word-break: keep-all } mark { background: var(--lime); color: inherit; paddi
 .v3d header button { border: 0; border-radius: 10px; background: var(--lime2); color: var(--navy); font-weight: 700; font-size: 15px; padding: 8px 14px }
 .v3d iframe { width: 100%; height: 100%; border: 0; background: #f4eedf }
 @media (orientation: portrait) {
-  .book { height: auto; width: min(100%, calc((100svh - 112px) * .68)); aspect-ratio: .68; grid-template-columns: 1fr }
-  .page { font-size: clamp(10px, min(3.05vw, 1.75vh), 16px); border-radius: 6px !important; box-shadow: none !important }
+  .book { grid-template-columns: 1fr }
+  .page { font-size: clamp(10px, min(3.3vw, 1.9vh), 17px); border-radius: 6px !important; box-shadow: none !important }
   .book::after { display: none } .book::before { left: 4px; width: calc(100% - 8px) }
-  .top .unit { display: none } .tabs button { padding: 5px 8px; font-size: 13px } .top .tb { padding: 6px 9px }
+  .top .unit, .pgn { display: none } .tabs button { padding: 5px 8px; font-size: 13px } .top .tb { padding: 6px 9px }
 }
 @media (prefers-reduced-motion: reduce) { .flip { animation: none } .book { transition: none } }
 </style>
@@ -99,10 +99,10 @@ p { word-break: keep-all } mark { background: var(--lime); color: inherit; paddi
 <body>
 <header class="top"><button type="button" class="tb" id="tocBtn">☰ 차례</button><span class="unit" id="unitName"></span>
   <div class="tabs" id="tabs"><button type="button" data-g="기본">기본</button><button type="button" data-g="응용">응용</button><button type="button" data-g="일상">일상</button><button type="button" data-g="스포츠">스포츠</button></div>
-  <button type="button" class="tb" id="zoomBtn" aria-pressed="false" aria-label="돋보기">🔍</button></header>
+  <span class="pgn" id="pg"></span><button type="button" class="tb" id="zoomBtn" aria-pressed="false" aria-label="돋보기">🔍</button></header>
 <div class="stage" id="stage"><div class="book" id="book"></div></div>
 <p class="zhint" id="zhint" hidden></p>
-<nav class="nav"><button type="button" id="prev">‹ 앞쪽</button><span id="pg"></span><button type="button" id="next">뒤쪽 ›</button></nav>
+<nav class="nav"><button type="button" id="prev" aria-label="앞쪽">‹</button><button type="button" id="next" aria-label="뒤쪽">›</button></nav>
 <div class="tocp" id="tocp" hidden><div class="in" id="tocIn"></div></div>
 <div class="v3d" id="v3d" hidden><header><b id="vTitle"></b><button type="button" id="vClose">✕ 책으로 돌아가기</button></header><iframe id="vFrame" title="3D 보기"></iframe></div>
 <script>
