@@ -21,11 +21,91 @@
 * { box-sizing: border-box }
 html, body { height: 100%; margin: 0; overflow: hidden; background: var(--navy); color: var(--ink); font-family: var(--f-body) }
 [hidden] { display: none !important }
-.pick { position: fixed; inset: 0; z-index: 9; background: rgba(10,18,32,.8); display: grid; place-items: center; padding: 20px }
-.pin { width: min(100%, 440px); background: #fbf5e6; color: #14284b; border-radius: 22px; padding: 24px 20px; display: grid; gap: 12px }
-.pin h2 { font-size: 26px } .pin p { font-size: 14px; color: #5c6475 }
-.pin button { display: grid; gap: 4px; text-align: left; border: 2px solid #e2d6bb; background: #fff; border-radius: 16px; padding: 14px 16px; font: inherit; color: inherit; cursor: pointer }
-.pin button b { font-size: 19px } .pin button span { font-size: 14px; color: #5c6475 } .pin button:hover { border-color: #14284b }
+/* ===== 시작 화면: 세로 폰은 한 줄, 가로 폰·태블릿은 두 칸 ===== */
+.st { --paper: #fbf5e6; --orange: #f28c38; --ink2: #1c2434; --mute: #5c6475; position: fixed; inset: 0; z-index: 9; background: var(--paper); color: var(--navy); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain }
+.st button { font: inherit; color: inherit; cursor: pointer }
+.st-in { min-height: 100%; display: flex; flex-direction: column; gap: 14px; width: min(100%, 560px); margin: 0 auto;
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) max(18px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)) }
+.st-L, .st-R { display: contents }
+.st-hd { order: 0; margin: 0 calc(-1 * max(16px, env(safe-area-inset-left, 0px))) -40px; padding: calc(22px + env(safe-area-inset-top, 0px)) 24px 58px; background: var(--navy); color: #fff; border-radius: 0 0 50% 50% / 0 0 34px 34px; display: grid; grid-template-columns: auto 1fr; column-gap: 12px; align-items: center }
+.st-hd svg { width: 44px; height: 44px; fill: none; stroke: #fff; stroke-width: 2.2; stroke-linejoin: round; grid-row: span 2 }
+.st-hd h1 { margin: 0; font-size: 30px; line-height: 1.15; font-weight: 700; letter-spacing: -.01em }
+.st-hd p { margin: 3px 0 0; font-size: 15px; color: #cdd7ea; font-weight: 600 }
+.st-hd .tag { grid-column: 1 / -1; justify-self: start; margin-top: 14px; background: var(--lime); color: var(--navy); font-size: 13.5px; font-weight: 700; padding: 5px 14px; border-radius: 999px }
+.st-ask { display: none }
+.st-hero { order: 1; position: relative; z-index: 1; margin: 0; border-radius: 20px; overflow: hidden; background: #fff; box-shadow: 0 8px 22px rgba(20,40,75,.12) }
+.st-hero img { display: block; width: 100%; height: auto; aspect-ratio: 435 / 196; object-fit: cover }
+.st-cards { order: 2; display: grid; gap: 14px }
+.st-card { position: relative; display: grid; grid-template-columns: 112px minmax(0, 1fr) 22px; grid-template-areas: "bd bd bd" "im tt ar" "im ds ar"; column-gap: 14px; row-gap: 4px; align-items: center; text-align: left;
+  border: 2px solid; border-radius: 22px; padding: 14px 14px 16px 16px; min-height: 48px; box-shadow: 0 6px 16px rgba(20,40,75,.08); transition: transform .12s }
+.st-card:active { transform: scale(.985) }
+.st-card:focus-visible, .st-sc button:focus-visible, .st-go:focus-visible { outline: 3px solid var(--navy); outline-offset: 3px }
+.st-card.bk { background: #f4f9dc; border-color: #b8d63a }
+.st-card.sc { background: #fff1e4; border-color: var(--orange) }
+.st-card .bd { grid-area: bd; justify-self: start; font-size: 13.5px; font-weight: 700; padding: 5px 14px; border-radius: 999px; margin-bottom: 8px }
+.st-card.bk .bd { background: var(--lime); color: var(--navy) } .st-card.sc .bd { background: var(--orange); color: #fff }
+.st-card img { grid-area: im; width: 100%; height: auto; border-radius: 12px; align-self: center }
+.st-card b { grid-area: tt; white-space: nowrap; font-size: 25px; line-height: 1.2; font-weight: 700; align-self: end }
+.st-card .ds { grid-area: ds; font-size: 15px; line-height: 1.5; color: var(--ink2); align-self: start; word-break: keep-all }
+.st-card .sh { display: none }
+.st-card i { grid-area: ar; font-style: normal; font-size: 24px; font-weight: 700; justify-self: end }
+.st-sc { order: 3; display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(0, 1fr); gap: 8px }
+.st-sc button { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 56px; padding: 6px 6px; background: #fff; border: 1.5px solid #e6dcc6; border-radius: 16px; font-size: 14.5px; font-weight: 700; line-height: 1.2; white-space: nowrap }
+@media (min-width: 420px) { .st-sc button { font-size: 15.5px } }
+.st-sc svg { width: 22px; height: 22px; flex: none; fill: none; stroke: var(--navy); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round }
+.st-q { display: none; margin: 0; font-size: 19px; font-weight: 700 }
+.st-cont { order: 4; display: grid; gap: 10px }
+.st-go { display: flex; align-items: center; gap: 10px; min-height: 58px; width: 100%; padding: 8px 16px; background: #fff; border: 2px solid var(--orange); border-radius: 18px; text-align: left }
+.st-go .gl { display: flex; align-items: center; gap: 6px; color: #c45a0f; font-size: 17px; font-weight: 700; white-space: nowrap; padding-right: 12px; border-right: 1.5px solid #f3c79f }
+.st-go .gl svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round }
+.st-go .gn { flex: 1; min-width: 0; font-size: 15.5px; font-weight: 600; color: var(--ink2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.st-go .gm { font-size: 12.5px; font-weight: 700; color: var(--mute); white-space: nowrap }
+.st-go i { font-style: normal; font-size: 20px; font-weight: 700 }
+.st-skip { order: 5; display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 4px; font-size: 16px; color: var(--ink2); cursor: pointer; user-select: none }
+.st-skip input { appearance: none; -webkit-appearance: none; width: 26px; height: 26px; margin: 0; border: 2px solid var(--navy); border-radius: 7px; background: #fff; display: grid; place-items: center; flex: none; cursor: pointer }
+.st-skip input:checked { background: var(--navy) } .st-skip input:checked::after { content: '✓'; color: var(--lime); font-weight: 700; font-size: 17px; line-height: 1 }
+.st-skip input:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px }
+.st-ct { order: 6; margin: auto 0 0; padding-top: 12px; border-top: 1px solid #e6dcc6; font-size: 13.5px; line-height: 1.6; color: var(--mute); text-align: center }
+.st-ct a { color: inherit }
+/* 가로 폰 */
+@media (orientation: landscape) and (max-height: 560px) {
+  .st-in { width: 100%; display: grid; grid-template-columns: minmax(0, 34fr) minmax(0, 66fr); gap: 0 16px; align-content: start;
+    padding: 0 max(14px, env(safe-area-inset-right, 0px)) max(10px, env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px)) }
+  .st-L, .st-R { display: flex; flex-direction: column; gap: 10px; min-width: 0 }
+  .st-L { padding-bottom: 6px } .st-R { padding-top: max(12px, env(safe-area-inset-top, 0px)) }
+  .st-hd { margin: 0 0 -46px calc(-1 * max(14px, env(safe-area-inset-left, 0px))); padding: max(16px, env(safe-area-inset-top, 0px)) 16px 54px max(18px, env(safe-area-inset-left, 0px)); border-radius: 0 0 26px 0 }
+  .st-hd svg { width: 32px; height: 32px } .st-hd h1 { font-size: 23px } .st-hd p { font-size: 12.5px } .st-hd .tag { display: none }
+  .st-hero { border-radius: 16px; margin-left: 6px }
+  .st-cards { grid-template-columns: 1fr 1fr; gap: 10px }
+  .st-card { grid-template-columns: 92px minmax(0, 1fr); grid-template-areas: "bd bd" "tt ar" "im ds"; column-gap: 10px; padding: 10px 12px 12px; border-radius: 18px }
+  .st-card .bd { font-size: 12.5px; padding: 4px 12px; margin-bottom: 2px } .st-card b { font-size: 21px; margin-bottom: 4px } .st-card i { align-self: center }
+  .st-card .lg { display: none } .st-card .sh { display: block; font-size: 15px }
+  .st-sc button { min-height: 50px; font-size: 14.5px }
+  .st-go { min-height: 50px; padding: 6px 12px } .st-go .gl { font-size: 15.5px } .st-go .gn { font-size: 14px } .st-go .gm { display: none }
+  .st-skip { min-height: 44px; font-size: 14.5px } .st-skip input { width: 24px; height: 24px }
+  .st-ct { margin: 0; padding-top: 6px; font-size: 12px; text-align: left; line-height: 1.5 }
+}
+/* 태블릿·큰 화면 */
+@media (min-width: 900px) and (min-height: 600px) {
+  .st { background: linear-gradient(var(--navy) 0, var(--navy) calc(190px + env(safe-area-inset-top, 0px)), var(--lime) calc(190px + env(safe-area-inset-top, 0px)), var(--lime) calc(198px + env(safe-area-inset-top, 0px)), var(--paper) calc(198px + env(safe-area-inset-top, 0px))) }
+  .st-in { width: min(100%, 1240px); display: grid; grid-template-columns: minmax(0, 40fr) minmax(0, 60fr); gap: 0 48px; align-content: start;
+    padding: 0 max(40px, env(safe-area-inset-right, 0px)) max(28px, env(safe-area-inset-bottom, 0px)) max(40px, env(safe-area-inset-left, 0px)) }
+  .st-L, .st-R { display: flex; flex-direction: column; gap: 16px; min-width: 0 }
+  .st-hd, .st-ask { height: calc(198px + env(safe-area-inset-top, 0px)); padding-top: calc(36px + env(safe-area-inset-top, 0px)) }
+  .st-hd { margin: 0 0 18px; padding-left: 0; padding-right: 0; padding-bottom: 0; background: none; border-radius: 0; align-content: start }
+  .st-hd svg { width: 56px; height: 56px } .st-hd h1 { font-size: 40px } .st-hd p { font-size: 18px } .st-hd .tag { font-size: 15px; padding: 6px 18px; margin-top: 16px }
+  .st-ask { display: block; color: #fff; padding-top: calc(78px + env(safe-area-inset-top, 0px)); margin-bottom: 26px }
+  .st-ask h2 { margin: 0; font-size: 32px; font-weight: 700 } .st-ask p { margin: 8px 0 0; font-size: 17px; color: #cdd7ea }
+  .st-hero { border-radius: 22px }
+  .st-q { display: block; margin-top: 8px }
+  .st-cards { gap: 18px }
+  .st-card { grid-template-columns: 200px minmax(0, 1fr) 28px; column-gap: 24px; padding: 18px 20px 20px 24px; border-radius: 24px }
+  .st-card b { font-size: 32px } .st-card .ds { font-size: 17px } .st-card .bd { font-size: 15px; padding: 6px 18px }
+  .st-sc { gap: 14px; margin-top: 4px } .st-sc button { min-height: 72px; font-size: 17.5px; gap: 10px; justify-content: flex-start; padding: 8px 18px } .st-sc svg { width: 26px; height: 26px }
+  .st-go { min-height: 70px; padding: 10px 20px } .st-go .gl { font-size: 19px } .st-go .gn { font-size: 17px }
+  .st-skip { font-size: 18px; min-height: 56px }
+  .st-ct { margin: 10px 0 0; text-align: left; font-size: 15px }
+}
 .app { position: fixed; inset: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto }
 .frames { position: relative; min-height: 0; min-width: 0; background: #fbf5e6 }
 .frames iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; background: #fbf5e6 }
@@ -47,7 +127,7 @@ nav button:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px }
   .app { grid-template-rows: none; grid-template-columns: auto minmax(0, 1fr) }
   nav { grid-template-columns: none; grid-auto-rows: min-content; align-content: center; gap: 6px; width: calc(var(--rail) + env(safe-area-inset-left, 0px)); border-top: 0; border-right: 1px solid rgba(255,255,255,.08);
     padding: max(6px, env(safe-area-inset-top, 0px)) 6px max(6px, env(safe-area-inset-bottom, 0px)) max(6px, env(safe-area-inset-left, 0px)) }
-  nav button { min-height: 48px; flex-direction: column; gap: 1px; font-size: 10.5px }
+  nav button { min-height: 48px; flex-direction: column; gap: 1px; font-size: 10.5px; white-space: nowrap; letter-spacing: -.03em }
   .frames { grid-column: 2; grid-row: 1 }
   nav { grid-column: 1; grid-row: 1 }
 }
@@ -63,9 +143,31 @@ nav button:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px }
     <button type="button" role="tab" data-tab="coach" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>자세 코치</button>
   </nav>
 </div>
-<div class="pick" id="pick" hidden><div class="pin"><h2>어떻게 볼까요?</h2><p>나중에 교과서 위쪽 버튼으로 언제든 바꿀 수 있어요.</p>
-  <button type="button" data-m="book"><b>📕 책으로 보기</b><span>진짜 교과서처럼 펼친 두 쪽. 태블릿·TV에 좋아요</span></button>
-  <button type="button" data-m="screen"><b>📱 화면으로 보기</b><span>글과 3D를 크게. 폰에 좋아요</span></button></div></div>
+<div class="st" id="start" hidden role="dialog" aria-modal="true" aria-labelledby="stTitle"><div class="st-in">
+  <div class="st-L">
+    <header class="st-hd"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.5c3.2-1.3 6.2-1.1 9 1 2.8-2.1 5.8-2.3 9-1v13c-3.2-1.3-6.2-1.1-9 1-2.8-2.1-5.8-2.3-9-1z"/><path d="M12 6.5v13"/></svg>
+      <h1 id="stTitle">움직임 교과서</h1><p>중학교 체육 3D 디지털 교과서</p><span class="tag">나만의 학습 방법 선택</span></header>
+    <figure class="st-hero"><img src="start/hero.webp" alt="스쿼트·푸시업·런지 하는 3D 모형, 일하는 근육이 빨갛게 표시됨" width="435" height="196"></figure>
+    <div class="st-cont" id="stCont" hidden><p class="st-q">마지막에 보던 장면이 있나요?</p>
+      <button type="button" class="st-go" id="stGo"><span class="gl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v4h4"/><path d="M12 8v4l3 2"/></svg>이어서 보기</span><span class="gn" id="stGoN"></span><span class="gm" id="stGoM"></span><i aria-hidden="true">→</i></button></div>
+    <label class="st-skip"><input type="checkbox" id="stSkip">다음부터 이 화면 건너뛰기</label>
+    <p class="st-ct">문의 · 낙원중학교 민동수<br>인스타 <a href="https://www.instagram.com/mindongsoo7/" target="_blank" rel="noopener">@mindongsoo7</a></p>
+  </div>
+  <div class="st-R">
+    <div class="st-ask"><h2>어떻게 공부해 볼까요?</h2><p>원하는 방식으로 시작하고, 언제든 바꿀 수 있어요.</p></div>
+    <div class="st-cards">
+      <button type="button" class="st-card bk" data-m="book"><span class="bd">태블릿·TV 추천</span><img src="start/book.webp" alt="" width="204" height="142"><b>교과서로 보기</b>
+        <span class="ds lg">종이 교과서처럼 펼쳐 넘기며 읽어요. 그림을 누르면 3D로 볼 수 있어요.</span><span class="ds sh">책처럼 읽고<br>그림은 3D로</span><i aria-hidden="true">→</i></button>
+      <button type="button" class="st-card sc" data-m="screen"><span class="bd">휴대폰 추천</span><img src="start/phone.webp" alt="" width="196" height="136"><b>3D로 보기</b>
+        <span class="ds lg">3D 모형을 돌려 보며 바른 자세와 일하는 근육을 익혀요.</span><span class="ds sh">돌려 보며<br>자세·근육 배우기</span><i aria-hidden="true">→</i></button>
+    </div>
+    <div class="st-sc">
+      <button type="button" data-t="lab"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M7.5 14h9"/></svg>움직임 실험실</button>
+      <button type="button" data-t="train"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>훈련장</button>
+      <button type="button" data-t="coach"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>자세 코치</button>
+    </div>
+  </div>
+</div></div>
 <div class="inst" id="inst" hidden><span>앱으로 설치하기</span><button type="button" id="instGo">설치</button><button type="button" class="x" id="instX" aria-label="닫기">✕</button></div>
 <div class="ios" id="ios" hidden role="dialog" aria-label="홈 화면에 추가하는 방법"><b>아이폰·아이패드에 앱으로 설치하기</b>
   <ol><li>Safari 아래(또는 위)의 <b>공유 버튼</b>(네모에서 화살표가 나가는 모양)을 눌러요.</li><li><b>홈 화면에 추가</b>를 눌러요.</li><li>오른쪽 위 <b>추가</b>를 누르면 홈 화면에 "움직임 교과서"가 생겨요.</li></ol>
@@ -112,10 +214,28 @@ function go(tab, url) {
   setTimeout(() => { try { f.contentWindow.dispatchEvent(new Event('resize')); } catch (e) { } }, 60); }
 document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => go(b.dataset.tab));
 const start = location.hash.slice(1); let last = null; try { last = localStorage.getItem('app-tab'); } catch (e) { }
-go(SRC[start] ? start : SRC[last] ? last : 'book');
-if (!MODE) $('pick').hidden = false;
-document.querySelectorAll('#pick [data-m]').forEach(b => b.onclick = () => { const m = b.dataset.m; $('pick').hidden = true; if (m !== (MODE || 'screen')) { setMode(m); if (frames.book) { frames.book.src = SRC.book; } go('book'); } else setMode(m); });
-addEventListener('popstate', () => { const t = location.hash.slice(1); if (SRC[t] && t !== cur) { fromPop = true; go(t); fromPop = false; } });
+let skip0 = null; try { skip0 = localStorage.getItem('start-skip'); } catch (e) { }
+const ASK = start === 'start' || !(MODE && skip0 === '1') && !['lab', 'train', 'coach'].includes(start);
+if (!ASK) go(SRC[start] ? start : SRC[last] ? last : 'book');
+// 시작 화면: 보기 방식 고르기 · 바로가기 · 이어서 보기 · 건너뛰기
+const LS = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) { } } };
+function lastScene() { try { const o = JSON.parse(LS.get('last-scene')); return o && o.k && /^s-[\w-]+$/.test(o.k) ? o : null; } catch (e) { return null; } }
+function showStart() {
+  const L = lastScene(); $('stCont').hidden = !L;
+  if (L) { $('stGoN').textContent = L.label || '마지막 장면'; $('stGoM').textContent = L.mode === 'book' ? '교과서' : '3D'; }
+  $('stSkip').checked = LS.get('start-skip') === '1'; $('start').hidden = false; $('start').scrollTop = 0;
+ }
+function hideStart() { $('start').hidden = true; if (!cur) go('book'); }
+function openMode(m, url) { const was = SRC.book; setMode(m); $('start').hidden = true;
+  if (frames.book && (url || SRC.book !== was)) { frames.book.src = url || SRC.book; go('book'); } else go('book', url); }
+$('stSkip').onchange = e => LS.set('start-skip', e.target.checked ? '1' : '0');
+$('start').querySelectorAll('[data-m]').forEach(b => b.onclick = () => openMode(b.dataset.m));
+$('start').querySelectorAll('[data-t]').forEach(b => b.onclick = () => { $('start').hidden = true; go(b.dataset.t); });
+$('stGo').onclick = () => { const L = lastScene(); if (!L) return; openMode(L.mode === 'book' ? 'book' : 'screen', (L.mode === 'book' ? 'book_demo.html#' : 'hybrid.html#') + L.k); };
+addEventListener('message', e => { if (e.origin === location.origin && e.data === 'start-screen' && $('start').hidden) { showStart(); history.pushState({ start: 1 }, '', '#start'); } });
+addEventListener('keydown', e => { if (e.key === 'Escape' && !$('start').hidden && MODE) hideStart(); });
+if (ASK) { showStart(); history.replaceState(null, '', location.pathname); }
+addEventListener('popstate', () => { if (location.hash === '#start') { showStart(); return; } if (!$('start').hidden && cur) { $('start').hidden = true; } const t = location.hash.slice(1); if (SRC[t] && t !== cur) { fromPop = true; go(t); fromPop = false; } });
 // 앱 설치: 안드로이드·크롬은 설치 버튼, 아이폰 Safari는 방법 안내
 const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 const seen = k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, mark = k => { try { localStorage.setItem(k, '1'); } catch (e) { } };

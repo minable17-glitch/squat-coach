@@ -1395,6 +1395,23 @@ body.v2 .pb[data-toc="1"] .pb-nav #sbS{display:none!important}
 body.v2 .v2-back{font-size:26px!important;background:#d7f25a!important;color:#14284b!important;font-weight:800}body.v2 .pb[data-toc="1"] .v2-back{display:none}
 body.v2 #pbToc[hidden]{display:none!important}
 @media (orientation:portrait){body.v2 #pbBookV{font-size:0!important;padding:0!important;width:40px;justify-content:center}body.v2 #pbBookV::before{content:"📕";font-size:18px}body.v2 .nv-home{width:38px;height:38px}}
+/* 가로 폰: 글로·책으로 버튼은 ☰ 안으로 */
+@media (orientation:landscape) and (max-height:560px){body.v2 #pbBookV,body.v2 #pbRead{display:none!important}}
+body.v2 #sbV{flex-direction:row!important;flex-wrap:wrap;gap:6px!important}
+/* v2 헤더 정리: 세로는 두 줄만 — ‹ 제목 ☆ ⌕ ☰ / 장면 묶음 + ▶ 영상 */
+@media (orientation:portrait){
+  body.v2 .pb-nav{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto auto auto;gap:6px!important;align-items:center}
+  body.v2 #pbBookV,body.v2 #pbRead{display:none!important}
+  body.v2 #v2Back{grid-area:1/1}body.v2 .nv-title{grid-area:1/2;font-size:21px!important;padding-left:2px}
+  body.v2 .pb[data-toc="1"] .nv-title{grid-area:1/1/2/3}
+  body.v2 #v2Star{grid-area:1/3;width:40px;height:40px}body.v2 #v2Find{grid-area:1/4}body.v2 #pbHome{grid-area:1/5}
+  body.v2 .pb-nav .nv-home{width:40px;height:40px}
+  body.v2 .pb-nav #sbS{grid-area:2/1/3/4;min-width:0}
+  body.v2 .nv-yt{grid-area:2/4/3/6;justify-self:end;height:34px!important;padding:0 12px!important;font-size:13px!important}
+  body.v2 #sbV{flex-direction:row!important;flex-wrap:wrap;gap:6px!important;max-width:calc(100vw - 100px)}
+  body.v2 #sbV .sb{height:32px!important;font-size:13px!important;padding:0 11px!important}
+  .rot-tip{top:auto!important;bottom:calc(74px + env(safe-area-inset-bottom,0px));font-size:13px!important;padding:8px 14px!important}
+}
 </style>
 
 <div class="cover" id="cover" hidden>
@@ -4458,12 +4475,13 @@ if (READER) {
     $('nvTitle').insertAdjacentHTML('afterend', '<button type="button" class="v2-star" id="v2Star" aria-label="즐겨찾기">☆</button>');
     const curKey = () => state.m + ':' + state.sc, starSync = () => { const on = ls('v2-favs', []).includes(curKey()); $('v2Star').textContent = on ? '★' : '☆'; $('v2Star').setAttribute('aria-pressed', on); };
     $('v2Star').onclick = () => { const f = ls('v2-favs', []), k = curKey(), i = f.indexOf(k); if (i >= 0) f.splice(i, 1); else f.unshift(k); lss('v2-favs', f.slice(0, 12)); starSync(); };
-    let lastK = ''; new MutationObserver(() => { const k = curKey(); starSync(); if (k !== lastK && MOVES[state.m]?.scenes && $('pbToc').hidden) { lastK = k; const v = ls('v2-views', {}); v[k] = (v[k] || 0) + 1; lss('v2-views', v); } }).observe($('nvTitle'), { childList: true, characterData: true, subtree: true });
+    let lastK = ''; new MutationObserver(() => { const k = curKey(); starSync(); if (k !== lastK && MOVES[state.m]?.scenes && $('pbToc').hidden) { lastK = k; const v = ls('v2-views', {}); v[k] = (v[k] || 0) + 1; lss('v2-views', v);
+      let inBook = false; try { inBook = /book_demo/.test(parent.location.pathname); } catch (er) { } if (!inBook) lss('last-scene', { mode: 'screen', k: 's-' + state.m + '-' + state.sc, label: (MOVES[state.m].name || '') + ' · ' + sceneName(k) }); } }).observe($('nvTitle'), { childList: true, characterData: true, subtree: true });
     // ===== 메뉴 서랍 + 찾기 =====
     const WEB = !/claude\.ai|claudeusercontent/.test(location.hostname);
     document.body.insertAdjacentHTML('beforeend', `<div class="v2-dr" id="v2Dr" hidden><nav class="v2-di">
       <div class="v2-dh"><b>움직임 교과서</b><small>중학교 체육 3D 디지털 교과서</small><button type="button" id="v2DrX" aria-label="닫기">✕</button></div>
-      <button type="button" data-a="toc">☰ 차례</button><button type="button" data-a="find">⌕ 찾기</button><button type="button" data-a="read">📖 글로 읽기</button>${WEB ? '<a href="book_demo.html" data-a="book">📕 책으로 보기</a>' : ''}
+      ${WEB ? '<button type="button" data-a="start">🏠 시작 화면</button>' : ''}<button type="button" data-a="toc">☰ 차례</button><button type="button" data-a="find">⌕ 찾기</button><button type="button" data-a="read">📖 글로 읽기</button>${WEB ? '<a href="book_demo.html" data-a="book">📕 책으로 보기</a>' : ''}
       <hr><button type="button" data-a="s-fitness-base">💓 체력 요소</button><button type="button" data-a="s-train-base">🏋️ 트레이닝 원리</button><button type="button" data-a="body">🧍 몸 지도</button>
       ${WEB ? '<a href="train.html">⏱️ 훈련 프로그램</a><a href="lab.html">🧪 움직임 실험실</a><a href="../">📷 자세 코치</a>' : ''}
       <hr><div class="v2-dfav" id="v2DFav"></div><p class="v2-dc">문의 · 낙원중학교 민동수 · <a href="https://www.instagram.com/mindongsoo7/" target="_blank" rel="noopener">@mindongsoo7</a></p></nav></div>
@@ -4472,6 +4490,7 @@ if (READER) {
     $('pbHome').onclick = () => drOpen(true); $('v2DrX').onclick = () => drOpen(false); $('v2Dr').onclick = e => { if (e.target.id === 'v2Dr') drOpen(false); };
     $('v2Dr').addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (!b) return; const a = b.dataset.a;
       if (a === 'book') { try { localStorage.setItem('book-mode', 'book'); } catch (er) { } drOpen(false); return; }
+      if (a === 'start') { drOpen(false); if (parent !== window) parent.postMessage('start-screen', '*'); else location.href = 'index.html#start'; return; }
       e.preventDefault(); drOpen(false);
       if (a === 'toc') { root.hidden = true; window.__pbToc(null); } else if (a === 'read') $('pbRead').click(); else if (a === 'find') findOpen();
       else if (a === 'body') { root.hidden = true; window.__pbGoScene('body', 'base'); } else if (a === 'fav') goScene(b.dataset.k); else if (a.startsWith('s-')) location.hash = '#' + a; });
