@@ -127,7 +127,9 @@ p { word-break: keep-all } mark { background: var(--lime); color: inherit; paddi
 .sp-band .bt { display: flex; align-items: center; gap: .6em; margin-bottom: .5em; flex-wrap: wrap }
 .sp-band .bt i { font: 400 1.1em var(--disp); font-style: normal; color: #fff; background: #2f6db5; padding: .15em .85em .1em; border-radius: 99px }
 .sp-band .bt b { background: #fff; border-radius: 99px; padding: .1em .85em; font-size: .9em }
-.sp-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: .7em }
+.sp-steps { display: grid; grid-template-columns: repeat(var(--n, 4), 1fr); gap: .7em }
+.sp-steps .st.no { align-content: start; background: #fff; border: 1.5px solid #e6e0d4; border-radius: .75em; padding: .55em .6em }
+.sp-3d { border: 0; background: var(--navy); color: #fff; font: 700 .75em var(--sans); border-radius: 99px; padding: .15em .7em; margin: .25em 0 .1em; cursor: pointer }
 .sp-steps .st { display: grid; gap: .3em; border: 0; background: none; padding: 0; text-align: left; cursor: pointer; font-family: var(--sans) }
 .sp-steps .im { display: block; height: 7.5em; border-radius: .75em; overflow: hidden; background: #d9d4cb }
 .sp-steps .im img { width: 100%; height: 100%; object-fit: cover; display: block }

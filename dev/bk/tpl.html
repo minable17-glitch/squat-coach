@@ -75,20 +75,20 @@ function spreadL(U, ui, base, bg, sk) { const P = U.spread, uid = U.m;
   <div class="sp-act"><i>활동 1</i><h2>${esc(P.act1)}</h2><span class="sp-d3">▶ 그림을 누르면 3D</span></div>
   <div class="sp-a1">${spFig(img(uid, 'base', bg.k), '바른 ' + base.name, sk, bg.k, 'big lbl')}
     <div class="sp-rows"><div class="rw"><b>자세</b><span>${esc(P.pose)}</span></div>
-      <div class="rw"><b>확인</b><ul>${bg.checks.filter(c => !/고관절/.test(c)).slice(0, 3).map(c => `<li>${esc(c)}</li>`).join('')}</ul></div>
+      <div class="rw"><b>확인</b><ul>${(P.checks || bg.checks.filter(c => !/고관절/.test(c))).slice(0, 3).map(c => `<li>${esc(c)}</li>`).join('')}</ul></div>
       <div class="rw"><b>근육</b><span class="sp-mus">${base.muscles.slice(0, 3).map(m => `<em>${esc(m)}</em>`).join('')}</span></div>
       <p class="sp-safe"><b>🚨 안전</b> ${esc(P.safe)}</p></div></div>
-  <div class="sp-band"><div class="bt"><i>기능 익히기</i><b>스쿼트를 잘하려면? · 그림을 누르면 3D</b></div>
-    <div class="sp-steps">${base.steps.map(([t, x], i) => `<button type="button" class="st" data-scene="${sk}" data-v="good" data-cap="${esc(t)}"><span class="im"><img src="${P.stepImg[i]}" alt="${esc(t)}" style="object-position:${P.stepPos[i]}${P.stepFlip[i] ? ';transform:scaleX(-1)' : ''}"></span><span class="sp-tx"><b>${i + 1}. ${esc(t)}</b>${esc(first(x))}</span></button>`).join('')}</div></div>
+  <div class="sp-band"><div class="bt"><i>기능 익히기</i><b>${esc(P.stepTitle || base.name + ' 잘하려면?')} · ${P.stepImg ? '그림을' : '단계를'} 누르면 3D</b></div>
+    <div class="sp-steps" style="--n:${base.steps.length}">${base.steps.map(([t, x], i) => `<button type="button" class="st${P.stepImg ? '' : ' no'}" data-scene="${sk}" data-v="good" data-cap="${esc(t)}">${P.stepImg ? `<span class="im"><img src="${P.stepImg[i]}" alt="${esc(t)}" style="object-position:${P.stepPos[i]}${P.stepFlip[i] ? ';transform:scaleX(-1)' : ''}"></span>` : ''}<span class="sp-tx"><b>${i + 1}. ${esc(t)}</b>${esc(first(x))}</span></button>`).join('')}</div></div>
 </div>`; }
 function spreadR(U, ui, base, sk) { const P = U.spread, uid = U.m, S = U.scenes;
-  const bads = base.vars.filter(v => !v.ok).slice(0, 3);
+  const bads = [...base.vars.filter(v => !v.ok).map(v => ({ v, sc: 'base' })), ...(P.bad || []).map(b => ({ v: S.find(s => s.sc === b.sc).vars.find(v => v.k === b.k), sc: b.sc }))].slice(0, 3);
   return `<div class="sp-r">
   <div class="sp-act"><i>활동 2</i><h2>일상과 스포츠에서 찾아보기</h2></div>
-  <div class="sp-conn">${P.life.map(L => { const s = S.find(x => x.sc === L.sc); if (!s) return ''; const k = `s-${uid}-${s.sc}`;
-    return `<div class="cn${L.tag === '스포츠' ? ' s' : ''}">${spFig(img(uid, s.sc, s.vars[0].k), s.name, k, s.vars[0].k)}<div><h3><small>${esc(L.tag)}</small>${esc(s.name)}</h3><p>${esc(L.text)}</p></div></div>`; }).join('')}</div>
-  <div class="sp-act"><i class="red">주의</i><h2>이러면 다쳐요</h2></div>
-  <div class="sp-bad">${bads.map(v => `<div class="bd">${spFig(img(uid, 'base', v.k), v.name, sk, v.k)}<div class="sp-tx"><h3><span aria-hidden="true">⚠</span> ${esc(v.name)}</h3><p>${esc(first(v.why || v.desc))}</p>${v.fix.length ? `<p class="fx">→ ${esc(v.fix[0])}</p>` : ''}</div></div>`).join('')}</div>
+  <div class="sp-conn">${P.life.map(L => { const lm = L.m || uid, LU = D.units.find(x => x.m === lm), s = LU && LU.scenes.find(x => x.sc === L.sc); if (!s) return ''; const k = `s-${lm}-${s.sc}`;
+    return `<div class="cn${L.tag === '스포츠' ? ' s' : ''}">${spFig(img(lm, s.sc, s.vars[0].k), s.name, k, s.vars[0].k)}<div><h3><small>${esc(L.tag)}</small>${esc(s.name)}</h3><p>${esc(L.text)}</p></div></div>`; }).join('')}</div>
+  <div class="sp-act"><i class="red">주의</i><h2>${esc(P.badTitle || '이러면 다쳐요')}</h2></div>
+  <div class="sp-bad">${bads.map(({ v, sc }) => { const k = `s-${uid}-${sc}`, src = img(uid, sc, v.k); return `<div class="bd">${spFig(src, v.name, k, v.k)}<div class="sp-tx"><h3><span aria-hidden="true">⚠</span> ${esc(v.name)}</h3>${src ? '' : `<button type="button" class="sp-3d" data-scene="${k}" data-v="${v.k}" data-cap="${esc(v.name)}">▶ 3D로 보기</button>`}<p>${esc(first(v.why || v.desc))}</p>${v.fix.length ? `<p class="fx">→ ${esc(v.fix[0])}</p>` : ''}</div></div>`; }).join('')}</div>
   <div class="sp-r2"><div><div class="sp-act"><i class="pur">도전</i><h2>${esc(P.challenge.title)}</h2></div><p class="sp-lead">${esc(P.challenge.text)}</p></div>
     <div class="sp-self"><b>스스로 확인</b><ul>${P.self.map((t, i) => `<li><span>${esc(t)}</span><span class="stars" role="group" aria-label="${esc(t)} 별점">${[1, 2, 3].map(n => `<button type="button" data-star="${uid}:${i}:${n}" aria-label="별 ${n}개" aria-pressed="false">★</button>`).join('')}</span></li>`).join('')}</ul></div></div>
   <div class="sp-band"><div class="bt"><i>단원 마무리</i><b>확인 문제 · 눌러서 답 확인</b></div>
