@@ -201,3 +201,11 @@ p { word-break: keep-all } mark { background: var(--lime); color: inherit; paddi
   .th-cols { grid-template-columns: 1fr }
   .xb { grid-template-columns: 1fr } .xb .sfig { height: 11em } .xk { grid-template-columns: 1fr }
 }
+/* ---------- 대표+변형, 더 찾아보기 ---------- */
+.xsub { font: 400 1.15em var(--disp); color: var(--navy); margin-top: .45em } .xsub b { color: var(--orange); margin-right: .15em }
+.xvg, .xmg { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75em; margin-top: .6em }
+.xv2 { display: grid; gap: .2em; align-content: start; min-width: 0 } .xv2 .sfig { height: 7.6em } .xv2 > .sp-3d { justify-self: start }
+.xv2 h4 { font: 400 1.02em/1.3 var(--disp); color: var(--navy); display: flex; flex-wrap: wrap; align-items: center; gap: 0 .3em } .xv2 h4 .lv { margin: 0; font-size: .8em }
+.xv2 p { font-size: .82em; line-height: 1.45; word-break: keep-all } .xv2 p i { font-style: normal; font-weight: 700; color: #fff; background: var(--navy); border-radius: .3em; padding: 0 .35em; margin-right: .2em; font-size: .9em }
+.xv2.p p i { background: #5b3cc4 } .xv2.d p i { background: #2f7a47 } .xv2.s p i { background: #c2410c }
+@media (orientation: portrait) { .xvg, .xmg { grid-template-columns: 1fr 1fr } }
