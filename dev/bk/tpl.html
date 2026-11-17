@@ -171,9 +171,9 @@ D.units.forEach((U, ui) => {
   const inSpread = new Set((U.spread && U.spread.life || []).filter(L => !L.m || L.m === uid).map(L => L.sc)); // 일상·스포츠: 펼침쪽에 없는 것만 한 묶음
   const more = S.filter(s => (s.g === '일상' || s.g === '스포츠') && !inSpread.has(s.sc));
   if (more.length) { let mh = `<div class="xg"><div class="sp-act"><i class="grn">더 찾아보기</i><h2>일상과 스포츠 속 ${U.verb}</h2></div><p class="sp-lead">펼침쪽에서 본 장면 말고도 이런 곳에서 ${U.verb} 동작을 써요. 그림을 누르면 3D로 볼 수 있어요.</p></div>`;
-    for (const g of ['일상', '스포츠']) { const ys = more.filter(s => s.g === g);
-      for (let i = 0; i < ys.length; i += 3) { const r = ys.slice(i, i + 3);
-        push(g, mh + `<div class="xmg">${r.map(s => xsmall(U, s, g === '스포츠' ? ' s' : ' d', g, first(s.vars[0].desc))).join('')}</div>`, { key: `s-${uid}-${r[0].sc}`, keys: r.map(s => `s-${uid}-${s.sc}`), name: r[0].name }); mh = ''; } } }
+    const ys = ['일상', '스포츠'].flatMap(g => more.filter(s => s.g === g)); // 일상·스포츠를 섞어 한 격자로(6개씩)
+    for (let i = 0; i < ys.length; i += 6) { const r = ys.slice(i, i + 6);
+      push(r[0].g, mh + `<div class="xmg">${r.map(s => xsmall(U, s, s.g === '스포츠' ? ' s' : ' d', s.g, first(s.vars[0].desc))).join('')}</div>`, { key: `s-${uid}-${r[0].sc}`, keys: r.map(s => `s-${uid}-${s.sc}`), gs: [...new Set(r.map(s => s.g))], name: r[0].name }); mh = ''; } }
 });
 // 목차 데이터
 const IX = []; D.units.forEach(U => { if (U.kind === 'theory') U.items.forEach(it => IX.push([it.name, it.scene, U.verb, '기본', '전신', 0]));
@@ -217,7 +217,7 @@ function build() {
   const P = portrait(); let content = null;
   for (let guess = 2, k = 0; k < 4; k++) { // 차례 쪽 수를 맞출 때까지
     T = guess; content = paginate(BL, T, i => i + 1);
-    keyPage = {}; groupPage = {}; content.forEach((p, i) => p.blocks.forEach(b => { if (b.key && keyPage[b.key] == null) keyPage[b.key] = i; (b.keys || []).forEach(k => { if (keyPage[k] == null) keyPage[k] = i; }); const gk = b.u + '|' + b.g; if (b.u && groupPage[gk] == null) groupPage[gk] = T + i; }));
+    keyPage = {}; groupPage = {}; content.forEach((p, i) => p.blocks.forEach(b => { if (b.key && keyPage[b.key] == null) keyPage[b.key] = i; (b.keys || []).forEach(k => { if (keyPage[k] == null) keyPage[k] = i; }); [b.g, ...(b.gs || [])].forEach(g => { const gk = b.u + '|' + g; if (b.u && groupPage[gk] == null) groupPage[gk] = T + i; }); }));
     const toc = paginate(tocBlocks(), 0, ROM); let n = toc.length; if (!P && n % 2) n++;
     if (n === guess) { PAGES = [...Array.from({ length: n }, (_, i) => ({ u: null, blocks: toc[i]?.blocks || [], num: ROM(i) })), ...content.map((p, i) => ({ ...p, num: i + 1 }))]; return; }
     guess = n; }
@@ -234,8 +234,8 @@ function render(anim) {
   book.querySelectorAll('[data-star]').forEach(s => { const [u, i, n] = s.dataset.star.split(':'); let v = 0; try { v = +localStorage.getItem(`self-${u}-${i}`) || 0; } catch (e) { } s.setAttribute('aria-pressed', +n <= v); });
   const cur = PAGES[idx[0]], u = cur.u || PAGES[idx[1]]?.u;
   $('unitName').textContent = u ? UNAME[u][0] + ' · ' + UNAME[u][1] : '차례';
-  const gsHere = new Set(idx.flatMap(i => PAGES[i].blocks.map(b => b.g)));
-  $('tabs').querySelectorAll('button').forEach(b => { const g = b.dataset.g; b.disabled = !u || !BL.some(x => x.u === u && (x.g === g || (g === '응용' && x.g === '원리'))); b.setAttribute('aria-pressed', !!u && (gsHere.has(g) || (g === '응용' && gsHere.has('원리')))); });
+  const gsHere = new Set(idx.flatMap(i => PAGES[i].blocks.flatMap(b => [b.g, ...(b.gs || [])])));
+  $('tabs').querySelectorAll('button').forEach(b => { const g = b.dataset.g; b.disabled = !u || !BL.some(x => x.u === u && (x.g === g || (x.gs || []).includes(g) || (g === '응용' && x.g === '원리'))); b.setAttribute('aria-pressed', !!u && (gsHere.has(g) || (g === '응용' && gsHere.has('원리')))); });
   const total = P ? PAGES.length : Math.ceil(PAGES.length / 2), n = P ? pi : a / 2;
   $('pg').textContent = `${n + 1} / ${total}`; $('prev').disabled = n === 0; $('next').disabled = n === total - 1;
   book.querySelectorAll('[data-tm]').forEach(b => b.onclick = e => { e.stopPropagation(); tmode = b.dataset.tm; try { localStorage.setItem('book-toc2', tmode); } catch (er) { } rebuild(''); go(0); });
@@ -248,7 +248,7 @@ const step = d => go(portrait() ? pi + d : pi - (pi % 2) + 2 * d);
 const goKey = k => { const i = keyPage[k]; if (i != null) go(T + i, 1); };
 $('prev').onclick = () => step(-1); $('next').onclick = () => step(1);
 $('tabs').querySelectorAll('button').forEach(b => b.onclick = () => { const u = PAGES[pi].u || PAGES[pi + 1]?.u, g = b.dataset.g;
-  const i = PAGES.findIndex(p => p.u === u && p.blocks.some(x => x.u === u && (x.g === g || (g === '응용' && x.g === '원리')))); if (i >= 0) go(i, 1); });
+  const i = PAGES.findIndex(p => p.u === u && p.blocks.some(x => x.u === u && (x.g === g || (x.gs || []).includes(g) || (g === '응용' && x.g === '원리')))); if (i >= 0) go(i, 1); });
 $('tocBtn').onclick = () => go(0, 1);
 $('toStart').onclick = () => { if (parent !== window) parent.postMessage('start-screen', '*'); else location.href = 'index.html#start'; };
 const hashKey = () => { const k = decodeURIComponent(location.hash.slice(1)); return keyPage[k] != null ? k : null; };
